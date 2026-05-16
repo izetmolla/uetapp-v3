@@ -43,16 +43,20 @@ type RenderOptions struct {
 	errorStatus  int
 	errorCode    string
 	errorDetails map[string]any
+
+	//authentication
+	withoutAuthentication bool
 }
 
 func defaultRenderOptions() RenderOptions {
 	return RenderOptions{
-		ctx:          context.Background(),
-		title:        "Home",
-		err:          nil,
-		errorStatus:  0,
-		errorCode:    "",
-		errorDetails: map[string]any{},
+		ctx:                   context.Background(),
+		title:                 "Home",
+		err:                   nil,
+		errorStatus:           0,
+		errorCode:             "",
+		errorDetails:          map[string]any{},
+		withoutAuthentication: false,
 	}
 }
 
@@ -101,5 +105,11 @@ func (app *Render) WithTitle(title string) RenderOptionsFunc {
 func (app *Render) WithData(data any) RenderOptionsFunc {
 	return func(o *RenderOptions) {
 		o.data = data
+	}
+}
+
+func (app *Render) WIthoutAuthentication() RenderOptionsFunc {
+	return func(o *RenderOptions) {
+		o.withoutAuthentication = true
 	}
 }

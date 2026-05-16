@@ -68,7 +68,8 @@ func (c *Controller) SignIn(ctx fiber.Ctx) error {
 }
 
 func (c *Controller) SignInView(ctx fiber.Ctx) error {
-	return c.app.View(ctx, c.app.Render().WithTitle("Sign In"))
+	r := c.app.Render()
+	return c.app.View(ctx, r.WithTitle("Sign In"), r.WIthoutAuthentication())
 }
 
 func (c *Controller) SignInCheckEmail(ctx fiber.Ctx) error {

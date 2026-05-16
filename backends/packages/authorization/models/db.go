@@ -169,6 +169,9 @@ func (d *DBManager) GetSessionFromDB(ctx context.Context, sessionID string) (*Se
 	if d == nil || d.db == nil {
 		return nil, errors.New("db manager is not initialized")
 	}
+	if sessionID == "" {
+		return nil, errors.New("session ID cannot be empty")
+	}
 	if d.redis != nil {
 		session, err := d.GetSessionFromRedis(ctx, sessionID)
 		if err == nil {

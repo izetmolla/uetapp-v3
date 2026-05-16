@@ -42,7 +42,7 @@ func (r *Render) prepareViewData(c fiber.Ctx, options *RenderOptions) map[string
 	if r.WithGeneralData != nil {
 		var err error
 		generalData, err = r.WithGeneralData(c, options.ctx, serviceName, false)
-		if err != nil {
+		if err != nil && !options.withoutAuthentication {
 			options.err = err
 			log.Printf("Error getting general data for service %s: %v", serviceName, err)
 		}
