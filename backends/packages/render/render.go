@@ -15,23 +15,26 @@ type RenderInterface interface {
 }
 
 type Render struct {
-	appName string
-	db      *gorm.DB
-	redis   *redis.Client
+	serviceName string
+	db          *gorm.DB
+	redis       *redis.Client
+
+	themes_table_name string
 }
 
 func New(cfg *Config) *Render {
 	return &Render{
-		db:    cfg.db,
-		redis: cfg.redis,
+		serviceName: cfg.ServiceName,
+		db:          cfg.DB,
+		redis:       cfg.Redis,
 	}
 }
 
 type RenderOptionsFunc func(*RenderOptions)
 type RenderOptions struct {
-	Ctx   context.Context
-	Title string
-	Data  any
+	ctx   context.Context
+	title string
+	data  any
 
 	// Error handling
 	err          error
@@ -42,8 +45,8 @@ type RenderOptions struct {
 
 func defaultRenderOptions() RenderOptions {
 	return RenderOptions{
-		Ctx:          context.Background(),
-		Title:        "Home",
+		ctx:          context.Background(),
+		title:        "Home",
 		err:          nil,
 		errorStatus:  fiber.StatusInternalServerError,
 		errorCode:    "INTERNAL_SERVER_ERROR",
@@ -71,7 +74,7 @@ func (app *Render) NewRender(opts ...RenderOptionsFunc) *RenderOptions {
 //	return app.View(c, app.WithContext(context.Background()))
 func (app *Render) WithContext(ctx context.Context) RenderOptionsFunc {
 	return func(o *RenderOptions) {
-		o.Ctx = ctx
+		o.ctx = ctx
 	}
 }
 
@@ -82,7 +85,7 @@ func (app *Render) WithContext(ctx context.Context) RenderOptionsFunc {
 //	return app.View(c, app.WithTitle("Hello, World!"))
 func (app *Render) WithTitle(title string) RenderOptionsFunc {
 	return func(o *RenderOptions) {
-		o.Title = title
+		o.title = title
 	}
 }
 
@@ -95,6 +98,6 @@ func (app *Render) WithTitle(title string) RenderOptionsFunc {
 //	}))
 func (app *Render) WithData(data any) RenderOptionsFunc {
 	return func(o *RenderOptions) {
-		o.Data = data
+		o.data = data
 	}
 }

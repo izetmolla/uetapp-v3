@@ -8,8 +8,8 @@ func (r *Render) Api(c fiber.Ctx, optsParams ...RenderOptionsFunc) error {
 
 	c.Set("Content-Type", "application/json; charset=utf-8")
 
-	if opts.Data != nil {
-		return c.JSON(opts.Data)
+	if opts.data != nil {
+		return c.JSON(opts.data)
 	}
 
 	// Set response headers

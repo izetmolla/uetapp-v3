@@ -1,7 +1,8 @@
 package render
 
 import (
-	"fmt"
+	"bytes"
+	"text/template"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -11,6 +12,23 @@ func (r *Render) View(c fiber.Ctx, optsParams ...RenderOptionsFunc) error {
 
 	// Set response headers
 	c.Set("Content-Type", "text/html; charset=utf-8")
+	if opts.errorStatus != 0 {
+		c.Status(opts.errorStatus)
+	} else {
+		c.Status(fiber.StatusOK)
+	}
 
-	return c.SendString(fmt.Sprintf("Hello, %s!", opts.Title))
+	// Parse the template
+	tmpl, err := template.New("index.html").Parse(r.prepareThemeString(opts))
+	if err != nil {
+		return c.SendString(staticErrorText(err))
+	}
+
+	// Execute template
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, r.prepareViewData(c, opts)); err != nil {
+		return c.SendString(staticErrorText(err))
+	}
+
+	return c.SendString(buf.String())
 }

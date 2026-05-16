@@ -6,6 +6,7 @@ import (
 )
 
 type Config struct {
-	db    *gorm.DB
-	redis *redis.Client
+	DB          *gorm.DB
+	Redis       *redis.Client
+	ServiceName string
 }

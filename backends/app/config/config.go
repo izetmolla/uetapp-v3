@@ -50,7 +50,7 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 		DB:                   app.postgres,
 		JWTSecret:            cfg.JWTSecret,
 		AccessTokenDuration:  "15s",
-		RefreshTokenDuration: "1w",
+		RefreshTokenDuration: "4w",
 		AutoMigration:        true,
 		UserModel:            &models.User{},
 		UserTableName:        "users",
@@ -61,7 +61,10 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 		return nil, err
 	}
 
-	app.render = render.New(&render.Config{})
+	app.render = render.New(&render.Config{
+		DB:          app.postgres,
+		ServiceName: "app",
+	})
 
 	return &app, err
 }
