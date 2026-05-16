@@ -1,0 +1,23 @@
+package models
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+
+	"gorm.io/gorm"
+)
+
+// Server specific settings.
+type Restriction struct {
+	ID string `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+
+	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+}
+
+func (b *Restriction) BeforeCreate(_ *gorm.DB) (err error) {
+	b.ID = uuid.New().String()
+	return
+}

@@ -3,14 +3,14 @@ FROM golang:1.26.2-alpine AS build
 RUN apk update
 RUN apk add --no-cache binutils upx
 WORKDIR /app
-COPY workspace/go.mod workspace/go.sum ./
+COPY app/go.mod app/go.sum ./
 # go.mod replace: ../packages/models → /packages/models (parent of /app)
 COPY packages/models/ /packages/models/
 COPY packages/entitymanager/ /packages/entitymanager/
 COPY packages/view/ /packages/view/
 COPY packages/authorization/ /packages/authorization/
 RUN go mod download
-COPY workspace/ ./
+COPY app/ ./
 
 
 RUN mkdir -p bin && \

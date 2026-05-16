@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/flowtrove/app/config"
-	"github.com/flowtrove/app/routes"
 	"github.com/flowtrove/packages/render"
 	"github.com/gofiber/fiber/v3"
+	"github.com/uetedu/app/config"
+	"github.com/uetedu/app/routes"
 )
 
 func Execute() {

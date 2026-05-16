@@ -6,23 +6,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: workspace
+  name: app
   namespace: flowtrove
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: workspace
+      app: app
   template:
     metadata:
       labels:
-        app: workspace
+        app: app
     spec:
       imagePullSecrets:
         - name: registry-01-secret
       containers:
-      - name: workspace
-        image: registry-01.flowtrove.com/flowtrove/workspace:latest
+      - name: app
+        image: registry-01.flowtrove.com/uetedu/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -46,11 +46,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: workspace
+  name: app
   namespace: flowtrove
 spec:
   selector:
-    app: workspace
+    app: app
   ports:
   - protocol: TCP
     port: 3000

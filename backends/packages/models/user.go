@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,10 +30,10 @@ type User struct {
 
 	// Devices []Device `json:"devices" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
-	IsConfirmed bool            `json:"is_confirmed" gorm:"default:false;"`
-	Status      UserStatus      `json:"status" gorm:"default:active;"`
-	Roles       json.RawMessage `json:"roles" gorm:"type:jsonb;default:'[]';"`
-	Content     json.RawMessage `json:"content" gorm:"type:jsonb;default:'{}';"`
+	IsConfirmed bool       `json:"is_confirmed" gorm:"default:false;"`
+	Status      UserStatus `json:"status" gorm:"default:active;"`
+	Roles       JSONBArray `json:"roles" gorm:"type:jsonb;default:'[]';"`
+	Content     JSONBAny   `json:"content" gorm:"type:jsonb;default:'{}';"`
 
 	Metadata JSONBAny `json:"meta_data" gorm:"type:jsonb;default:'{}';"`
 

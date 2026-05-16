@@ -8,7 +8,7 @@ import (
 )
 
 // Service specific settings.
-type AppNavigation struct {
+type ServiceNavigation struct {
 	ID       string `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	IdNumber int64  `json:"id_number" gorm:"uniqueIndex;autoIncrement"`
 
@@ -25,21 +25,21 @@ type AppNavigation struct {
 	IsExternal  bool             `json:"isExternal" gorm:"column:isExternal;default:false;"`
 	Roles       JSONBStringArray `json:"roles" gorm:"type:jsonb;default:'[]';"`
 
-	Children []AppNavigation `json:"children,omitempty" gorm:"foreignKey:ParentID;references:ID"`
+	Children []ServiceNavigation `json:"children,omitempty" gorm:"foreignKey:ParentID;references:ID"`
 
-	Service AppService `json:"service" gorm:"foreignKey:ServiceID;references:ID"`
-	OrderNr int64      `json:"order_nr" gorm:"column:order_nr;default:0;"`
+	Service Service `json:"service" gorm:"foreignKey:ServiceID;references:ID"`
+	OrderNr int64   `json:"order_nr" gorm:"column:order_nr;default:0;"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
 
-func (b *AppNavigation) BeforeCreate(_ *gorm.DB) (err error) {
+func (b *ServiceNavigation) BeforeCreate(_ *gorm.DB) (err error) {
 	b.ID = uuid.New().String()
 	return
 }
 
-func (b AppNavigation) TableName() string {
-	return "app_navigations"
+func (b ServiceNavigation) TableName() string {
+	return "service_navigations"
 }

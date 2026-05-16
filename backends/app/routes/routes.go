@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"github.com/flowtrove/app/config"
-	"github.com/flowtrove/app/internal/authorization"
-	"github.com/flowtrove/app/internal/enter"
-	"github.com/flowtrove/app/internal/languages"
-	"github.com/flowtrove/app/internal/render"
 	"github.com/gofiber/fiber/v3"
+	"github.com/uetedu/app/config"
+	"github.com/uetedu/app/internal/authorization"
+	"github.com/uetedu/app/internal/enter"
+	"github.com/uetedu/app/internal/languages"
+	"github.com/uetedu/app/internal/render"
 )
 
 func SetupRoutes(app fiber.Router, appClients *config.AppClients) {

@@ -42,6 +42,11 @@ func Models() []any {
 		// &WsDns{},
 
 		// &Workflow{},
+		&Role{},
+		&User{},
+		&Session{},
+		&Service{},
+		&ServiceNavigation{},
 	}
 
 	if len(models) > 0 {

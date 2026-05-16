@@ -1,8 +1,8 @@
 package languages
 
 import (
-	"github.com/flowtrove/app/config"
 	"github.com/gofiber/fiber/v3"
+	"github.com/uetedu/app/config"
 )
 
 type Controller struct {

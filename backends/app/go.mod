@@ -1,4 +1,4 @@
-module github.com/flowtrove/app
+module github.com/uetedu/app
 
 go 1.26.2
 

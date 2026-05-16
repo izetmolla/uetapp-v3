@@ -33,9 +33,7 @@ type AppClients struct {
 	render     *render.Render
 }
 
-var ExcludedRoutes = []string{
-	"all-workspaces",
-}
+var ExcludedRoutes = []string{}
 
 func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 	var err error
@@ -121,7 +119,7 @@ func GetConfigSettings() (*ConfigSettings, error) {
 
 func (app *AppClients) ServiceName() string {
 	if app.appService == "" {
-		app.appService = "workspace"
+		app.appService = "app"
 	}
 	return app.appService
 }
