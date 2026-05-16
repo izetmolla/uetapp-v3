@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"os"
 
@@ -172,4 +173,8 @@ func (app *AppClients) ViewNotFound(c fiber.Ctx) error {
 				"url":    c.OriginalURL(),
 			},
 		}))
+}
+
+func (app *AppClients) USER(c fiber.Ctx, reqCtx context.Context, fromAPI ...bool) (*authorization.AuthData, error) {
+	return app.auth.USER(c, reqCtx, fromAPI...)
 }

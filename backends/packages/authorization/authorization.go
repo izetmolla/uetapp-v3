@@ -15,6 +15,7 @@ import (
 
 type AuthorizationInterface interface {
 	SignIn(opts ...SignInOptionsFunc) (SignInResponse, error)
+	User(c fiber.Ctx, fromAPI ...bool) (*AuthData, error)
 }
 type Authorization struct {
 	dbManager       *models.DBManager
@@ -111,6 +112,9 @@ func (a *Authorization) GetRoles(ctx fiber.Ctx) ([]string, error) {
 	if raw == nil {
 		return nil, errors.New("invalid roles")
 	}
+	if rolesRaw, ok := raw.(json.RawMessage); ok {
+		return utils.FormatRoles(rolesRaw), nil
+	}
 	if roles, ok := raw.([]string); ok {
 		return roles, nil
 	}
@@ -156,22 +160,42 @@ func (a *Authorization) GetAuthDataAPI(ctx fiber.Ctx) (d AuthData, err error) {
 	if !ok {
 		d.UserID = ""
 	}
-	rolesRaw, ok := mc["roles"].(json.RawMessage)
-	if ok {
-		d.Roles = utils.FormatRoles(rolesRaw)
+	if roles, err := a.GetRoles(ctx); err == nil {
+		d.Roles = roles
 	}
 
 	return d, nil
 }
-func (a *Authorization) GetAuthDataWEB(ctx fiber.Ctx) (AuthData, error) {
-	sessionID := a.GetSessionID(ctx)
-	session, err := a.GetSession(ctx.Context(), sessionID)
+
+func (a *Authorization) GetAuthDataWEB(ctx fiber.Ctx, reqCtx context.Context) (AuthData, error) {
+	session, err := a.GetSession(reqCtx, a.GetSessionID(ctx))
 	if err != nil {
 		return AuthData{}, err
 	}
 	return AuthData{
-		SessionID: sessionID,
+		SessionID: session.ID,
 		UserID:    session.UserID,
 		Roles:     utils.FormatRoles(session.User.Roles),
 	}, nil
+}
+
+/**
+ * Get the user data from the context
+ * @param c fiber.Ctx
+ * @param fromAPI bool
+ * @return *AuthData, error
+ */
+func (a *Authorization) USER(c fiber.Ctx, reqCtx context.Context, fromAPI ...bool) (*AuthData, error) {
+	if len(fromAPI) > 0 && fromAPI[0] {
+		authData, err := a.GetAuthDataAPI(c)
+		if err != nil {
+			return nil, err
+		}
+		return &authData, nil
+	}
+	authData, err := a.GetAuthDataWEB(c, reqCtx)
+	if err != nil {
+		return nil, err
+	}
+	return &authData, nil
 }

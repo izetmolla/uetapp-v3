@@ -5,17 +5,12 @@ import (
 )
 
 func (cc *Controller) GetGeneralDataApi(c fiber.Ctx) error {
-	render := cc.app.Render()
+	r := cc.app.Render()
 	reqCtx := c.Context()
-
-	generalData, err := cc.app.GeneralData(reqCtx, c.Query("service", cc.app.ServiceName()))
+	generalData, err := cc.app.GeneralData(c, reqCtx, c.Query("service", cc.app.ServiceName()), true)
 	if err != nil {
-		return cc.app.Api(c, render.WithError(err))
+		return cc.app.Api(c, r.WithError(err))
 	}
 
-	return cc.app.Api(c,
-		render.WithContext(reqCtx),
-		render.WithTitle("General Data"),
-		render.WithData(generalData),
-	)
+	return cc.app.Api(c, r.WithContext(reqCtx), r.WithData(generalData))
 }
