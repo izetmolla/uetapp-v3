@@ -11,7 +11,7 @@ export default defineConfig(async ({ command }) => {
   const nextVersion = await bumpVersion(command);
   return {
     plugins: [react(), tailwindcss(), replaceTags(command)],
-    base: process.env.NODE_ENV === 'production' ? `/static/portal/${nextVersion}/` : "/",
+    base: process.env.NODE_ENV === 'production' ? `/static/app/${nextVersion}/` : "/",
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
@@ -100,7 +100,7 @@ function replaceTags(command: string): Plugin {
       if (command === 'serve') {
         out = out
           .replace(/{{.title}}/g, 'FT')
-          .replace(/{{.globalOptions}}/g, '<script id="__GLOBAL_DATA__" data-app="portal" type="application/json"></script>')
+          .replace(/{{.globalOptions}}/g, '<script id="__GLOBAL_DATA__" data-app="app" type="application/json"></script>')
           .replace(/{{.globalContent}}/g, '<script id="__GLOBAL_CONTENT_DATA__" type="application/json"></script>')
           .replace(/{{ .metaData }}/g, '')
           .replace(/{{if .metaData }}/g, '')
@@ -131,7 +131,7 @@ function replaceTags(command: string): Plugin {
 
 async function bumpVersion(command: string) {
   try {
-    const { currentVersion } = await getServiceVersion("portal");
+    const { currentVersion } = await getServiceVersion("app");
     console.log("bumpVersion", command, currentVersion);
     const cvArray = currentVersion.split(".");
     cvArray[2] = (parseInt(cvArray[2]) + 1).toString();

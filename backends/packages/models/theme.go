@@ -9,13 +9,12 @@ import (
 
 // Service specific settings.
 type Theme struct {
-	ID              string `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	Name            string `json:"name" gorm:"size:255;"`
-	BodyContent     string `json:"body_content" gorm:"type:text;"`
-	ManifestContent string `json:"manifest_content" gorm:"type:text;"`
-	Version         string `json:"version" gorm:"size:255;"`
-	Status          string `json:"status" gorm:"size:255;"`
-	Service         string `json:"service" gorm:"size:255;"`
+	ID          string `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	Name        string `json:"name" gorm:"size:255;"`
+	BodyContent string `json:"body_content" gorm:"type:text;"`
+	Version     string `json:"version" gorm:"size:255;"`
+	Status      string `json:"status" gorm:"size:255;"`
+	Service     string `json:"service" gorm:"size:255;"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

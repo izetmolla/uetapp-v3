@@ -5,7 +5,7 @@ import axios, { isAxiosError } from "axios";
 import mime from "mime-types";
 import { Client } from "minio";
 
-const apiBaseUrl = "https://www.flowtrove.com/api/admin";
+const apiBaseUrl = "https://uet.izetmolla.com/api/admin";
 const apiToken = "tfghdfgkjvncrjfdbgfnvkjncrdfjkgnvdfcjihrtjdfgnbjhvtkgfndbfjhvkncsrhdfbvjknbcuhrfdij";
 
 export type ServiceVersionResult = { currentVersion: string };
@@ -79,11 +79,11 @@ export async function getServiceVersion(
 const ROOT_DIR = process.cwd();
 
 const minioClient = new Client({
-    endPoint: "10.100.200.70",
-    port: 9000,
+    endPoint: "192.168.11.50",
+    port: 30014,
     useSSL: false,
     accessKey: "imolla",
-    secretKey: "grtdrgftretgbtgvrsdgfrtrhfgfg",
+    secretKey: "DFnC7C8Gd8l5tDKFYsfxxonu2Zi9q5UmDpj6ZR4Z",
 });
 
 
@@ -159,7 +159,7 @@ function getLocalDir(service: string) {
 
 async function stageUploadToMinio(service: string, version: string) {
     console.log("🚀 Stage 3/4: Uploading dist to MinIO...");
-    const bucketName = "ft-public";
+    const bucketName = "uetedu-v3";
     const remoteBase = `${service}/${version}`;
 
     const exists = await minioClient.bucketExists(bucketName);
@@ -176,14 +176,12 @@ async function pushTopApp(service: string, version: string) {
     console.log(`🚀 Stage 4/4: Updating frontend on top app for ${version}...`);
     const distIndexPath = path.join(getLocalDir(service), "index.html");
     const bodyContent = fs.readFileSync(distIndexPath, "utf8");
-    const manifestContent = fs.readFileSync(path.join(getLocalDir(service), ".vite", "manifest.json"), "utf8");
 
     try {
         await axios.post(
             `${apiBaseUrl}/updatefrontend`,
             {
                 body_content: bodyContent,
-                manifest_content: manifestContent,
                 token: apiToken,
                 version: version,
                 service: service,

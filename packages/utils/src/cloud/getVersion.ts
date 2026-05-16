@@ -1,6 +1,6 @@
 import axios, { isAxiosError } from "axios";
 
-const url = "https://www.flowtrove.com/api/admin/getversion";
+const url = "https://uet.izetmolla.com/api/admin/getversion";
 
 export type ServiceVersionResult = { currentVersion: string };
 

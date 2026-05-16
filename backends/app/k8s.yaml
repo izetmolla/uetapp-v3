@@ -1,13 +1,13 @@
 # apiVersion: v1
 # kind: Namespace
 # metadata:
-#   name: flowtrove
+#   name: uetedu-v3
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app
-  namespace: flowtrove
+  namespace: uetedu-v3
 spec:
   replicas: 2
   selector:
@@ -22,7 +22,7 @@ spec:
         - name: registry-01-secret
       containers:
       - name: app
-        image: registry-01.flowtrove.com/uetedu/app:latest
+        image: rg1.uetonline.com/uetedu-v3/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -30,24 +30,22 @@ spec:
           - name: ENV
             value: "production"
           - name: AUTH_URL
-            value: "https://www.flowtrove.com"
+            value: "https://uet.izetmolla.com"
           - name: PORT
             value: "3000"
           - name: ADDRESS
             value: "0.0.0.0"
           - name: JWT_SECRET
-            value: "tgregftrjcfidughvtriufghenfitvurjngiufvnctriejgnwsfiurjkndrydsgafucrebusdfhwcje"
+            value: "rjfedhgfierdfgivwrdfighvridfgvrhfsdvhrtfdgjhrdfhsgdftrdfg"
           - name: DATABASE_URL
-            value: "postgres://imolla:gdfsvfdsvfeds8e7y87dy8h8@10.100.100.200:5432/flowtrove_dev"      
-          - name: MAIL_URL
-            value: smtp://support%40flowtrove.com:Skrapari2252!@smtp.hostinger.com:587      
+            value: "postgres://imolla:TopeTope1995@192.168.11.50:30080/uetapp_v3"          
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: app
-  namespace: flowtrove
+  namespace: uetedu-v3
 spec:
   selector:
     app: app
@@ -56,3 +54,43 @@ spec:
     port: 3000
     targetPort: 3000
   type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  # Must match the existing ingress in the cluster (nginx allows one rule per host+path).
+  name: app
+  namespace: uetedu-v3
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01-issuer
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600s"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600s"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600s"
+    
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - uet.izetmolla.com
+    secretName: uetedu-v3-tls
+  rules:
+    - host: uet.izetmolla.com
+      http:
+        paths:
+          # - path: /administrator
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: uetapp-administrator
+          #       port:
+          #         number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 3000

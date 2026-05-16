@@ -6,9 +6,8 @@ WORKDIR /app
 COPY app/go.mod app/go.sum ./
 # go.mod replace: ../packages/models → /packages/models (parent of /app)
 COPY packages/models/ /packages/models/
-COPY packages/entitymanager/ /packages/entitymanager/
-COPY packages/view/ /packages/view/
 COPY packages/authorization/ /packages/authorization/
+COPY packages/render/ /packages/render/
 RUN go mod download
 COPY app/ ./
 

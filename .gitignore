@@ -32,6 +32,7 @@ npm-debug.log*
 
 
 #Backends
+backends/k8s.secrets.yaml
 backends/app/tmp/*
 backends/app/dist/*
 backends/app/node_modules/*

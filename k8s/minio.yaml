@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storages
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: storages
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - minio server /data --console-address :9001
+        env:
+        - name: MINIO_ROOT_USER
+          value: 'imolla'
+        - name: MINIO_ROOT_PASSWORD
+          value: 'grtdrgftretgbtgvrsdgfrtrhfgfg'
+        ports:
+        - containerPort: 9000
+          name: api
+        - containerPort: 9001
+          name: console
+        livenessProbe:
+          httpGet:
+            path: /minio/health/live
+            port: api
+          initialDelaySeconds: 120
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /minio/health/ready
+            port: api
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        volumeMounts:
+        - mountPath: /data
+          name: data
+      volumes:
+        - name: data
+          nfs:
+            server: 10.100.100.100
+            path: /FLOWTROVE/content/minio/public-cdn
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: minio
+    namespace: storages
+spec:
+  selector:
+    app: minio
+  ports:
+    - name: panel
+      port: 9001
+      targetPort: 9001
+    - name: api
+      port: 9000
+      targetPort: 9000
+  type: ClusterIP
+  clusterIP: 10.100.200.70
+  clusterIPs:
+    - 10.100.200.70

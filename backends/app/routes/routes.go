@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
+	"github.com/uetedu/app/internal/admin"
 	"github.com/uetedu/app/internal/authorization"
 	"github.com/uetedu/app/internal/enter"
 	"github.com/uetedu/app/internal/languages"
@@ -14,6 +15,7 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	api := app.Group("/api")
 	viewController := render.NewController(appClients)
 
+	admin.SetupRoutes(api, appClients)
 	languages.SetupRoutes(api, appClients)
 	authorization.SetupRoutes(app, api, appClients)
 
