@@ -17,7 +17,6 @@ func (r *Render) View(c fiber.Ctx, optsParams ...RenderOptionsFunc) error {
 	} else {
 		c.Status(fiber.StatusOK)
 	}
-
 	// Parse the template
 	tmpl, err := template.New("index.html").Parse(r.prepareThemeString(opts))
 	if err != nil {

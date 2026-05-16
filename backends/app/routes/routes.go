@@ -6,6 +6,7 @@ import (
 	"github.com/uetedu/app/internal/admin"
 	"github.com/uetedu/app/internal/authorization"
 	"github.com/uetedu/app/internal/enter"
+	"github.com/uetedu/app/internal/general"
 	"github.com/uetedu/app/internal/languages"
 	"github.com/uetedu/app/internal/render"
 )
@@ -25,6 +26,7 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 
 	// Handle Routes based on the API group
 	enter.SetupRoutes(app, api, appClients)
+	general.SetupRoutes(api, appClients)
 
 	api.Use(appClients.ApiNotFound)
 	app.Use(viewController.HandleDynamicPages)

@@ -14,7 +14,7 @@ import useAuthorizationStore from "../store/authorization"
 import { QueryClient } from "@tanstack/react-query"
 import { getGlobalOptions, mergeInitialData } from "./globalOptions"
 
-export const exceptedPaths = ["all-workspaces"]
+export const exceptedPaths: string[] = []
 
 export const TOKEN_TYPE = "Bearer "
 export const REQUEST_HEADER_AUTH_KEY = "Authorization"
@@ -36,7 +36,7 @@ function getServiceName(): string {
 
 const baseApiURL = (): string => {
     const sn = getServiceName()
-    if (sn === "portal") {
+    if (sn === "app") {
         return `${window.location.protocol}//${window.location.host}`
     }
     return `${window.location.protocol}//${window.location.host}/${sn}`

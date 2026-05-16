@@ -48,8 +48,8 @@ func defaultRenderOptions() RenderOptions {
 		ctx:          context.Background(),
 		title:        "Home",
 		err:          nil,
-		errorStatus:  fiber.StatusInternalServerError,
-		errorCode:    "INTERNAL_SERVER_ERROR",
+		errorStatus:  0,
+		errorCode:    "",
 		errorDetails: map[string]any{},
 	}
 }

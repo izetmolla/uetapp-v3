@@ -5,14 +5,14 @@ import { useNavigate } from "react-router";
 import { type FC } from "react";
 
 
-interface WsHeaderProps {
-    ws: {
+interface ServiceHeaderProps {
+    service: {
         title: string;
         description: string;
         name: string;
     };
 }
-const WsHeader: FC<WsHeaderProps> = ({ ws }) => {
+const ServiceHeader: FC<ServiceHeaderProps> = ({ service }) => {
     const navigate = useNavigate();
     const stopLogoEvent = (e: React.MouseEvent<HTMLImageElement> | React.PointerEvent<HTMLImageElement>) => {
         e.stopPropagation();
@@ -21,12 +21,12 @@ const WsHeader: FC<WsHeaderProps> = ({ ws }) => {
 
     const onLogoClick = (e: React.MouseEvent<HTMLImageElement>) => {
         stopLogoEvent(e);
-        navigate("/workspace");
+        navigate("/");
     };
 
     const onTitleClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
-        navigate(`/workspace/${ws.name}`);
+        navigate(`/${service.name}`);
     };
 
     return (
@@ -38,10 +38,10 @@ const WsHeader: FC<WsHeaderProps> = ({ ws }) => {
                     <Logo onClick={onLogoClick} onPointerDown={stopLogoEvent} />
                     <div className="min-w-0 space-y-0.5 leading-tight group-data-[collapsible=icon]:hidden cursor-pointer" onClick={onTitleClick}>
                         <p className="text-foreground truncate text-sm font-semibold">
-                            {ws.title || "FlowTrove Workspace"}
+                            {service.title || "UET App Workspace"}
                         </p>
                         <p className="text-muted-foreground truncate text-xs">
-                            {ws.description || "Build, ship, and manage your ws workflows from one place."}
+                            {service.description || "Your university management system"}
                         </p>
                     </div>
                 </SidebarMenuButton>
@@ -50,4 +50,4 @@ const WsHeader: FC<WsHeaderProps> = ({ ws }) => {
     )
 }
 
-export default WsHeader;
+export default ServiceHeader;

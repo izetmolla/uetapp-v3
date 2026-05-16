@@ -55,6 +55,28 @@ spec:
     targetPort: 3000
   type: ClusterIP
 ---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-static
+  namespace: uetedu-v3
+spec:
+  type: ExternalName
+  externalName: minio-svc.uet-app.svc.cluster.local
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+# Static assets → MinIO only. Do NOT combine this Ingress with portal / on the same Ingress:
+# rewrite-target applies to every path on this resource; keep only /static/<app>/v… here.
+#
+# Apply order: Ingress "portal" MUST come before "portal-static" in this file so kubectl apply
+# updates the main ingress (drops /static/…) before creating portal-static; otherwise the nginx
+# admission webhook rejects duplicate host+path with the old portal spec still in the cluster.
+
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -94,3 +116,32 @@ spec:
                 name: app
                 port:
                   number: 3000
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-static
+  namespace: uetedu-v3
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /uetedu-v3/$1
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - uet.izetmolla.com
+      secretName: uetedu-v3-tls
+  rules:
+    - host: uet.izetmolla.com
+      http:
+        paths:
+          - path: /static/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: minio-static
+                port:
+                  number: 9000

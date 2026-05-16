@@ -23,8 +23,8 @@ import { useQuery } from "@tanstack/react-query";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { NavigationItems } from "./navigations";
-import WsSwitcher from "./sidebarheader/index";
-import WsHeader from "./sidebarheader/wsheader";
+import ServiceSwitcher from "./sidebarheader";
+import ServiceHeader from "./sidebarheader/service-header";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { ws = "" } = useParams()
@@ -50,10 +50,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="gap-0 p-0">
         <ContentLoader isLoading={isLoading} error={withError(error, data)} minimalError>
-          {data?.ws?.id ? (
-            <WsHeader ws={data?.ws} />
+          {data?.service?.id ? (
+            <ServiceHeader service={data?.service} />
           ) : (
-            <WsSwitcher wss={data?.wss ?? []} />
+            <ServiceSwitcher services={data?.services ?? []} />
           )}
         </ContentLoader>
       </SidebarHeader>

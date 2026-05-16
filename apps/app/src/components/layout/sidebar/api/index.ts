@@ -3,14 +3,14 @@ import type { NavigationItem } from "../navigations";
 
 
 export interface GeneralDataTypes {
-    wss: any[];
-    ws: any;
+    services: any[];
+    service: any;
     current_user_id: string;
     navigations: NavigationItem[];
 }
 export function getGeneralData() {
     return ApiService.fetchDataBody<GeneralDataTypes>({
-        url: withAPI('/wsdata'),
+        url: withAPI('/general'),
         method: 'get',
         params: withWs(),
     });

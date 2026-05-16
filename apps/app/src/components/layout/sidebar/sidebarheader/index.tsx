@@ -1,12 +1,15 @@
 "use client"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import {
+    ChevronsUpDown,
+    // Plus
+} from "lucide-react"
 
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
+    // DropdownMenuSeparator,
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
@@ -20,16 +23,16 @@ import Icon from "@workspace/ui/components/icon"
 import { useNavigate } from "react-router"
 import Logo from "../../logo"
 
-export function WsSwitcher({
-    wss,
+export function ServiceSwitcher({
+    services,
 }: {
-    wss: {
+    services: {
         id: string
         title: string
         description: string
         icon?: string
         name: string
-    }[]
+    }[];
 }) {
     const navigate = useNavigate()
     const { isMobile } = useSidebar()
@@ -38,7 +41,7 @@ export function WsSwitcher({
     };
     const onLogoClick = (e: React.MouseEvent<HTMLImageElement>) => {
         e.stopPropagation();
-        navigate("/workspace");
+        navigate("/");
     };
 
     return (
@@ -54,8 +57,8 @@ export function WsSwitcher({
                                 <Logo onClick={onLogoClick} onPointerDown={stopLogoEvent} />
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">FlowTrove Workspace</span>
-                                <span className="truncate text-xs">Build, ship, and manage your ws workflows from one place.</span>
+                                <span className="truncate font-medium">UET App Workspace</span>
+                                <span className="truncate text-xs">Your university management system</span>
                             </div>
                             <ChevronsUpDown className="ml-auto" />
                         </SidebarMenuButton>
@@ -67,28 +70,28 @@ export function WsSwitcher({
                         sideOffset={4}
                     >
                         <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            Workspaces
+                            Services
                         </DropdownMenuLabel>
-                        {wss.map((ws, index) => (
+                        {services?.map((service, index) => (
                             <DropdownMenuItem
-                                key={ws.id}
-                                onClick={() => navigate(`/workspace/${ws.name}`)}
+                                key={service.id}
+                                onClick={() => navigate(`/${service.name}`)}
                                 className="gap-2 p-2 cursor-pointer"
                             >
                                 <div className="flex size-6 items-center justify-center rounded-md border">
-                                    <Icon name={ws.icon ?? ""} className="size-3.5 shrink-0" />
+                                    <Icon name={service.icon ?? ""} className="size-3.5 shrink-0" />
                                 </div>
-                                {ws.title}
+                                {service.title}
                                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                             </DropdownMenuItem>
                         ))}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 p-2 cursor-pointer" onClick={() => navigate("/workspace?createwspopup")}>
+                        {/* <DropdownMenuSeparator />
+                        <DropdownMenuItem className="gap-2 p-2 cursor-pointer" onClick={() => navigate("/")}>
                             <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                                 <Plus className="size-4" />
                             </div>
                             <div className="font-medium text-muted-foreground">Create workspace</div>
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
@@ -96,4 +99,4 @@ export function WsSwitcher({
     )
 }
 
-export default WsSwitcher;
+export default ServiceSwitcher;

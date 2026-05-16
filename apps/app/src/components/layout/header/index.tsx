@@ -9,7 +9,7 @@ import ThemeSwitch from "./theme-switch";
 import { ThemeCustomizerPanel } from "@workspace/flowtrove/components/theme-customizer";
 import { Button } from "@workspace/ui/components/button";
 import { useSidebar } from "@workspace/ui/components/sidebar";
-import { Link } from "react-router";
+// import { Link } from "react-router";
 import UserMenu from "./user-menu";
 
 export function SiteHeader() {
@@ -29,7 +29,7 @@ export function SiteHeader() {
         <Search />
 
         <div className="ml-auto flex items-center gap-2">
-          <Button
+          {/* <Button
             size="sm"
             variant="link"
             className="relative animate-pulse bg-linear-to-r from-violet-600 via-fuchsia-600 to-cyan-600 bg-clip-text font-medium text-transparent hover:bg-transparent"
@@ -37,7 +37,7 @@ export function SiteHeader() {
             <Link to="https://shadcnuikit.com/pricing" target="_blank">
               Get Pro
             </Link>
-          </Button>
+          </Button> */}
           <Notifications />
           <ThemeSwitch />
           <ThemeCustomizerPanel />
