@@ -45,3 +45,7 @@ func firstHeaderValue(value string) string {
 	}
 	return strings.TrimSpace(parts[0])
 }
+
+func staticErrorText(err error) string {
+	return err.Error()
+}

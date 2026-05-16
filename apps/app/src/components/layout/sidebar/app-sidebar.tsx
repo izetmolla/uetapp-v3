@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useIsTablet } from "@/hooks/use-mobile";
 
 import {
@@ -26,13 +26,14 @@ import ServiceSwitcher from "./sidebarheader";
 import ServiceHeader from "./sidebarheader/service-header";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [_svcs, setSvcs] = useState<string[]>([]);
   const { service } = withService()
   const { isLoading, error, data } = useQuery({
     queryKey: ["general-data", service],
     queryFn: () => getGeneralData(),
     ...withInitialData<GeneralDataTypes>("general"),
+    // ...((svcs.length > 0 && !svcs.includes(service)) ? { enabled: false } : {}),
   });
-  console.log("data", service)
   const { pathname } = useLocation();
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
   const isTablet = useIsTablet();
@@ -45,10 +46,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setOpen(!isTablet);
   }, [isTablet]);
 
+  useEffect(() => {
+    if (data?.services) {
+      setSvcs(data.services.map((svc) => svc.name).filter((svc) => svc !== "app"));
+    }
+  }, [data?.services]);
+
+
+
+
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="gap-0 p-0">
+      <SidebarHeader className="gap-0 p-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pt-2">
         <ContentLoader isLoading={isLoading} error={withError(error, data)} minimalError>
           {data?.service?.id && data?.service?.name != "app" ? (
             <ServiceHeader service={data?.service} />

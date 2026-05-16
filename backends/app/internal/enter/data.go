@@ -20,7 +20,8 @@ func (c *Controller) GetEnterDataView(ctx fiber.Ctx) error {
 	context := ctx.Context()
 	return c.app.View(ctx,
 		render.WithContext(context),
-		render.WithTitle("Flowtrove App Dashboard"),
+		render.WithTitle("UET App Dashboard"),
+		render.WIthoutAuthentication(),
 		render.WithData(map[string]any{
 			"message": "Hello, World!",
 		}))

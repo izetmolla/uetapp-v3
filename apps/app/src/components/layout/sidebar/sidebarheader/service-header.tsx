@@ -30,10 +30,10 @@ const ServiceHeader: FC<ServiceHeaderProps> = ({ service }) => {
     };
 
     return (
-        <SidebarMenu>
-            <SidebarMenuItem>
+        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center">
                 <SidebarMenuButton
-                    className="hover:text-foreground h-(--header-height) items-center gap-3 rounded-lg px-2 py-2 group-data-[collapsible=icon]:px-0! cursor-pointer"
+                    className="hover:text-foreground h-(--header-height) items-center gap-3 rounded-lg px-2 py-2 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0! cursor-pointer"
                 >
                     <Logo onClick={onLogoClick} onPointerDown={stopLogoEvent} />
                     <div className="min-w-0 space-y-0.5 leading-tight group-data-[collapsible=icon]:hidden cursor-pointer" onClick={onTitleClick}>

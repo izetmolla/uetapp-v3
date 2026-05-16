@@ -45,22 +45,22 @@ export function ServiceSwitcher({
     };
 
     return (
-        <SidebarMenu>
-            <SidebarMenuItem>
+        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0!"
                         >
-                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                            <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground group-data-[collapsible=icon]:bg-transparent">
                                 <Logo onClick={onLogoClick} onPointerDown={stopLogoEvent} />
                             </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
+                            <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                                 <span className="truncate font-medium">UET App Workspace</span>
                                 <span className="truncate text-xs">Your university management system</span>
                             </div>
-                            <ChevronsUpDown className="ml-auto" />
+                            <ChevronsUpDown className="ml-auto group-data-[collapsible=icon]:hidden" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
