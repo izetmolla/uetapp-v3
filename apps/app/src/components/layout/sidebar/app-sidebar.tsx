@@ -27,9 +27,9 @@ import ServiceSwitcher from "./sidebarheader";
 import ServiceHeader from "./sidebarheader/service-header";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { ws = "" } = useParams()
+  const { service = "" } = useParams()
   const { isLoading, error, data } = useQuery({
-    queryKey: ["general-data", ws],
+    queryKey: ["general-data", service],
     queryFn: () => getGeneralData(),
     ...withInitialData<GeneralDataTypes>("general"),
   });
@@ -50,7 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="gap-0 p-0">
         <ContentLoader isLoading={isLoading} error={withError(error, data)} minimalError>
-          {data?.service?.id ? (
+          {data?.service?.id && data?.service?.name != "app" ? (
             <ServiceHeader service={data?.service} />
           ) : (
             <ServiceSwitcher services={data?.services ?? []} />

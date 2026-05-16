@@ -28,6 +28,7 @@ type Application interface {
 }
 type AppClients struct {
 	appService string
+	serviceID  string
 	postgres   *gorm.DB
 	auth       *authorization.Authorization
 	render     *render.Render

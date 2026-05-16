@@ -1,4 +1,4 @@
-type Notification = {
+export type Notification = {
     id: number;
     title: string;
     role: string;

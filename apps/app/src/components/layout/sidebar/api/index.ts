@@ -1,4 +1,4 @@
-import ApiService, { withAPI, withWs } from "@workspace/flowtrove/lib/network";
+import ApiService, { withAPI, withService } from "@workspace/flowtrove/lib/network";
 import type { NavigationItem } from "../navigations";
 
 
@@ -12,6 +12,6 @@ export function getGeneralData() {
     return ApiService.fetchDataBody<GeneralDataTypes>({
         url: withAPI('/general'),
         method: 'get',
-        params: withWs(),
+        params: withService(),
     });
 }

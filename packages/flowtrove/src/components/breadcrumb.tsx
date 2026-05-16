@@ -28,10 +28,10 @@ export type BreadcrumbSegment = {
 export type BreadcrumbsProps = {
     items: BreadcrumbSegment[]
     listClassName?: string
-    withWs?: boolean
+    withService?: boolean
     /**
      * Prefix for segment-based hrefs, no trailing slash.
-     * If omitted and `withWs` is set, defaults to `/workspace/:ws/endpoints`, otherwise an empty prefix.
+     * If omitted and `withService` is set, defaults to `/service/:service/endpoints`, otherwise an empty prefix.
      */
     basePath?: string
 } & Omit<ComponentProps<typeof Breadcrumb>, "children">
@@ -40,20 +40,20 @@ function stripTrailingSlashes(p: string): string {
     return p.trim().replace(/\/+$/, "")
 }
 
-function workspaceEndpointsBase(ws: string): string {
-    return `/workspace/${ws}`
+function serviceEndpointsBase(service: string): string {
+    return `/service/${service}`
 }
 
 function computePrefixPath(
     basePath: string | undefined,
-    withWs: boolean,
-    ws: string
+    withService: boolean,
+    service: string
 ): string {
     if (basePath !== undefined) {
         return stripTrailingSlashes(basePath)
     }
-    if (withWs && ws !== "") {
-        return workspaceEndpointsBase(ws)
+    if (withService && service !== "") {
+        return serviceEndpointsBase(service)
     }
     return ""
 }
@@ -94,16 +94,16 @@ export function Breadcrumbs({
     items,
     className,
     listClassName,
-    withWs = false,
+    withService = false,
     basePath,
     ...navProps
 }: BreadcrumbsProps) {
-    const { ws = "" } = useParams()
-    const prefixPath = computePrefixPath(basePath, withWs, ws)
+    const { service = "" } = useParams()
+    const prefixPath = computePrefixPath(basePath, withService, service)
 
     const head: Array<{ id?: string; label: ReactNode; href: string | null }> =
-        withWs && ws !== ""
-            ? [{ label: "Home", href: workspaceEndpointsBase(ws) }]
+        withService && service !== ""
+            ? [{ label: "Home", href: serviceEndpointsBase(service) }]
             : [{ label: "Home", href: "/" }]
 
     const tail = resolveItemHrefs(items, prefixPath)
