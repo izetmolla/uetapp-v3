@@ -1,6 +1,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { useTranslation } from "react-i18next";
+import { authSocialButtonClassName } from "../styles";
 
 function MicrosoftLogo({ className }: { className?: string }) {
     return (
@@ -32,13 +33,8 @@ const SocialLogin = () => {
             type="button"
             variant="outline"
             onClick={signInWithMicrosoft}
-            className={cn(
-                "h-10 w-full gap-2.5 rounded-md border-[1.5px] border-gray-400 bg-white px-4",
-                "text-[15px] font-normal text-[#5e5e5e] shadow-sm",
-                "hover:border-gray-500 hover:bg-[#f3f3f3] hover:text-[#5e5e5e]",
-                "focus-visible:border-gray-500 focus-visible:ring-2 focus-visible:ring-[#0078d4]/25",
-                "active:border-gray-600 active:bg-[#ebebeb] dark:bg-white dark:hover:bg-[#f3f3f3]"
-            )}
+            disabled={true}
+            className={authSocialButtonClassName}
         >
             <MicrosoftLogo />
             <span>{t("Sign in with Microsoft")}</span>

@@ -17,6 +17,15 @@ import PasswordInput from "@workspace/flowtrove/components/password";
 import Links from "../../components/links";
 import { useTranslation } from "react-i18next";
 import LanguageSwitch from "@workspace/flowtrove/components/language-switch";
+import {
+    authCardClassName,
+    authInputClassName,
+    authLinkClassName,
+    authPageClassName,
+    authSeparatorClassName,
+    authSeparatorLabelClassName,
+    authSeparatorLineClassName,
+} from "../../styles";
 
 // Enhanced FlowTrove Logo Component
 const FlowTroveLogo = ({ className }: { className?: string }) => {
@@ -29,19 +38,10 @@ const FlowTroveLogo = ({ className }: { className?: string }) => {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-500 rounded-lg blur-sm opacity-50 -z-10"></div>
             </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">UET App</span>
+            <span className="text-xl font-bold text-foreground tracking-tight">UET App</span>
         </div>
     )
 };
-
-const authInputClassName = cn(
-    "h-10 w-full rounded-md border-[1.5px] border-gray-300 bg-white px-3",
-    "text-sm text-gray-900 shadow-sm placeholder:text-gray-400",
-    "transition-[border-color,box-shadow] duration-150",
-    "hover:border-gray-400",
-    "focus-visible:border-gray-500 focus-visible:ring-2 focus-visible:ring-gray-200/80",
-    "disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-50 disabled:opacity-60",
-);
 
 const SignIn = () => {
     const { t } = useTranslation('authorization');
@@ -131,10 +131,8 @@ const SignIn = () => {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onsubmit)}>
                 <div className="min-h-screen">
-                    {/* Background */}
-                    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-login">
-                        {/* Container - 400px width, 32px padding, 12px border radius, responsive shadow */}
-                        <div className="w-full max-w-[450px] rounded-[12px] border border-gray-200 bg-white p-8 shadow-2xl">
+                    <div className={authPageClassName}>
+                        <div className={authCardClassName}>
                             <div className="space-y-3">
                                 {/* Header with Logo and Language Switch */}
                                 <div className="flex items-start justify-between mb-6">
@@ -144,8 +142,8 @@ const SignIn = () => {
 
                                 {/* Login Header - Dark text for white background */}
                                 <div className="text-left space-y-2">
-                                    <h1 className="text-xl font-semibold text-gray-900">{t('Log in')}</h1>
-                                    <p className="text-base font-normal text-gray-600">{t("Continue to UET App")}</p>
+                                    <h1 className="text-xl font-semibold text-foreground">{t('Log in')}</h1>
+                                    <p className="text-base font-normal text-muted-foreground">{t("Continue to UET App")}</p>
                                 </div>
 
                                 <FormField
@@ -198,7 +196,7 @@ const SignIn = () => {
                                     <div className="flex justify-end">
                                         <Link
                                             to={`/reset-password?email=${encodeURIComponent(form.getValues("email"))}`}
-                                            className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
+                                            className={authLinkClassName}
                                         >
                                             {t("Forgot password?")}
                                         </Link>
@@ -216,14 +214,10 @@ const SignIn = () => {
                                 </Button>
 
 
-                                {/* Separator - Dark styling for white background */}
-                                <div className="relative">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <div className="w-full border-t border-gray-300" />
-                                    </div>
-                                    <div className="relative flex justify-center text-sm">
-                                        <span className="px-2 bg-white text-gray-500">{t("or")}</span>
-                                    </div>
+                                <div className={authSeparatorClassName}>
+                                    <div className={authSeparatorLineClassName} />
+                                    <span className={authSeparatorLabelClassName}>{t("or")}</span>
+                                    <div className={authSeparatorLineClassName} />
                                 </div>
                                 <SocialLogin />
 

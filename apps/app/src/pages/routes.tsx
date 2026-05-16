@@ -5,14 +5,14 @@ import TemplateLayout, { AuthorizationLayout } from "../components/layout/layout
 
 
 
-import { Fragment } from "react/jsx-runtime"
+// import { Fragment } from "react/jsx-runtime"
 
 import DynamicPage from "./dynamic"
 import Dashboard from "./dashboard"
 
 
-import workspaceRoutes from "./workspace/routes"
-import WorkspaceLayout from "./workspace/layout"
+// import workspaceRoutes from "./workspace/routes"
+// import WorkspaceLayout from "./workspace/layout"
 
 
 // Authorization routes
@@ -20,13 +20,19 @@ import SignIn from "./authorization/pages/signin"
 import Reset from "./authorization/pages/reset"
 
 
-const ws_routes = [
-    { index: true, element: <Dashboard /> },
-    { path: ":ws", hydrateFallbackElement: <Fragment />, children: workspaceRoutes, element: <WorkspaceLayout /> },
-    { path: "*", element: <DynamicPage /> },
-]
+// const ws_routes = [
+
+//     { path: ":ws", hydrateFallbackElement: <Fragment />, children: workspaceRoutes, element: <WorkspaceLayout /> },
+//     { path: "*", element: <DynamicPage /> },
+// ]
 const router = createBrowserRouter([
-    { path: "/workspace", element: <TemplateLayout />, children: ws_routes },
+    // { path: "/workspace", element: <TemplateLayout />, children: ws_routes },
+    {
+        path: "/", element: <TemplateLayout />, children: [
+            { index: true, element: <Dashboard /> },
+            { path: "*", element: <DynamicPage /> },
+        ]
+    },
     {
         path: "/",
         element: <AuthorizationLayout />,

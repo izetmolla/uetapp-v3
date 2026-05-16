@@ -12,6 +12,14 @@ import { resetPasswordSchema, type ResetPasswordSchema } from "./api/validations
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router";
 import Links from "../../components/links";
+import {
+    authCardClassName,
+    authInputClassName,
+    authPageClassName,
+    authSeparatorClassName,
+    authSeparatorLabelClassName,
+    authSeparatorLineClassName,
+} from "../../styles";
 
 const FlowTroveLogo = ({ className }: { className?: string }) => {
     const navigate = useNavigate();
@@ -23,7 +31,7 @@ const FlowTroveLogo = ({ className }: { className?: string }) => {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-500 rounded-lg blur-sm opacity-50 -z-10"></div>
             </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">flowtrove</span>
+            <span className="text-xl font-bold text-foreground tracking-tight">flowtrove</span>
         </div>
     )
 };
@@ -68,9 +76,8 @@ const ResetPassword = () => {
             <form onSubmit={form.handleSubmit(onsubmit)}>
                 <div className="min-h-screen">
                     {/* Background */}
-                    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-login">
-                        {/* Container - 400px width, 32px padding, 12px border radius, responsive shadow */}
-                        <div className="w-full max-w-[450px] bg-white rounded-[12px] p-8 shadow-2xl">
+                    <div className={authPageClassName}>
+                        <div className={authCardClassName}>
                             <div className="space-y-3">
                                 {/* Logo */}
                                 <div className="text-left">
@@ -79,8 +86,8 @@ const ResetPassword = () => {
 
                                 {/* Login Header - Dark text for white background */}
                                 <div className="text-left space-y-2">
-                                    <h1 className="text-xl font-semibold text-gray-900">Reset Password</h1>
-                                    <p className="text-base font-normal text-gray-600">Continue to FlowTrove</p>
+                                    <h1 className="text-xl font-semibold text-foreground">Reset Password</h1>
+                                    <p className="text-base font-normal text-muted-foreground">Continue to FlowTrove</p>
                                 </div>
 
                                 <FormField
@@ -91,7 +98,7 @@ const ResetPassword = () => {
                                             <FormLabel className="sr-only"> Email</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="h-10 w-full rounded-md border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus-visible:border-gray-400 focus-visible:ring-2 focus-visible:ring-gray-200"
+                                                    className={authInputClassName}
                                                     placeholder="Email"
                                                     autoComplete="email"
                                                     {...field}
@@ -116,14 +123,10 @@ const ResetPassword = () => {
                                 </Button>
 
 
-                                {/* Separator - Dark styling for white background */}
-                                <div className="relative">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <div className="w-full border-t border-gray-300" />
-                                    </div>
-                                    <div className="relative flex justify-center text-sm">
-                                        <span className="px-2 bg-white text-gray-500">or</span>
-                                    </div>
+                                <div className={authSeparatorClassName}>
+                                    <div className={authSeparatorLineClassName} />
+                                    <span className={authSeparatorLabelClassName}>or</span>
+                                    <div className={authSeparatorLineClassName} />
                                 </div>
                                 <SocialLogin />
 
