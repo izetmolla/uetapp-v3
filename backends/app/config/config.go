@@ -1,0 +1,155 @@
+package config
+
+import (
+	"errors"
+	"os"
+
+	"github.com/flowtrove/packages/authorization"
+	"github.com/flowtrove/packages/models"
+	"github.com/flowtrove/packages/render"
+	"github.com/gofiber/fiber/v3"
+	"github.com/spf13/viper"
+	"gorm.io/gorm"
+)
+
+type ConfigSettings struct {
+	Port        string
+	Address     string
+	JWTSecret   string
+	DatabaseURL string
+	RedisURL    string
+	AuthURL     string
+}
+
+type Application interface {
+	Postgres() *gorm.DB
+	View(ctx fiber.Ctx, optsParams ...render.RenderOptionsFunc) error
+	Api(ctx fiber.Ctx, optsParams ...render.RenderOptionsFunc) error
+}
+type AppClients struct {
+	appService string
+	postgres   *gorm.DB
+	auth       *authorization.Authorization
+	render     *render.Render
+}
+
+var ExcludedRoutes = []string{
+	"all-workspaces",
+}
+
+func BootApplication(cfg ConfigSettings) (*AppClients, error) {
+	var err error
+	app := AppClients{}
+	app.postgres, err = InitializeDatabase(cfg.DatabaseURL)
+	if err != nil {
+		return nil, err
+	}
+	if err := AutoMigratePostgress(app.postgres, models.Models()...); err != nil {
+		return nil, err
+	}
+
+	if app.auth, err = authorization.NewAuthorization(&authorization.AuthorizationOptions{
+		DB:                   app.postgres,
+		JWTSecret:            cfg.JWTSecret,
+		AccessTokenDuration:  "15s",
+		RefreshTokenDuration: "1w",
+		AutoMigration:        true,
+		UserModel:            &models.User{},
+		UserTableName:        "users",
+		SessionModel:         &models.Session{},
+		SessionTableName:     "sessions",
+		AuthURL:              cfg.AuthURL,
+	}); err != nil {
+		return nil, err
+	}
+
+	app.render = render.New(&render.Config{})
+
+	return &app, err
+}
+
+func (app *AppClients) Postgres() *gorm.DB {
+	return app.postgres
+}
+
+func GetConfigSettings() (*ConfigSettings, error) {
+	// Process env (e.g. Kubernetes env / secrets) must work without a .env file.
+	viper.AutomaticEnv()
+
+	if _, statErr := os.Stat(".env"); statErr == nil {
+		viper.SetConfigFile(".env")
+		if err := viper.ReadInConfig(); err != nil {
+			return nil, err
+		}
+	} else if !errors.Is(statErr, os.ErrNotExist) {
+		return nil, statErr
+	}
+
+	configSettings := ConfigSettings{}
+	if viper.GetString("ENV") != "production" {
+		os.Setenv("ENV", "development")
+	}
+	if viper.GetString("PORT") != "" {
+		configSettings.Port = viper.GetString("PORT")
+	} else {
+		configSettings.Port = "3000"
+	}
+
+	if viper.GetString("ADDRESS") != "" {
+		configSettings.Address = viper.GetString("ADDRESS")
+	} else {
+		configSettings.Address = "0.0.0.0"
+	}
+	if viper.GetString("JWT_SECRET") != "" {
+		configSettings.JWTSecret = viper.GetString("JWT_SECRET")
+	} else {
+		return nil, errors.New("JWT_SECRET is not set")
+	}
+	if viper.GetString("AUTH_URL") != "" {
+		configSettings.AuthURL = viper.GetString("AUTH_URL")
+	} else {
+		return nil, errors.New("AUTH_URL is not set")
+	}
+	if viper.GetString("DATABASE_URL") != "" {
+		configSettings.DatabaseURL = viper.GetString("DATABASE_URL")
+	} else {
+		return nil, errors.New("DATABASE_URL is not set")
+	}
+
+	return &configSettings, nil
+}
+
+func (app *AppClients) ServiceName() string {
+	if app.appService == "" {
+		app.appService = "workspace"
+	}
+	return app.appService
+}
+
+func (app *AppClients) Render() *render.Render {
+	return app.render
+}
+
+func (app *AppClients) View(c fiber.Ctx, optsParams ...render.RenderOptionsFunc) error {
+	return app.render.View(c, optsParams...)
+}
+func (app *AppClients) Api(c fiber.Ctx, optsParams ...render.RenderOptionsFunc) error {
+	return app.render.Api(c, optsParams...)
+}
+
+func (app *AppClients) Auth() *authorization.Authorization {
+	return app.auth
+}
+
+func (app *AppClients) ApiNotFound(c fiber.Ctx) error {
+	return app.render.Api(c, app.render.WithData(fiber.Map{
+		"error":   true,
+		"message": "API Not Found",
+		"code":    "NOT_FOUND",
+		"status":  fiber.StatusNotFound,
+		"details": map[string]any{
+			"method": c.Method(),
+			"url":    c.OriginalURL(),
+		},
+	}))
+}

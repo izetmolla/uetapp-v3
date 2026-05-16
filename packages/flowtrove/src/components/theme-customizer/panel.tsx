@@ -1,0 +1,46 @@
+"use client";
+
+import { Palette } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger
+} from "@workspace/ui/components/dropdown-menu";
+import {
+  PresetSelector,
+  ThemeScaleSelector,
+  ColorModeSelector,
+  ContentLayoutSelector,
+  ThemeRadiusSelector,
+  ResetThemeButton
+} from "./index";
+import { useIsMobile } from "@workspace/flowtrove/hooks/use-mobile";
+import { SidebarModeSelector } from "./sidebar-mode-selector";
+
+export function ThemeCustomizerPanel() {
+  const isMobile = useIsMobile();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="icon-sm" variant="ghost">
+          <Palette />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="me-4 w-80 p-4 shadow-xl lg:me-0"
+        align={isMobile ? "center" : "end"}>
+        <div className="grid space-y-4">
+          <PresetSelector />
+          <ThemeScaleSelector />
+          <ThemeRadiusSelector />
+          <ColorModeSelector />
+          <ContentLayoutSelector />
+          <SidebarModeSelector />
+        </div>
+        <ResetThemeButton />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

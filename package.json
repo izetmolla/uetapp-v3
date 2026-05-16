@@ -1,0 +1,33 @@
+{
+  "name": "app",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "typecheck": "turbo typecheck",
+    "pub": "node --experimental-specifier-resolution=node packages/utils/src/cloud/publish.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.7.4",
+    "turbo": "^2.9.12",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.100.9",
+    "@tanstack/react-table": "^8.21.3",
+    "next-themes": "^0.4.6",
+    "react-i18next": "^17.0.7",
+    "react-router": "^7.15.0",
+    "zod": "^3.25.76",
+    "zustand": "^5.0.13"
+  }
+}

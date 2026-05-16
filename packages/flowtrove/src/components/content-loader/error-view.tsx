@@ -1,0 +1,60 @@
+"use client";
+
+import { type FC, useMemo } from "react";
+
+import type { ApiErrorResponse } from "./types";
+
+interface ContentLoaderErrorViewProps {
+    error: Error;
+    /** Compact layout for constrained areas (e.g. sidebar). */
+    minimal?: boolean;
+}
+
+/**
+ * Renders error message and optional API response details (message, code, details).
+ * Used by ContentLoader in the error state and exported for reuse.
+ */
+export const ContentLoaderErrorView: FC<ContentLoaderErrorViewProps> = ({
+    error,
+    minimal = false,
+}) => {
+    const apiResponse = useMemo((): ApiErrorResponse | null => {
+        const response = (error as Error & { response?: { data?: ApiErrorResponse } })
+            .response?.data;
+        return response ?? null;
+    }, [error]);
+
+    if (minimal) {
+        return (
+            <div
+                className="text-destructive px-2 py-1.5 text-xs"
+                role="alert"
+            >
+                <p className="font-medium leading-tight break-words">{error.message}</p>
+                {apiResponse?.message && apiResponse.message !== error.message && (
+                    <p className="text-muted-foreground mt-0.5 line-clamp-2">{apiResponse.message}</p>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div
+            className="flex flex-col items-center justify-center gap-2 h-[70vh] text-center text-destructive"
+            role="alert"
+        >
+            <p className="font-medium">{error.message}</p>
+            {apiResponse?.message && (
+                <p className="text-sm">{apiResponse.message}</p>
+            )}
+            {apiResponse?.code && (
+                <p className="text-muted-foreground text-xs">{apiResponse.code}</p>
+            )}
+            {apiResponse?.details != null && (
+                <pre className="max-w-full overflow-auto rounded bg-muted px-2 py-1 text-left text-xs">
+                    {JSON.stringify(apiResponse.details, null, 2)}
+                </pre>
+            )}
+        </div>
+    );
+};

@@ -1,0 +1,58 @@
+{
+  "name": "@workspace/flowtrove",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.100.8",
+    "@workspace/ui": "workspace:*",
+    "@workspace/utils": "workspace:*",
+    "axios": "^1.16.0",
+    "i18next": "^26.0.8",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "i18next-http-backend": "^3.0.6",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^1.14.0",
+    "motion": "^12.38.0",
+    "react": "^19.2.6",
+    "react-day-picker": "^10.0.0",
+    "react-dom": "^19.2.6",
+    "react-hook-form": "^7.75.0",
+    "react-i18next": "^17.0.6",
+    "sonner": "^2.0.7",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.59.1",
+    "vite": "^7.3.2"
+  },
+  "exports": {
+    "./globals.css": "./src/styles/globals.css",
+    "./lib/utils": "./src/lib/utils.ts",
+    "./lib/*": "./src/lib/*.ts",
+    "./components/providers": "./src/components/providers/index.tsx",
+    "./components/layout/builder": "./src/components/layout/builder/index.ts",
+    "./components/theme-provider": "./src/components/theme-provider/index.tsx",
+    "./components/content-loader": "./src/components/content-loader/index.tsx",
+    "./components/loader": "./src/components/loader.tsx",
+    "./components/theme-customizer": "./src/components/theme-customizer/index.ts",
+    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./store/*": "./src/store/*.ts",
+    "./types": "./src/types/index.ts",
+    "./types/*": "./src/types/*.ts"
+  }
+}
