@@ -258,15 +258,14 @@ export interface ResponseWithPagination<T> extends ResponseWithError {
 }
 
 
-export function withService<T>(params?: T & { service?: string }): T {
-    const service =
-        window?.location?.pathname?.split("/")?.length > 2
-            ? window?.location?.pathname?.split("/")?.[2]
-            : params?.service ?? ""
+export function withService<T>(params?: T & { service?: string }): T & { service: string } {
+    const service = window?.location?.pathname?.split("/")?.length > 1
+        ? window?.location?.pathname?.split("/")?.[1]
+        : params?.service ?? ""
     if (exceptedPaths.includes(service)) {
-        return { service: "", ...params } as T
+        return { service: "", ...params } as T & { service: string }
     }
-    return { service, ...params } as T
+    return { service, ...params } as T & { service: string }
 }
 
 export interface WithPagination<T> {

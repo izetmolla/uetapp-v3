@@ -7,20 +7,19 @@ import (
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 func (cc *Controller) GetGeneralDataApi(c fiber.Ctx) error {
 	render := cc.app.Render()
 	reqCtx := c.Context()
 
-	service, err := cc.getNavigationData(reqCtx, c.Query("service", cc.app.ServiceName()))
+	service, err := cc.getServiceData(reqCtx, c.Query("service", cc.app.ServiceName()))
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return cc.app.Api(c, render.WithError(err))
 		}
 	}
-	navigations, err := cc.getNavigationsByServiceName(reqCtx, cc.app.ServiceName())
+	navigations, err := cc.getNavigationData(reqCtx, c.Query("service", cc.app.ServiceName()))
 	if err != nil {
 		return cc.app.Api(c, render.WithError(err))
 	}
@@ -35,18 +34,15 @@ func (cc *Controller) GetGeneralDataApi(c fiber.Ctx) error {
 		}))
 }
 
-func (c *Controller) getNavigationsByServiceName(ctx context.Context, serviceName string) ([]models.ServiceNavigation, error) {
-	navigations, err := gorm.G[models.ServiceNavigation](c.app.Postgres()).
-		Joins(clause.InnerJoin.Association("Service"), nil).
-		Where(clause.Eq{
-			Column: clause.Column{Table: "Service", Name: "name"},
-			Value:  serviceName,
-		}).
-		Find(ctx)
+func (cc *Controller) getServiceData(ctx context.Context, serviceName string) (*models.Service, error) {
+	db := cc.app.Postgres()
+	service, err := gorm.G[models.Service](db).
+		Where("name = ?", serviceName).
+		First(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return navigations, nil
+	return &service, nil
 }
 
 func (cc *Controller) getNavigationData(ctx context.Context, serviceName string) ([]models.ServiceNavigation, error) {
@@ -58,6 +54,7 @@ func (cc *Controller) getNavigationData(ctx context.Context, serviceName string)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(serviceIDs) == 0 {
 		return []models.ServiceNavigation{}, nil
 	}

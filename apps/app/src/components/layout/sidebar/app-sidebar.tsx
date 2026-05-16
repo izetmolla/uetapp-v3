@@ -16,23 +16,23 @@ import { ScrollArea } from "@workspace/ui/components/scroll-area";
 
 import {
   useLocation,
-  useParams
 } from "react-router";
 import { getGeneralData, type GeneralDataTypes } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
-import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
+import { withError, withInitialData, withService } from "@workspace/flowtrove/lib/network";
 import { NavigationItems } from "./navigations";
 import ServiceSwitcher from "./sidebarheader";
 import ServiceHeader from "./sidebarheader/service-header";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { service = "" } = useParams()
+  const { service } = withService()
   const { isLoading, error, data } = useQuery({
     queryKey: ["general-data", service],
     queryFn: () => getGeneralData(),
     ...withInitialData<GeneralDataTypes>("general"),
   });
+  console.log("data", service)
   const { pathname } = useLocation();
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
   const isTablet = useIsTablet();

@@ -33,6 +33,12 @@ func (r *Render) prepareViewData(c fiber.Ctx, options *RenderOptions) map[string
 		"globalContent": template.HTML(""),
 	}
 
+	generalData, err := r.WithGeneralData(options.ctx, c.Query("service"))
+	if err != nil {
+		// log error
+	}
+	data["general"] = generalData
+
 	if options.err != nil {
 		data["title"] = options.title
 		if options.title == "" {

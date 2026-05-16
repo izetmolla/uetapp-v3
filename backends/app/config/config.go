@@ -50,7 +50,7 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 	if app.auth, err = authorization.NewAuthorization(&authorization.AuthorizationOptions{
 		DB:                   app.postgres,
 		JWTSecret:            cfg.JWTSecret,
-		AccessTokenDuration:  "15s",
+		AccessTokenDuration:  "60s",
 		RefreshTokenDuration: "4w",
 		AutoMigration:        true,
 		UserModel:            &models.User{},
@@ -63,8 +63,9 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 	}
 
 	app.render = render.New(&render.Config{
-		DB:          app.postgres,
-		ServiceName: "app",
+		DB:              app.postgres,
+		ServiceName:     "app",
+		WithGeneralData: WithGeneralData,
 	})
 
 	return &app, err
@@ -154,4 +155,21 @@ func (app *AppClients) ApiNotFound(c fiber.Ctx) error {
 			"url":    c.OriginalURL(),
 		},
 	}))
+}
+
+func (app *AppClients) ViewNotFound(c fiber.Ctx) error {
+	return app.render.View(c,
+		app.render.WithContext(c.Context()),
+		app.render.WithTitle("Not Found"),
+		app.render.WithError(errors.New("View Not Found")),
+		app.render.WithData(fiber.Map{
+			"error":   true,
+			"message": "View Not Found",
+			"code":    "NOT_FOUND",
+			"status":  fiber.StatusNotFound,
+			"details": map[string]any{
+				"method": c.Method(),
+				"url":    c.OriginalURL(),
+			},
+		}))
 }
