@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"log"
 
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
@@ -33,11 +34,19 @@ func (r *Render) prepareViewData(c fiber.Ctx, options *RenderOptions) map[string
 		"globalContent": template.HTML(""),
 	}
 
-	generalData, err := r.WithGeneralData(options.ctx, c.Query("service"))
-	if err != nil {
-		// log error
+	serviceName := c.Query("service")
+	if serviceName == "" {
+		serviceName = r.serviceName
 	}
-	data["general"] = generalData
+	var generalData map[string]any
+	if r.WithGeneralData != nil {
+		var err error
+		generalData, err = r.WithGeneralData(options.ctx, serviceName)
+		if err != nil {
+			options.err = err
+			log.Printf("Error getting general data for service %s: %v", serviceName, err)
+		}
+	}
 
 	if options.err != nil {
 		data["title"] = options.title
@@ -51,7 +60,8 @@ func (r *Render) prepareViewData(c fiber.Ctx, options *RenderOptions) map[string
 				"status":  options.errorStatus,
 				"code":    options.errorCode,
 			},
-			"general": options.data,
+			"general": generalData,
+			"data":    options.data,
 			// "template": getEndpointTemplate(options.Endpoint),
 		}
 		jsonData, _ := json.Marshal(content)
@@ -65,7 +75,7 @@ func (r *Render) prepareViewData(c fiber.Ctx, options *RenderOptions) map[string
 		content := map[string]any{
 			"originalUrl": c.OriginalURL(),
 			"data":        options.data,
-			// "general":     options.General,
+			"general":     generalData,
 			// "template":    getEndpointTemplate(options.Endpoint),
 		}
 		jsonData, _ := json.Marshal(content)

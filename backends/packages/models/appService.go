@@ -14,9 +14,13 @@ type Service struct {
 	Name     string `json:"name" gorm:"size:255;"`
 	Title    string `json:"title" gorm:"size:255;"`
 
+	Icon        string `json:"icon" gorm:"size:255;"`
+	Description string `json:"description" gorm:"type:text;"`
+
 	Navigations []ServiceNavigation `json:"navigations,omitempty" gorm:"foreignKey:ServiceID;references:ID"`
 
-	Roles JSONBArray `json:"roles" gorm:"type:jsonb;default:'[]';"`
+	Roles  JSONBArray `json:"roles" gorm:"type:jsonb;default:'[]';"`
+	Status Status     `json:"status" gorm:"default:active;"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

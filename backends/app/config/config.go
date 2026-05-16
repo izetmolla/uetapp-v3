@@ -65,7 +65,7 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 	app.render = render.New(&render.Config{
 		DB:              app.postgres,
 		ServiceName:     "app",
-		WithGeneralData: WithGeneralData,
+		WithGeneralData: app.withGeneralData(),
 	})
 
 	return &app, err

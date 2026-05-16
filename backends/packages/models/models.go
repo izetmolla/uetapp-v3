@@ -47,6 +47,9 @@ func Models() []any {
 		// &Session{},
 		// &Service{},
 		// &ServiceNavigation{},
+		// &Service{},
+		// &ServiceNavigation{},
+		// &Role{},
 	}
 
 	if len(models) > 0 {

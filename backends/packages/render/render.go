@@ -20,13 +20,15 @@ type Render struct {
 	redis       *redis.Client
 
 	themes_table_name string
+	WithGeneralData   GeneralDataFunc
 }
 
 func New(cfg *Config) *Render {
 	return &Render{
-		serviceName: cfg.ServiceName,
-		db:          cfg.DB,
-		redis:       cfg.Redis,
+		serviceName:     cfg.ServiceName,
+		db:              cfg.DB,
+		redis:           cfg.Redis,
+		WithGeneralData: cfg.WithGeneralData,
 	}
 }
 
