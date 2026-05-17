@@ -1,7 +1,6 @@
 package authorization
 
 import (
-	"encoding/json"
 	"errors"
 
 	"github.com/gofiber/fiber/v3"
@@ -21,8 +20,7 @@ func NewController(app *config.AppClients) *Controller {
 func SetupRoutes(app fiber.Router, api fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	authApi := api.Group("/authorization")
-	authApi.Post("/sign-in", controller.SignIn)
-	authApi.Get("/sign-in", controller.SignIn)
+	authApi.Post("/sign-in", controller.SignInApi)
 	authApi.Post("/check-email", controller.SignInCheckEmail)
 
 	app.Get("/sign-in", controller.SignInView)
@@ -35,32 +33,28 @@ type SignInRequest struct {
 	CheckEmail bool   `json:"check_email"`
 }
 
-func (c *Controller) SignIn(ctx fiber.Ctx) error {
-	if c == nil || c.app == nil || c.app.Auth() == nil {
-		return c.app.Api(ctx, c.app.Render().WithError(errors.New("Authorization not initialized")))
-	}
+func (cc *Controller) SignInApi(c fiber.Ctx) error {
+	ctxReq := c.Context()
+	r := cc.app.Render()
+	auth := cc.app.Auth()
+
 	var req SignInRequest
-	if err := ctx.Bind().JSON(&req); err != nil {
-		return c.app.Api(ctx, c.app.Render().WithError(errors.New("Invalid request")))
+	if err := c.Bind().JSON(&req); err != nil {
+		return cc.app.Api(c, r.WithError(err))
 	}
 
-	auth := c.app.Auth()
 	res, err := auth.SignIn(
-		auth.WithContext(ctx),
+		auth.WithContext(ctxReq),
 		auth.WithEmail(req.Email),
 		auth.WithPassword(req.Password),
-		auth.WithIPAddress(ctx.IP()),
-		auth.WithUserAgent(ctx.Get("User-Agent")),
-		auth.WithContent(json.RawMessage(`{
-			"Test":  "data1234",
-			"Test2": "data5678"
-		}`)),
+		auth.WithIPAddress(c.IP()),
+		auth.WithUserAgent(c.Get("User-Agent")),
 	)
 	if err != nil {
-		return c.app.Api(ctx, c.app.Render().WithError(err))
+		return cc.app.Api(c, r.WithError(err))
 	}
-	auth.SetCookie(ctx, res.SessionID)
-	return ctx.JSON(fiber.Map{
+	auth.SetCookie(c, res.SessionID)
+	return c.JSON(fiber.Map{
 		"user":       res.User,
 		"tokens":     res.Tokens,
 		"session_id": res.SessionID,

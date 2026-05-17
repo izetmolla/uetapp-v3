@@ -9,13 +9,19 @@ import (
 
 	"github.com/flowtrove/packages/authorization/utils"
 	"github.com/gofiber/fiber/v3"
+	"gorm.io/gorm"
 )
 
+// SignInRequest is the canonical sign-in payload accepted by callers
+// that want to use the package's request struct directly.
 type SignInRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+// SignInResponse is returned by SignIn / CheckEmail. It groups the
+// authenticated user, the new session id, the token pair and any
+// validation error encountered.
 type SignInResponse struct {
 	User      any                `json:"user"`
 	SessionID string             `json:"session_id"`
@@ -23,7 +29,10 @@ type SignInResponse struct {
 	Error     AuthorizationError `json:"error"`
 }
 
-// SignInOptions is the options for the SignIn method
+// --- Functional options --------------------------------------------------
+
+// SignInOptions is the input bag built by the WithXxx functional options
+// below and consumed by SignIn / CheckEmail.
 type SignInOptions struct {
 	Ctx       context.Context
 	Email     string
@@ -33,96 +42,107 @@ type SignInOptions struct {
 	UserAgent string
 }
 
-// SignInOptionsFunc is a function that sets the options for the SignIn method
+// SignInOptionsFunc mutates a SignInOptions in place.
 type SignInOptionsFunc func(*SignInOptions)
 
 func defaultSignInOptions() SignInOptions {
-	return SignInOptions{
-		Ctx:      context.Background(),
-		Email:    "",
-		Password: "",
-	}
+	return SignInOptions{Ctx: context.Background()}
 }
 
-// NewSignInOptions creates a new SignInOptions struct with the given options
+// NewSignInOptions applies the provided functional options on top of
+// the defaults.
 func NewSignInOptions(opts ...SignInOptionsFunc) *SignInOptions {
 	o := defaultSignInOptions()
 	for _, fn := range opts {
-		fn(&o)
+		if fn != nil {
+			fn(&o)
+		}
 	}
 	return &o
 }
 
-// WithContext sets the context for the SignIn method
-func (o *Authorization) WithContext(ctx fiber.Ctx) SignInOptionsFunc {
+// WithContext propagates a context through the sign-in pipeline.
+// fiber.Ctx satisfies context.Context in Fiber v3, so passing the
+// request context works seamlessly.
+func (a *Authorization) WithContext(ctx context.Context) SignInOptionsFunc {
 	return func(o *SignInOptions) {
-		o.Ctx = ctx
+		if ctx != nil {
+			o.Ctx = ctx
+		}
 	}
 }
 
-// WithEmail sets the email for the SignIn method
-func (o *Authorization) WithEmail(email string) SignInOptionsFunc {
+// WithEmail sets the email used for the lookup.
+func (a *Authorization) WithEmail(email string) SignInOptionsFunc {
+	return func(o *SignInOptions) { o.Email = email }
+}
+
+// WithPassword sets the cleartext password used for the verification.
+func (a *Authorization) WithPassword(password string) SignInOptionsFunc {
+	return func(o *SignInOptions) { o.Password = password }
+}
+
+// WithCredentials is a convenience for setting Email and Password in one call.
+func (a *Authorization) WithCredentials(email, password string) SignInOptionsFunc {
 	return func(o *SignInOptions) {
 		o.Email = email
-	}
-}
-
-// WithPassword sets the password for the SignIn method
-func (o *Authorization) WithPassword(password string) SignInOptionsFunc {
-	return func(o *SignInOptions) {
 		o.Password = password
 	}
 }
 
-func (o *Authorization) WithCredentials(email, password string) SignInOptionsFunc {
-	return func(o *SignInOptions) {
-		o.Email = email
-		o.Password = password
-	}
+// WithContent attaches arbitrary application content that is then
+// stamped into the JWT.
+func (a *Authorization) WithContent(content json.RawMessage) SignInOptionsFunc {
+	return func(o *SignInOptions) { o.Content = content }
 }
 
-func (o *Authorization) WithContent(content json.RawMessage) SignInOptionsFunc {
-	return func(o *SignInOptions) {
-		o.Content = content
-	}
+// WithIPAddress records the client IP on the session row.
+func (a *Authorization) WithIPAddress(ipAddress string) SignInOptionsFunc {
+	return func(o *SignInOptions) { o.IPAddress = ipAddress }
 }
 
-func (o *Authorization) WithIPAddress(ipAddress string) SignInOptionsFunc {
-	return func(o *SignInOptions) {
-		o.IPAddress = ipAddress
-	}
+// WithUserAgent records the User-Agent on the session row.
+func (a *Authorization) WithUserAgent(userAgent string) SignInOptionsFunc {
+	return func(o *SignInOptions) { o.UserAgent = userAgent }
 }
 
-func (o *Authorization) WithUserAgent(userAgent string) SignInOptionsFunc {
-	return func(o *SignInOptions) {
-		o.UserAgent = userAgent
-	}
-}
+// --- SignIn / CheckEmail --------------------------------------------------
 
+// SignIn authenticates a user with email + password, creates a session,
+// issues a token pair and returns everything bundled in a SignInResponse.
+//
+// On a *user-facing* failure (user not found / wrong password) the
+// returned error is one of the package sentinels (ErrUserNotFound,
+// ErrInvalidCredentials) and SignInResponse.Error is populated with a
+// friendly field marker. Unexpected errors (DB failures, JSON errors)
+// are returned wrapped.
 func (a *Authorization) SignIn(opts ...SignInOptionsFunc) (SignInResponse, error) {
-	userResponse := SignInResponse{}
-	db := a.DBManager()
-	tm := a.TokenManager()
 	options := NewSignInOptions(opts...)
 
-	user, err := db.FindUser(options.Ctx, options.Email)
+	user, err := a.dbManager.FindUser(options.Ctx, options.Email)
 	if err != nil {
-		return SignInResponse{Error: AuthorizationError{Error: errors.New("user not found"), Field: "email"}}, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return SignInResponse{
+				Error: AuthorizationError{Error: ErrUserNotFound, Field: "email"},
+			}, ErrUserNotFound
+		}
+		return SignInResponse{
+			Error: AuthorizationError{Error: err, Field: "email"},
+		}, fmt.Errorf("find user: %w", err)
 	}
 
 	if !a.passwordManager.IsValidPassword(user.Password, options.Password) {
-		userResponse.Error = AuthorizationError{Error: errors.New("invalid credentials"), Field: "password"}
-		return userResponse, errors.New("invalid credentials")
+		return SignInResponse{
+			Error: AuthorizationError{Error: ErrInvalidCredentials, Field: "password"},
+		}, ErrInvalidCredentials
 	}
 
-	content := options.Content
-	if len(content) == 0 {
-		content, err = json.Marshal(map[string]any{})
-		if err != nil {
-			return userResponse, err
-		}
+	content, err := normalizeContent(options.Content)
+	if err != nil {
+		return SignInResponse{}, err
 	}
 
+	tm := a.tokenManager
 	tokens, sessionID, err := tm.Authorize(
 		tm.WithContext(options.Ctx),
 		tm.WithUserID(user.ID),
@@ -132,41 +152,66 @@ func (a *Authorization) SignIn(opts ...SignInOptionsFunc) (SignInResponse, error
 		tm.WithContent(content),
 	)
 	if err != nil {
-		return userResponse, err
+		return SignInResponse{}, fmt.Errorf("issue tokens: %w", err)
 	}
 
-	userResponse.Tokens = tokens
-	userResponse.SessionID = sessionID
 	utils.StripPasswordFromUserModel(user)
-	userResponse.User = user
-
-	return userResponse, nil
+	return SignInResponse{
+		Tokens:    tokens,
+		SessionID: sessionID,
+		User:      user,
+	}, nil
 }
 
+// CheckEmail returns the (password-stripped) user matching the supplied
+// email, without performing any credential check. Useful for two-step
+// sign-in UIs.
 func (a *Authorization) CheckEmail(opts ...SignInOptionsFunc) (SignInResponse, error) {
-	db := a.DBManager()
 	options := NewSignInOptions(opts...)
-	user, err := db.FindUser(options.Ctx, options.Email)
+
+	user, err := a.dbManager.FindUser(options.Ctx, options.Email)
 	if err != nil {
-		return SignInResponse{Error: AuthorizationError{Error: errors.New("user not found"), Field: "email"}}, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return SignInResponse{
+				Error: AuthorizationError{Error: ErrUserNotFound, Field: "email"},
+			}, ErrUserNotFound
+		}
+		return SignInResponse{
+			Error: AuthorizationError{Error: err, Field: "email"},
+		}, fmt.Errorf("find user: %w", err)
 	}
-	if user == nil {
-		return SignInResponse{Error: AuthorizationError{Error: errors.New("user not found"), Field: "email"}}, nil
-	}
+
 	utils.StripPasswordFromUserModel(user)
 	return SignInResponse{User: user}, nil
 }
 
+// normalizeContent guarantees the content passed downstream is valid
+// JSON. Empty input becomes an empty object so the resulting JWT still
+// holds a well-formed "content" field.
+func normalizeContent(content json.RawMessage) (json.RawMessage, error) {
+	if len(content) == 0 {
+		return json.RawMessage(`{}`), nil
+	}
+	if !json.Valid(content) {
+		return nil, ErrInvalidContent
+	}
+	return content, nil
+}
+
+// --- Cookie helpers ------------------------------------------------------
+
+// SetCookie stores the session id in an HTTP-only, secure cookie scoped
+// to the auth domain. The cookie is valid for 365 days and uses
+// SameSite=Lax so cross-subdomain navigation keeps the user signed in.
 func (a *Authorization) SetCookie(c fiber.Ctx, sessionID string) {
-	cookie := new(fiber.Cookie)
-	cookie.Name = a.cookieSessionName
-	cookie.Value = sessionID
-	// Set Domain to a dot-prefixed base domain to cover all subdomains.
-	cookie.Domain = fmt.Sprintf(".%s", utils.GetDomainWithoutWWW(a.authURL))
-	cookie.Path = "/"
-	cookie.Expires = time.Now().Add(365 * 24 * time.Hour)
-	cookie.HTTPOnly = true
-	cookie.Secure = true
-	cookie.SameSite = fiber.CookieSameSiteLaxMode
-	c.Cookie(cookie)
+	c.Cookie(&fiber.Cookie{
+		Name:     a.cookieSessionName,
+		Value:    sessionID,
+		Domain:   a.cookieDomain,
+		Path:     "/",
+		Expires:  time.Now().Add(365 * 24 * time.Hour),
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: fiber.CookieSameSiteLaxMode,
+	})
 }

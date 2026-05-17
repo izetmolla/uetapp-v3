@@ -31,7 +31,7 @@ func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	app := appGroup.Group("/cadmin", controller.CadminMiddlewareView)
 	users.SetupWebRoutes(app, appClients)
-	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
+	app.Get("/", appClients.WebView("Cadmin")) // Web endpoint for getting enter data
 
 	// api.Get("/enter", controller.GetEnterDataApi) // API endpoint for getting enter data
 	app.Use(appClients.ViewNotFound)

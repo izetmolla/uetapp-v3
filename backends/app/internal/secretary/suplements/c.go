@@ -29,7 +29,7 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	app := appGroup.Group("/suplements")
 	students.SetupWebRoutes(app, appClients)
-	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
+	app.Get("/", appClients.WebView("Suplements")) // Web endpoint for getting enter data
 
 	// api.Get("/enter", controller.GetEnterDataApi) // API endpoint for getting enter data
 	app.Use(appClients.ViewNotFound)

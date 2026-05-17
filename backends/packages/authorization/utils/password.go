@@ -1,69 +1,67 @@
 package utils
 
 import (
+	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
-// PasswordManager handles password hashing and validation operations.
+// defaultBcryptCost mirrors the value in the parent package's defaults.
+// It is duplicated here to keep utils free of an import cycle.
+const defaultBcryptCost = 12
+
+// ErrPasswordTooLong is returned when bcrypt rejects a password because
+// it exceeds the 72-byte hard limit imposed by the algorithm.
+var ErrPasswordTooLong = errors.New("password exceeds maximum length (72 bytes)")
+
+// PasswordManager handles password hashing and validation.
+//
+// Instances are safe for concurrent use and hold no per-call state, so a
+// single one per process is enough.
 type PasswordManager struct {
 	cost int
 }
 
-// NewPasswordManager creates a new password manager with the specified cost.
-//
-// Parameters:
-//   - cost: The bcrypt cost factor (4-31, recommended 10-14)
-//
-// Returns:
-//   - *PasswordManager: Password manager instance
+// NewPasswordManager creates a password manager with the given bcrypt
+// cost. Costs outside the valid bcrypt range fall back to the default.
 func NewPasswordManager(cost int) *PasswordManager {
-	if cost == 0 {
-		cost = 12 // Default bcrypt cost
+	if cost < bcrypt.MinCost || cost > bcrypt.MaxCost {
+		cost = defaultBcryptCost
 	}
 	return &PasswordManager{cost: cost}
 }
 
-// HashPassword generates a bcrypt hash from a plain text password.
-//
-// Parameters:
-//   - password: The plain text password to hash
-//
-// Returns:
-//   - string: The bcrypt hash of the password
-//   - error: Error if hashing fails
+// Cost returns the bcrypt cost used by this manager.
+func (pm *PasswordManager) Cost() int { return pm.cost }
+
+// HashPassword returns the bcrypt hash of `password`.
 func (pm *PasswordManager) HashPassword(password string) (string, error) {
-	encpw, err := bcrypt.GenerateFromPassword([]byte(password), pm.cost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), pm.cost)
 	if err != nil {
+		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
+			return "", ErrPasswordTooLong
+		}
 		return "", err
 	}
-	return string(encpw), nil
+	return string(hash), nil
 }
 
-// IsValidPassword compares a plain text password with an encrypted password hash.
-// Uses bcrypt to safely compare the passwords.
+// IsValidPassword reports whether `pw` is the cleartext for the
+// bcrypt-encoded `encpw`.
 //
-// Parameters:
-//   - encpw: The encrypted password hash to compare against
-//   - pw: The plain text password to verify
-//
-// Returns:
-//   - bool: true if passwords match, false otherwise
+// Both inputs are zero-cost guarded so the bcrypt comparison (which is
+// the expensive step) is skipped when either side is empty.
 func (pm *PasswordManager) IsValidPassword(encpw, pw string) bool {
+	if encpw == "" || pw == "" {
+		return false
+	}
 	return bcrypt.CompareHashAndPassword([]byte(encpw), []byte(pw)) == nil
 }
 
-// CreatePassword is a standalone function for password hashing with default cost.
+// CreatePassword is a package-level convenience for callers that don't
+// want to instantiate a PasswordManager.
 //
-// Parameters:
-//   - password: The plain text password to hash
-//
-// Returns:
-//   - string: The bcrypt hash of the password
-//   - error: Error if hashing fails
+// Deprecated: prefer (*PasswordManager).HashPassword.
 func CreatePassword(password string) (string, error) {
-	encpw, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		return "", err
-	}
-	return string(encpw), nil
+	return NewPasswordManager(defaultBcryptCost).HashPassword(password)
 }

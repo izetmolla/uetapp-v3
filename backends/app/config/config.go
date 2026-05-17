@@ -51,9 +51,9 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 	if app.auth, err = authorization.NewAuthorization(&authorization.AuthorizationOptions{
 		DB:                   app.postgres,
 		JWTSecret:            cfg.JWTSecret,
-		AccessTokenDuration:  "60s",
+		AccessTokenDuration:  "10s",
 		RefreshTokenDuration: "4w",
-		AutoMigration:        true,
+		AutoMigration:        false,
 		UserModel:            &models.User{},
 		UserTableName:        "users",
 		SessionModel:         &models.Session{},
@@ -178,6 +178,17 @@ func (app *AppClients) ViewNotFound(c fiber.Ctx) error {
 		}))
 }
 
+func (app *AppClients) WebView(params ...string) fiber.Handler {
+	r := app.Render()
+	return func(c fiber.Ctx) error {
+		if len(params) > 0 {
+			r.WithTitle(params[0])
+		}
+
+		return app.View(c, r.WithContext(c.Context()))
+	}
+}
+
 func (app *AppClients) USER(c fiber.Ctx, reqCtx context.Context, fromAPI ...bool) (*authorization.AuthData, error) {
-	return app.auth.USER(c, reqCtx, fromAPI...)
+	return app.auth.User(c, reqCtx, fromAPI...)
 }

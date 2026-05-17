@@ -7,28 +7,44 @@ import (
 	"strings"
 )
 
+// IsExcludedPath reports whether `path` starts with any prefix in
+// `excluded`. Prefix matching is intentional so callers can opt entire
+// route trees out of authentication (e.g. "/api/public").
 func IsExcludedPath(excluded []string, path string) bool {
-	for _, excludedPath := range excluded {
-		if strings.HasPrefix(path, excludedPath) {
+	for _, prefix := range excluded {
+		if prefix == "" {
+			continue
+		}
+		if strings.HasPrefix(path, prefix) {
 			return true
 		}
 	}
 	return false
 }
 
+// FormatRoles unmarshals a JSON role array into a []string. It returns
+// an empty slice rather than nil on any error so callers can safely
+// range over the result.
 func FormatRoles(roles json.RawMessage) []string {
-	if roles == nil {
+	if len(roles) == 0 {
 		return []string{}
 	}
-	var rolesArray []string
-	if err := json.Unmarshal(roles, &rolesArray); err != nil {
+	var out []string
+	if err := json.Unmarshal(roles, &out); err != nil {
 		return []string{}
 	}
-	return rolesArray
+	if out == nil {
+		return []string{}
+	}
+	return out
 }
 
-// stripPasswordFromUserModel clears Password on arbitrary user structs registered via WithUserModel.
-// A type assertion to authorization/models.User would panic when the app uses another models package.
+// StripPasswordFromUserModel clears the "Password" field on an arbitrary
+// user struct registered via WithUserModel.
+//
+// The reflection dance is required because we cannot type-assert to
+// authorization/models.User: applications are free to provide their own
+// User type, and a hard-coded assertion would panic at runtime for them.
 func StripPasswordFromUserModel(user any) {
 	if user == nil {
 		return
@@ -38,6 +54,9 @@ func StripPasswordFromUserModel(user any) {
 		return
 	}
 	v = v.Elem()
+	if v.Kind() != reflect.Struct {
+		return
+	}
 	f := v.FieldByName("Password")
 	if !f.IsValid() || !f.CanSet() {
 		return
@@ -50,17 +69,13 @@ func StripPasswordFromUserModel(user any) {
 	}
 }
 
-// GetDomainWithoutWWW extracts domain and removes "www."
+// GetDomainWithoutWWW extracts the host from `rawURL`, drops any port
+// and strips a leading "www." prefix. Returns "localhost" when parsing
+// fails so callers always have a usable value.
 func GetDomainWithoutWWW(rawURL string) string {
 	parsed, err := url.Parse(rawURL)
-	if err != nil {
+	if err != nil || parsed.Hostname() == "" {
 		return "localhost"
 	}
-
-	host := parsed.Hostname() // safe: removes port if exists
-
-	// remove "www." prefix if present
-	host = strings.TrimPrefix(host, "www.")
-
-	return host
+	return strings.TrimPrefix(parsed.Hostname(), "www.")
 }

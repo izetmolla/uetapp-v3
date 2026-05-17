@@ -1,9 +1,8 @@
-package secretary
+package contracts
 
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
-	"github.com/uetedu/app/internal/secretary/suplements"
 )
 
 type Controller struct {
@@ -18,8 +17,8 @@ func NewController(app *config.AppClients) *Controller {
 
 func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	api := apiGroup.Group("/secretary", controller.SecretaryMiddlewareApi)
-	suplements.SetupApiRoutes(api, appClients)
+	api := apiGroup.Group("/contracts", controller.ContractsMiddlewareApi)
+	// suplements.SetupApiRoutes(api, appClients)
 
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
 
@@ -29,14 +28,14 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 
 func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	app := appGroup.Group("/secretary", controller.SecretaryMiddlewareView)
-	suplements.SetupWebRoutes(app, appClients)
+	app := appGroup.Group("/contracts", controller.ContractsMiddlewareView)
+	// suplements.SetupWebRoutes(app, appClients)
 	app.Get("/", appClients.WebView("Secretary")) // Web endpoint for getting enter data
 
 	app.Use(appClients.ViewNotFound)
 }
 
-func (c *Controller) SecretaryMiddlewareApi(ctx fiber.Ctx) error {
+func (c *Controller) ContractsMiddlewareApi(ctx fiber.Ctx) error {
 	// wsName := strings.TrimSpace(ctx.Params("ws", ctx.Query("ws")))
 	// if ctx.Method() == "POST" || ctx.Method() == "PUT" || ctx.Method() == "PATCH" || ctx.Method() == "DELETE" {
 	// 	if bodyWsName, ok := getWsNameFromPostMethodBody(ctx.Body()); ok {
@@ -58,7 +57,7 @@ func (c *Controller) SecretaryMiddlewareApi(ctx fiber.Ctx) error {
 	return ctx.Next()
 }
 
-func (c *Controller) SecretaryMiddlewareView(ctx fiber.Ctx) error {
+func (c *Controller) ContractsMiddlewareView(ctx fiber.Ctx) error {
 	// // Keep in sync with [config.reservedWorkspacePathSegment]: /api must not be treated as a tenant slug.
 	// if ctx.Params("ws") == "api" {
 	// 	return ctx.Next()

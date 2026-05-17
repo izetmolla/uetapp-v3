@@ -7,71 +7,75 @@ import (
 	"time"
 
 	"github.com/flowtrove/packages/authorization/models"
-	"github.com/flowtrove/packages/authorization/utils"
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 )
 
-// SignInOptions is the options for the SignIn method
-type SignOutOptions struct {
-	Ctx       context.Context
-	SessionID string
-}
-
-// SignInOptionsFunc is a function that sets the options for the SignIn method
-type SignOutOptionsFunc func(*SignOutOptions)
-
-func defaultSignOutOptions() SignOutOptions {
-	return SignOutOptions{
-		Ctx:       context.Background(),
-		SessionID: "",
-	}
-}
-
-// NewSignInOptions creates a new SignInOptions struct with the given options
-func NewSignOutOptions(opts ...SignOutOptionsFunc) *SignOutOptions {
-	o := defaultSignOutOptions()
-	for _, fn := range opts {
-		fn(&o)
-	}
-	return &o
-}
-
-func (o *Authorization) SignOut(ctx context.Context, sessionID string) error {
-	db := o.DBManager()
-	if db == nil {
+// SignOut tears down a session: it soft-deletes the DB row and, when a
+// Redis cache is configured, evicts the cached entry too.
+//
+// A missing DB row is *not* an error: it is treated as "already signed
+// out" and the cache is best-effort cleared.
+func (a *Authorization) SignOut(ctx context.Context, sessionID string) error {
+	if a == nil || a.dbManager == nil {
 		return errors.New("db manager is not initialized")
 	}
+	if sessionID == "" {
+		return errors.New("session id is required")
+	}
+
+	db := a.dbManager
+
 	var session models.Session
-	if err := db.DB().WithContext(ctx).Where("id = ?", sessionID).Select("id").First(&session).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return db.DeleteSessionFromRedis(ctx, sessionID)
-		}
-		return err
+	err := db.DB().
+		WithContext(ctx).
+		Select("id").
+		Where("id = ?", sessionID).
+		First(&session).Error
+
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		a.evictSession(ctx, sessionID)
+		return nil
+	case err != nil:
+		return fmt.Errorf("lookup session: %w", err)
 	}
 
-	if err := db.DB().WithContext(ctx).Model(&models.Session{}).Where("id = ?", session.ID).Update("is_deleted", true).Error; err != nil {
-		return err
-	}
-	if err := db.DeleteSessionFromRedis(ctx, sessionID); err != nil {
-		return err
+	if err := db.DB().
+		WithContext(ctx).
+		Model(&models.Session{}).
+		Where("id = ?", session.ID).
+		Update("is_deleted", true).Error; err != nil {
+		return fmt.Errorf("soft-delete session: %w", err)
 	}
 
+	a.evictSession(ctx, sessionID)
 	return nil
 }
 
+// evictSession is a Redis-aware best-effort cache eviction. Errors are
+// swallowed because failing to evict shouldn't mask a successful DB
+// sign-out, and a missing/disabled Redis is not an error condition.
+func (a *Authorization) evictSession(ctx context.Context, sessionID string) {
+	if a.dbManager == nil || a.dbManager.Redis() == nil {
+		return
+	}
+	_ = a.dbManager.DeleteSessionFromRedis(ctx, sessionID)
+}
+
+// RemoveCookie expires the session cookie on the client. It mirrors the
+// attributes used by SetCookie so the browser actually deletes the
+// cookie instead of writing a second one.
 func (a *Authorization) RemoveCookie(c fiber.Ctx, _ string) {
-	// Match SetCookie name/domain/path/flags; MaxAge<0 and epoch Expires issue Max-Age=0 + Expires in the past so browsers remove the cookie.
-	cookie := &fiber.Cookie{
+	c.Cookie(&fiber.Cookie{
 		Name:     a.cookieSessionName,
 		Value:    "",
-		Domain:   fmt.Sprintf(".%s", utils.GetDomainWithoutWWW(a.authURL)),
+		Domain:   a.cookieDomain,
 		Path:     "/",
 		MaxAge:   -1,
 		Expires:  time.Unix(0, 0).UTC(),
 		HTTPOnly: true,
 		Secure:   true,
 		SameSite: fiber.CookieSameSiteLaxMode,
-	}
-	c.Cookie(cookie)
+	})
 }
