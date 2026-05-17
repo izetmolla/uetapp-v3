@@ -49,3 +49,23 @@ func firstHeaderValue(value string) string {
 func staticErrorText(err error) string {
 	return err.Error()
 }
+
+// firstPathSegment returns the first non-empty segment of an URL path.
+// For "/users/list" it returns "users"; for "/contracts" it returns
+// "contracts"; for "/" or "" it returns defaultServiceName.
+//
+// Query strings and fragments are ignored; matching is allocation-free
+// (no strings.Split) so it is safe on the hot render path.
+func firstPathSegment(path string, defaultServiceName string) string {
+	if i := strings.IndexAny(path, "?#"); i >= 0 {
+		path = path[:i]
+	}
+	path = strings.TrimLeft(path, "/")
+	if path == "" {
+		return defaultServiceName
+	}
+	if i := strings.IndexByte(path, '/'); i >= 0 {
+		return path[:i]
+	}
+	return path
+}

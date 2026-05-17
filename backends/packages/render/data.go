@@ -34,17 +34,13 @@ func (r *Render) prepareViewData(c fiber.Ctx, options *RenderOptions) map[string
 		"globalContent": template.HTML(""),
 	}
 
-	serviceName := c.Query("service")
-	if serviceName == "" {
-		serviceName = r.serviceName
-	}
 	var generalData map[string]any
 	if r.WithGeneralData != nil {
 		var err error
-		generalData, err = r.WithGeneralData(c, options.ctx, serviceName, false)
+		generalData, err = r.WithGeneralData(c, options.ctx, firstPathSegment(c.Path(), r.serviceName), false)
 		if err != nil && !options.withoutAuthentication {
 			options.err = err
-			log.Printf("Error getting general data for service %s: %v", serviceName, err)
+			log.Printf("Error getting general data for service %s: %v", firstPathSegment(c.Path(), r.serviceName), err)
 		}
 	}
 

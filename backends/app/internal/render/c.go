@@ -22,7 +22,10 @@ func (c *Controller) Index(ctx fiber.Ctx) error {
 func (c *Controller) HandleDynamicPages(ctx fiber.Ctx) error {
 	render := c.app.Render()
 	context := ctx.Context()
-	return c.app.View(ctx, render.WithContext(context), render.WithTitle("Home"), render.WithData(map[string]any{
-		"message": "Hello, World!",
-	}))
+	return c.app.View(ctx,
+		render.WithContext(context),
+		render.WithTitle("Home"),
+		render.WithData(map[string]any{
+			"message": "Hello, World!",
+		}))
 }

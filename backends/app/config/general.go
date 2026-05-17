@@ -50,9 +50,10 @@ func (app *AppClients) GeneralData(c fiber.Ctx, reqCtx context.Context, serviceN
 	}
 
 	return map[string]any{
+		"current_service": serviceName,
 		"services":        services,
 		"service":         service,
-		"current_user_id": "",
+		"current_user_id": user.UserID,
 		"navigations":     formatNavigation(navigations),
 	}, nil
 }
