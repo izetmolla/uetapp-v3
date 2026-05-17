@@ -49,9 +49,15 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 	}
 
 	if app.auth, err = authorization.NewAuthorization(&authorization.AuthorizationOptions{
-		DB:                   app.postgres,
-		JWTSecret:            cfg.JWTSecret,
-		AccessTokenDuration:  "10s",
+		DB:        app.postgres,
+		JWTSecret: cfg.JWTSecret,
+		// 15m gives enough headroom for clock skew, slow networks and
+		// concurrent tabs. The frontend refreshes proactively a minute
+		// before this expires; a value as low as 15s caused legitimate
+		// requests to be rejected mid-flight (and the user signed out)
+		// any time there was even a small delay between the client's
+		// expiry check and the server seeing the request.
+		AccessTokenDuration:  "15s",
 		RefreshTokenDuration: "4w",
 		AutoMigration:        false,
 		UserModel:            &models.User{},

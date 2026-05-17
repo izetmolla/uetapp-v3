@@ -22,8 +22,14 @@ func SetupRoutes(app fiber.Router, api fiber.Router, appClients *config.AppClien
 	authApi := api.Group("/authorization")
 	authApi.Post("/sign-in", controller.SignInApi)
 	authApi.Post("/check-email", controller.SignInCheckEmail)
+	// The sign-out endpoint is intentionally unauthenticated: a client
+	// with a stale or already-revoked session should still be able to
+	// drop the cookie and clear server-side state without bouncing
+	// through the JWT middleware.
+	authApi.Post("/sign-out", controller.SignOut)
 
 	app.Get("/sign-in", controller.SignInView)
+	app.Post("/sign-out", controller.SignOut)
 	authApi.Use(appClients.ApiNotFound)
 }
 
@@ -84,17 +90,32 @@ func (c *Controller) SignInCheckEmail(ctx fiber.Ctx) error {
 	})
 }
 
+// SignOut tears down the user's session in a way that is safe to call
+// from a stale, expired or already-signed-out client. It always:
+//
+//  1. Drops the session cookie.
+//  2. Best-effort soft-deletes the session row when the cookie carried
+//     a non-empty id; underlying errors are surfaced but do not
+//     block the cookie removal.
+//
+// Returning 200 even when the session has already disappeared keeps the
+// frontend's sign-out flow idempotent and prevents the response
+// interceptor from getting wedged into a sign-out loop.
 func (c *Controller) SignOut(ctx fiber.Ctx) error {
-	context := ctx.Context()
 	if c == nil || c.app == nil || c.app.Auth() == nil {
 		return c.app.Api(ctx, c.app.Render().WithError(errors.New("Authorization not initialized")))
 	}
 	auth := c.app.Auth()
 	sessionID := auth.GetSessionID(ctx)
-	if err := auth.SignOut(context, sessionID); err != nil {
-		return c.app.Api(ctx, c.app.Render().WithError(err))
-	}
+
 	auth.RemoveCookie(ctx, sessionID)
+
+	if sessionID != "" {
+		if err := auth.SignOut(ctx.Context(), sessionID); err != nil {
+			return c.app.Api(ctx, c.app.Render().WithError(err))
+		}
+	}
+
 	return ctx.JSON(fiber.Map{
 		"message": "signed out",
 	})

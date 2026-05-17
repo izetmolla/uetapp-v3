@@ -6,7 +6,9 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -41,16 +43,20 @@
     "@types/node": "^25.7.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
+    "@vitest/expect": "^4.1.6",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "happy-dom": "^20.9.0",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.59.1",
-    "vite": "^7.3.2"
+    "vite": "^7.3.2",
+    "vitest": "^4.1.6"
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",
     "./lib/utils": "./src/lib/utils.ts",
+    "./lib/network": "./src/lib/network/index.ts",
     "./lib/*": "./src/lib/*.ts",
     "./components/providers": "./src/components/providers/index.tsx",
     "./components/layout/builder": "./src/components/layout/builder/index.ts",
@@ -58,13 +64,11 @@
     "./components/content-loader": "./src/components/content-loader/index.tsx",
     "./components/loader": "./src/components/loader.tsx",
     "./components/theme-customizer": "./src/components/theme-customizer/index.ts",
-
     "./components/datatable/types": "./src/components/datatable/types/index.ts",
     "./components/datatable/lib/*": "./src/components/datatable/lib/*.ts",
     "./components/datatable/hooks/*": "./src/components/datatable/hooks/*.ts",
     "./components/datatable/ui/*": "./src/components/datatable/ui/*.tsx",
     "./components/datatable/*": "./src/components/datatable/*.tsx",
-
     "./components/data-table": "./src/components/data-table/index.tsx",
     "./components/data-table/types/*": "./src/components/data-table/types/*.ts",
     "./components/data-table/lib/*": "./src/components/data-table/lib/*.ts",
@@ -72,9 +76,6 @@
     "./components/data-table/components/*": "./src/components/data-table/components/*.tsx",
     "./components/data-table/ui/*": "./src/components/data-table/components/ui/*.tsx",
     "./components/data-table/*": "./src/components/data-table/*.tsx",
-
-
-
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./store/*": "./src/store/*.ts",

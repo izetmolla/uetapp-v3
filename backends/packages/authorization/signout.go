@@ -14,6 +14,12 @@ import (
 // SignOut tears down a session: it soft-deletes the DB row and, when a
 // Redis cache is configured, evicts the cached entry too.
 //
+// Both the legacy `is_deleted` flag and GORM's standard `deleted_at`
+// soft-delete sentinel are set so subsequent GetSession lookups (which
+// rely on GORM's automatic `deleted_at IS NULL` predicate) actually
+// stop returning the row. Setting only `is_deleted` left dead sessions
+// resurrectable, which would let a sign-out be undone by a refresh.
+//
 // A missing DB row is *not* an error: it is treated as "already signed
 // out" and the cache is best-effort cleared.
 func (a *Authorization) SignOut(ctx context.Context, sessionID string) error {
@@ -41,11 +47,15 @@ func (a *Authorization) SignOut(ctx context.Context, sessionID string) error {
 		return fmt.Errorf("lookup session: %w", err)
 	}
 
+	now := time.Now().UTC()
 	if err := db.DB().
 		WithContext(ctx).
 		Model(&models.Session{}).
 		Where("id = ?", session.ID).
-		Update("is_deleted", true).Error; err != nil {
+		Updates(map[string]any{
+			"is_deleted": true,
+			"deleted_at": now,
+		}).Error; err != nil {
 		return fmt.Errorf("soft-delete session: %w", err)
 	}
 

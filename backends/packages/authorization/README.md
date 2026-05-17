@@ -463,9 +463,18 @@ api.Get("/profile", func(c fiber.Ctx) error {
 
 **Unauthorized / forbidden responses:**
 
+All authentication failures from `UseAPIAuthorization` come back as a stable JSON envelope so frontend interceptors can branch on the `code` rather than guessing from the status line:
+
 ```json
-{ "error": "...", "code": "INSUFFICIENT_PERMISSIONS" }
+{ "error": "access token expired", "message": "access token expired", "code": "TOKEN_EXPIRED" }
 ```
+
+| Status | Code                      | Meaning |
+|--------|---------------------------|---------|
+| 401    | `AUTH_REQUIRED`           | No `Authorization` header on a protected route |
+| 401    | `TOKEN_EXPIRED`           | Access token's `exp` is in the past — refresh and retry |
+| 401    | `TOKEN_INVALID`           | Bad signature, unparseable header, or otherwise unusable token |
+| 403    | `INSUFFICIENT_PERMISSIONS`| Authenticated but missing the required role |
 
 ---
 
@@ -942,13 +951,21 @@ This repo wires the package in `backends/app/config/config.go`:
 app.auth, err = authorization.NewAuthorization(&authorization.AuthorizationOptions{
     DB:                   app.postgres,
     JWTSecret:            cfg.JWTSecret,
-    AccessTokenDuration:  "10s",
+    // 15m gives enough headroom for clock skew, slow networks and
+    // concurrent tabs. The frontend refreshes proactively a minute
+    // before this expires.
+    AccessTokenDuration:  "15m",
     RefreshTokenDuration: "4w",
     UserModel:            &models.User{},
     SessionModel:         &models.Session{},
     AuthURL:              cfg.AuthURL,
 })
 ```
+
+> **Note** – do not set `AccessTokenDuration` to a value below ~30s in production.
+> A short TTL means the frontend has to refresh on almost every request, which
+> magnifies the impact of any transient network or DB hiccup and can manifest
+> as random sign-outs.
 
 Handlers live under `backends/app/internal/authorization/`. Application code reads the principal via `app.USER(c, reqCtx, forApi)` which delegates to `auth.User`.
 

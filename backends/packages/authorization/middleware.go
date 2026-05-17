@@ -11,6 +11,7 @@ import (
 	jwtware "github.com/gofiber/contrib/v3/jwt"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/extractors"
+	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 )
 
@@ -88,12 +89,19 @@ func (a *Authorization) WithDebug(debug bool) AuthConfigOptions {
 //
 // Excluded paths declared on the config are honored: they short-circuit
 // the JWT check entirely.
+//
+// Errors are returned as JSON envelopes with a machine-readable `code`
+// field so the frontend can distinguish recoverable conditions
+// (TOKEN_EXPIRED, AUTH_REQUIRED) from terminal ones (TOKEN_INVALID).
 func (a *Authorization) UseAPIAuthorization(opts ...AuthConfigOptions) fiber.Handler {
 	cfg := NewAuthConfig(opts...)
 
 	jwtHandler := jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(a.tokenManager.GetJWTSecret())},
 		Extractor:  extractors.FromAuthHeader("Bearer"),
+		ErrorHandler: func(c fiber.Ctx, err error) error {
+			return jwtErrorResponse(c, err)
+		},
 		SuccessHandler: func(c fiber.Ctx) error {
 			if len(cfg.roles) == 0 {
 				return c.Next()
@@ -121,6 +129,45 @@ func (a *Authorization) UseAPIAuthorization(opts ...AuthConfigOptions) fiber.Han
 		}
 		return jwtHandler(c)
 	}
+}
+
+// jwtErrorResponse maps the various error conditions surfaced by the
+// JWT middleware to a stable JSON envelope. The frontend keys on the
+// `code` field to decide whether to refresh-and-retry or sign the user
+// out, so the upstream string body would force the client to guess -
+// and historically led to spurious sign-outs.
+func jwtErrorResponse(c fiber.Ctx, err error) error {
+	switch {
+	case errors.Is(err, extractors.ErrNotFound),
+		errors.Is(err, jwtware.ErrMissingToken):
+		return jsonErrorMsgCode(c, fiber.StatusUnauthorized, "authentication required", AUTH_REQUIRED)
+	case errors.Is(err, jwt.ErrTokenExpired):
+		return jsonErrorMsgCode(c, fiber.StatusUnauthorized, "access token expired", TOKEN_EXPIRED)
+	case errors.Is(err, jwt.ErrTokenNotValidYet):
+		return jsonErrorMsgCode(c, fiber.StatusUnauthorized, "token not yet valid", TOKEN_INVALID)
+	case errors.Is(err, jwt.ErrTokenMalformed),
+		errors.Is(err, jwt.ErrTokenSignatureInvalid),
+		errors.Is(err, jwt.ErrTokenUnverifiable),
+		errors.Is(err, jwt.ErrTokenInvalidClaims),
+		errors.Is(err, jwt.ErrSignatureInvalid):
+		return jsonErrorMsgCode(c, fiber.StatusUnauthorized, "invalid access token", TOKEN_INVALID)
+	}
+	if fe, ok := err.(*fiber.Error); ok {
+		return jsonErrorMsgCode(c, fe.Code, fe.Message, TOKEN_INVALID)
+	}
+	return jsonErrorMsgCode(c, fiber.StatusUnauthorized, err.Error(), TOKEN_INVALID)
+}
+
+// jsonErrorMsgCode mirrors jsonError but accepts a literal message and
+// also surfaces the structured `{error, message, code}` envelope used
+// across the rest of the application. The legacy `error` string is
+// preserved so older clients keep working.
+func jsonErrorMsgCode(c fiber.Ctx, status int, msg, code string) error {
+	return c.Status(status).JSON(fiber.Map{
+		"error":   msg,
+		"message": msg,
+		"code":    code,
+	})
 }
 
 // UseWEBAuthorization returns a Fiber middleware that protects WEB
