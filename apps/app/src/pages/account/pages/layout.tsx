@@ -56,15 +56,14 @@ function AccountNavLink({
             end={end}
             className={({ isActive }) =>
                 cn(
-                    "relative inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-1 py-3.5 text-sm font-medium transition-colors",
-                    "after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full after:transition-colors",
+                    "relative inline-flex h-full shrink-0 items-center gap-1.5 whitespace-nowrap px-1 text-xs font-medium transition-colors",
                     isActive
-                        ? "text-foreground after:bg-primary"
-                        : "text-muted-foreground hover:text-foreground after:bg-transparent"
+                        ? "text-foreground font-semibold after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary after:content-['']"
+                        : "text-muted-foreground hover:text-foreground"
                 )
             }
         >
-            <Icon className="size-4 shrink-0 opacity-70" aria-hidden />
+            <Icon className="size-3.5 shrink-0 opacity-70" aria-hidden />
             {label}
         </NavLink>
     );
@@ -84,7 +83,7 @@ const AccountLayout = () => {
                 </p>
             </header>
 
-            <div className="space-y-6 lg:space-y-8 [--account-nav-height:3.5rem]">
+            <div className="space-y-6 lg:space-y-8 [--account-nav-height:2.75rem]">
                 <div className="overflow-hidden rounded-t-xl border border-b-0 bg-card shadow-sm">
                     <ProfileHeader />
                 </div>
@@ -93,9 +92,9 @@ const AccountLayout = () => {
                     className="sticky top-(--header-height) z-40 -mt-6 min-h-(--account-nav-height) rounded-b-xl border bg-card shadow-sm supports-[backdrop-filter]:bg-card/95 supports-[backdrop-filter]:backdrop-blur-md lg:-mt-8"
                     data-account-nav
                 >
-                    <div className="flex min-w-0 items-center gap-2 px-4 py-1.5 sm:justify-between sm:px-6">
+                    <div className="flex min-h-(--account-nav-height) min-w-0 items-stretch gap-1.5 px-4 sm:justify-between sm:px-5">
                         <nav
-                            className="-mb-px flex min-w-0 flex-1 flex-nowrap gap-4 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-7 [&::-webkit-scrollbar]:hidden"
+                            className="flex min-h-full min-w-0 flex-1 flex-nowrap items-stretch gap-3 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden"
                             aria-label="Account sections"
                         >
                             {accountNav.map((item) => (
@@ -103,25 +102,25 @@ const AccountLayout = () => {
                             ))}
                         </nav>
 
-                        <div className="flex shrink-0 items-center gap-1.5">
+                        <div className="flex shrink-0 items-center gap-1 self-center">
                             {isOverview ? (
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="size-8 shrink-0 gap-0 px-0 sm:h-8 sm:w-auto sm:gap-1.5 sm:px-2.5"
+                                    className="h-7 shrink-0 gap-0 px-0 text-xs sm:h-7 sm:w-auto sm:gap-1 sm:px-2"
                                     aria-label="Edit profile"
                                 >
-                                    <Pencil className="size-3.5" />
+                                    <Pencil className="size-3" />
                                     <span className="hidden sm:inline">Edit profile</span>
                                 </Button>
                             ) : null}
                             <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                className="text-muted-foreground size-8"
+                                className="text-muted-foreground size-7"
                                 aria-label="More options"
                             >
-                                <MoreHorizontal className="size-4" />
+                                <MoreHorizontal className="size-3.5" />
                             </Button>
                         </div>
                     </div>
