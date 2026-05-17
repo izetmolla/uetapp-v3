@@ -88,46 +88,44 @@ const AccountLayout = () => {
             </header>
 
             <div className="space-y-6 lg:space-y-8 [--account-nav-height:3.5rem]">
-                <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <section className="overflow-hidden rounded-t-xl">
-                        <ProfileHeader />
-                    </section>
+                <div className="overflow-hidden rounded-t-xl border border-b-0 bg-card shadow-sm">
+                    <ProfileHeader />
+                </div>
 
-                    <div
-                        className="sticky top-0 z-30 min-h-(--account-nav-height) border-t bg-card shadow-sm supports-[backdrop-filter]:bg-card/95 supports-[backdrop-filter]:backdrop-blur-md"
-                        data-account-nav
-                    >
-                        <div className="flex min-w-0 items-center gap-2 px-4 py-1.5 sm:justify-between sm:px-6">
-                            <nav
-                                className="-mb-px flex min-w-0 flex-1 flex-nowrap gap-4 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-7 [&::-webkit-scrollbar]:hidden"
-                                aria-label="Account sections"
-                            >
-                                {accountNav.map((item) => (
-                                    <AccountNavLink key={item.to} {...item} />
-                                ))}
-                            </nav>
+                <div
+                    className="sticky top-(--header-height) z-40 -mt-6 min-h-(--account-nav-height) rounded-b-xl border bg-card shadow-sm supports-[backdrop-filter]:bg-card/95 supports-[backdrop-filter]:backdrop-blur-md lg:-mt-8"
+                    data-account-nav
+                >
+                    <div className="flex min-w-0 items-center gap-2 px-4 py-1.5 sm:justify-between sm:px-6">
+                        <nav
+                            className="-mb-px flex min-w-0 flex-1 flex-nowrap gap-4 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-7 [&::-webkit-scrollbar]:hidden"
+                            aria-label="Account sections"
+                        >
+                            {accountNav.map((item) => (
+                                <AccountNavLink key={item.to} {...item} />
+                            ))}
+                        </nav>
 
-                            <div className="flex shrink-0 items-center gap-1.5">
-                                {isOverview ? (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="size-8 shrink-0 gap-0 px-0 sm:h-8 sm:w-auto sm:gap-1.5 sm:px-2.5"
-                                        aria-label="Edit profile"
-                                    >
-                                        <Pencil className="size-3.5" />
-                                        <span className="hidden sm:inline">Edit profile</span>
-                                    </Button>
-                                ) : null}
+                        <div className="flex shrink-0 items-center gap-1.5">
+                            {isOverview ? (
                                 <Button
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    className="text-muted-foreground size-8"
-                                    aria-label="More options"
+                                    variant="outline"
+                                    size="sm"
+                                    className="size-8 shrink-0 gap-0 px-0 sm:h-8 sm:w-auto sm:gap-1.5 sm:px-2.5"
+                                    aria-label="Edit profile"
                                 >
-                                    <MoreHorizontal className="size-4" />
+                                    <Pencil className="size-3.5" />
+                                    <span className="hidden sm:inline">Edit profile</span>
                                 </Button>
-                            </div>
+                            ) : null}
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="text-muted-foreground size-8"
+                                aria-label="More options"
+                            >
+                                <MoreHorizontal className="size-4" />
+                            </Button>
                         </div>
                     </div>
                 </div>
