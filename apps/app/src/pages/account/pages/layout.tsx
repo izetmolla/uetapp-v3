@@ -78,9 +78,6 @@ const AccountLayout = () => {
     return (
         <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-2 sm:px-6 lg:px-8 lg:pt-4">
             <header className="mb-6 sm:mb-8">
-                <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                    Settings
-                </p>
                 <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Account</h1>
                 <p className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-relaxed">
                     Manage your profile, security settings, and how you appear across the platform.
