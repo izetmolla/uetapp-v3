@@ -3,6 +3,7 @@ package secretary
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
+	"github.com/uetedu/app/internal/secretary/suplements"
 )
 
 type Controller struct {
@@ -17,7 +18,8 @@ func NewController(app *config.AppClients) *Controller {
 
 func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	api := apiGroup.Group("/", controller.SecretaryMiddlewareApi)
+	api := apiGroup.Group("/secretary", controller.SecretaryMiddlewareApi)
+	suplements.SetupApiRoutes(api, appClients)
 
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
 
@@ -27,8 +29,8 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 
 func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	app := appGroup.Group("/", controller.SecretaryMiddlewareView)
-
+	app := appGroup.Group("/secretary", controller.SecretaryMiddlewareView)
+	suplements.SetupWebRoutes(app, appClients)
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
 
 	// api.Get("/enter", controller.GetEnterDataApi) // API endpoint for getting enter data
