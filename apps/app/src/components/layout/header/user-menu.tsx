@@ -1,4 +1,15 @@
-import { BadgeCheck, Bell, ChevronRightIcon, CreditCard, LogOut, ShieldCog, Sparkles } from "lucide-react";
+import {
+  Bell,
+  LogOut,
+  User,
+  Monitor,
+  Moon,
+  Palette,
+  Settings,
+  ShieldCog,
+  Sun,
+  UserRound,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import {
@@ -7,24 +18,37 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { Link } from "react-router";
-import { Progress } from "@workspace/ui/components/progress";
+import { useTheme, type Theme } from "@workspace/flowtrove/components/providers/theme-provider";
 import useAuthorizationStore, { useSignOutApi } from "@workspace/flowtrove/store/authorization";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
 
 export default function UserMenu() {
   const { user, signOut } = useAuthorizationStore()
+  const { theme, setTheme } = useTheme()
   const fullName = `${user?.first_name} ${user?.last_name}`
-
-
 
   const handleLogout = () => {
     signOut()
-    useSignOutApi()
+    void useSignOutApi()
+    window.location.replace("/sign-in")
   }
+
+  const handleSwitchAccount = () => {
+    signOut()
+    void useSignOutApi()
+    const returnTo = `${window.location.pathname}${window.location.search}`
+    window.location.replace(`/sign-in?redirectUrl=${encodeURIComponent(returnTo)}`)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -48,52 +72,67 @@ export default function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to="https://www.flowtrove.com/pricing" target="_blank">
-              <Sparkles /> Upgrade to Pro
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link to="/account">
+              <User />
+              My Profile
             </Link>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <BadgeCheck />
-            Account
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link to="/notifications">
+              <Bell />
+              Notifications
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            Billing
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link to="/settings">
+              <Settings />
+              Settings
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Bell />
-            Notifications
-          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Palette className="size-3.5 opacity-70" />
+              Apparence
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent side="left" align="start" className="min-w-36 cursor-pointer">
+              <DropdownMenuRadioGroup
+                value={theme}
+                onValueChange={(value) => setTheme(value as Theme)}
+              >
+                <DropdownMenuRadioItem value="light">
+                  <Sun className="size-3.5 opacity-70" />
+                  Light
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="dark">
+                  <Moon className="size-3.5 opacity-70" />
+                  Dark
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="system">
+                  <Monitor className="size-3.5 opacity-70" />
+                  System
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
           {user?.roles.includes('admin:rw') && (
-            <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = '/cadmin'}>
-              <ShieldCog />
-              CAdmin
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link to="/cadmin">
+                <ShieldCog />
+                CAdmin
+              </Link>
             </DropdownMenuItem>
           )}
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          <LogOut />
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+          <LogOut className="size-3.5 opacity-70" />
           Log out
         </DropdownMenuItem>
-        <div className="bg-muted mt-1.5 rounded-md border">
-          <div className="space-y-3 p-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Credits</h4>
-              <div className="text-muted-foreground flex cursor-pointer items-center text-sm">
-                <span>5 left</span>
-                <ChevronRightIcon className="ml-1 h-4 w-4" />
-              </div>
-            </div>
-            <Progress value={40} className="bg-primary" />
-            <div className="text-muted-foreground flex items-center text-sm">
-              Daily credits used first
-            </div>
-          </div>
-        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleSwitchAccount} className="cursor-pointer text-xs">
+          <UserRound className="size-3.5 opacity-70" />
+          Switch account
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -61,6 +61,7 @@ const SignIn = () => {
     })
     // const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [confirmedEmail, setConfirmedEmail] = useState<string | null>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -82,6 +83,8 @@ const SignIn = () => {
                 }
             } else {
                 if (form.getValues("checkEmail")) {
+                    const email = form.getValues("email");
+                    setConfirmedEmail(email);
                     setShowPassword(true);
                     form.setValue("password", "");
                     form.setValue("checkEmail", false);
@@ -157,8 +160,21 @@ const SignIn = () => {
                                                     className={authInputClassName}
                                                     placeholder={t("Email")}
                                                     autoComplete="email"
-                                                    readOnly={showPassword}
                                                     {...field}
+                                                    onChange={(event) => {
+                                                        field.onChange(event);
+                                                        if (
+                                                            showPassword &&
+                                                            confirmedEmail !== null &&
+                                                            event.target.value !== confirmedEmail
+                                                        ) {
+                                                            setShowPassword(false);
+                                                            setConfirmedEmail(null);
+                                                            form.setValue("checkEmail", true);
+                                                            form.setValue("password", "");
+                                                            form.clearErrors("password");
+                                                        }
+                                                    }}
                                                 />
                                             </FormControl>
                                             <FormMessage />
