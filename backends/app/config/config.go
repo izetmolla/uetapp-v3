@@ -146,16 +146,18 @@ func (app *AppClients) Auth() *authorization.Authorization {
 }
 
 func (app *AppClients) ApiNotFound(c fiber.Ctx) error {
-	return app.render.Api(c, app.render.WithData(fiber.Map{
-		"error":   true,
-		"message": "API Not Found",
-		"code":    "NOT_FOUND",
-		"status":  fiber.StatusNotFound,
-		"details": map[string]any{
-			"method": c.Method(),
-			"url":    c.OriginalURL(),
-		},
-	}))
+	return app.render.Api(c,
+		app.render.WithStatus(fiber.StatusNotFound),
+		app.render.WithData(fiber.Map{
+			"error":   true,
+			"message": "API Not Found",
+			"code":    "NOT_FOUND",
+			"status":  fiber.StatusNotFound,
+			"details": map[string]any{
+				"method": c.Method(),
+				"url":    c.OriginalURL(),
+			},
+		}))
 }
 
 func (app *AppClients) ViewNotFound(c fiber.Ctx) error {
@@ -163,6 +165,7 @@ func (app *AppClients) ViewNotFound(c fiber.Ctx) error {
 		app.render.WithContext(c.Context()),
 		app.render.WithTitle("Not Found"),
 		app.render.WithError(errors.New("View Not Found")),
+		app.render.WithStatus(fiber.StatusNotFound),
 		app.render.WithData(fiber.Map{
 			"error":   true,
 			"message": "View Not Found",

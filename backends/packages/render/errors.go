@@ -22,3 +22,14 @@ func (app *Render) WithError(err error) RenderOptionsFunc {
 		o.errorCode = "INTERNAL_SERVER_ERROR"
 	}
 }
+
+// WithStatus returns a functional option that sets the status for the render.
+//
+// Example:
+//
+//	return app.View(c, app.WithStatus(fiber.StatusNotFound))
+func (app *Render) WithStatus(status int) RenderOptionsFunc {
+	return func(o *RenderOptions) {
+		o.errorStatus = status
+	}
+}

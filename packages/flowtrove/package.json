@@ -65,10 +65,12 @@
     "./components/datatable/ui/*": "./src/components/datatable/ui/*.tsx",
     "./components/datatable/*": "./src/components/datatable/*.tsx",
 
-    "./components/data-table/types": "./src/components/data-table/types/index.ts",
+    "./components/data-table": "./src/components/data-table/index.tsx",
+    "./components/data-table/types/*": "./src/components/data-table/types/*.ts",
     "./components/data-table/lib/*": "./src/components/data-table/lib/*.ts",
     "./components/data-table/hooks/*": "./src/components/data-table/hooks/*.ts",
-    "./components/data-table/ui/*": "./src/components/data-table/ui/*.tsx",
+    "./components/data-table/components/*": "./src/components/data-table/components/*.tsx",
+    "./components/data-table/ui/*": "./src/components/data-table/components/ui/*.tsx",
     "./components/data-table/*": "./src/components/data-table/*.tsx",
 
 

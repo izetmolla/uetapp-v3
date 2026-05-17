@@ -104,7 +104,8 @@ export function StudentsTableActionBar({ table , templates }: StudentsTableActio
                 className="hidden data-[orientation=vertical]:h-5 sm:block"
             />
             <div className="flex items-center gap-1.5">
-                <ButtonDialog view={<DownloadMultipleSupplements students={table.getFilteredSelectedRowModel().rows} templates={templates} />} >
+                <ButtonDialog
+                 triggerButton={<DownloadMultipleSupplements students={table.getFilteredSelectedRowModel().rows} templates={templates} />} >
                     <DataTableActionBarAction
                         size="icon"
                         tooltip="Export Suplementet"

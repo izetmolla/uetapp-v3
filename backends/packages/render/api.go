@@ -7,7 +7,9 @@ func (r *Render) Api(c fiber.Ctx, optsParams ...RenderOptionsFunc) error {
 	opts := r.NewRender(optsParams...)
 
 	c.Set("Content-Type", "application/json; charset=utf-8")
-
+	if opts.errorStatus != 0 {
+		c.Status(opts.errorStatus)
+	}
 	if opts.data != nil {
 		return c.JSON(opts.data)
 	}
