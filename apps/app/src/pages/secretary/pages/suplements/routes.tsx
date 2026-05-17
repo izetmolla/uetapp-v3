@@ -7,7 +7,7 @@ const suplementsRoutes: RouteObject[] = [
         index: true,
         hydrateFallbackElement: <Fragment />,
         lazy: async () => {
-            const m = await import("./pages/students")
+            const m = await import("./pages/student1/index")
             return { Component: m.default }
         },
     },

@@ -49,6 +49,18 @@ export async function getSupplementStudents(params: Record<string, unknown>) {
     })
 }
 
+interface ColumnsResponse extends ResponseWithError {
+    columns: any[];
+    columnVisibility?: Record<string, boolean>;
+}
+
+export async function getSupplementStudentsColumns() {
+    return ApiService.fetchData<ColumnsResponse>({
+        url: withAPI('/secretary/suplements/students/columns'),
+        method: 'get',
+    });
+}
+
 
 
 
