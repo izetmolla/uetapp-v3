@@ -25,7 +25,7 @@ import {
     authSeparatorClassName,
     authSeparatorLabelClassName,
     authSeparatorLineClassName,
-} from "../../styles";
+} from "../../components/styles";
 
 // Enhanced FlowTrove Logo Component
 const FlowTroveLogo = ({ className }: { className?: string }) => {

@@ -1,7 +1,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { useTranslation } from "react-i18next";
-import { authSocialButtonClassName } from "../styles";
+import { authSocialButtonClassName } from "./styles";
 
 function MicrosoftLogo({ className }: { className?: string }) {
     return (

@@ -13,6 +13,15 @@ const languages = [
     { code: "sq_AL", name: "Shqip", flag: "🇦🇱" },
 ];
 
+const dropdownPanelClassName =
+    "absolute right-0 top-full z-20 rounded-md border border-border bg-popover text-popover-foreground shadow-lg";
+
+const dropdownItemClassName = (isActive: boolean) =>
+    cn(
+        "flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+        isActive && "bg-accent font-medium text-accent-foreground"
+    );
+
 interface LanguageSwitchProps {
     className?: string;
     variant?: "default" | "compact" | "minimal";
@@ -32,6 +41,13 @@ const LanguageSwitch: React.FC<LanguageSwitchProps> = ({
         setIsOpen(false);
     };
 
+    const backdrop = isOpen ? (
+        <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+        />
+    ) : null;
+
     if (variant === "minimal") {
         return (
             <div className={cn("relative", className)}>
@@ -40,28 +56,22 @@ const LanguageSwitch: React.FC<LanguageSwitchProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsOpen(!isOpen)}
-                    className="h-8 px-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    className="h-8 px-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
-                    <Globe className="w-4 h-4 mr-1" />
+                    <Globe className="mr-1 h-4 w-4" />
                     {currentLanguage.code.split('_')[0].toUpperCase()}
                 </Button>
 
                 {isOpen && (
                     <>
-                        <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setIsOpen(false)}
-                        />
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                        {backdrop}
+                        <div className={cn(dropdownPanelClassName, "mt-1 w-48")}>
                             {languages.map((language) => (
                                 <button
                                     key={language.code}
                                     type="button"
                                     onClick={() => handleLanguageChange(language.code)}
-                                    className={cn(
-                                        "w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2",
-                                        language.code === i18n.language && "bg-gray-100 text-gray-900"
-                                    )}
+                                    className={dropdownItemClassName(language.code === i18n.language)}
                                 >
                                     <span className="text-base">{language.flag}</span>
                                     <span>{language.name}</span>
@@ -86,25 +96,19 @@ const LanguageSwitch: React.FC<LanguageSwitchProps> = ({
                 >
                     <span className="mr-1">{currentLanguage.flag}</span>
                     {currentLanguage.name}
-                    <ChevronDown className="w-3 h-3 ml-1" />
+                    <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
 
                 {isOpen && (
                     <>
-                        <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setIsOpen(false)}
-                        />
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                        {backdrop}
+                        <div className={cn(dropdownPanelClassName, "mt-1 w-48")}>
                             {languages.map((language) => (
                                 <button
                                     key={language.code}
                                     type="button"
                                     onClick={() => handleLanguageChange(language.code)}
-                                    className={cn(
-                                        "w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2",
-                                        language.code === i18n.language && "bg-gray-100 text-gray-900"
-                                    )}
+                                    className={dropdownItemClassName(language.code === i18n.language)}
                                 >
                                     <span className="text-base">{language.flag}</span>
                                     <span>{language.name}</span>
@@ -124,21 +128,18 @@ const LanguageSwitch: React.FC<LanguageSwitchProps> = ({
                 type="button"
                 variant="outline"
                 onClick={() => setIsOpen(!isOpen)}
-                className="h-10 px-4 text-sm font-medium bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="h-10 px-4 text-sm font-medium"
             >
-                <Globe className="w-4 h-4 mr-2" />
+                <Globe className="mr-2 h-4 w-4" />
                 <span className="mr-1">{currentLanguage.flag}</span>
                 {currentLanguage.name}
-                <ChevronDown className="w-4 h-4 ml-2" />
+                <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
 
             {isOpen && (
                 <>
-                    <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setIsOpen(false)}
-                    />
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
+                    {backdrop}
+                    <div className={cn(dropdownPanelClassName, "mt-2 w-56 rounded-lg shadow-xl")}>
                         <div className="py-1">
                             {languages.map((language) => (
                                 <button
@@ -146,14 +147,14 @@ const LanguageSwitch: React.FC<LanguageSwitchProps> = ({
                                     type="button"
                                     onClick={() => handleLanguageChange(language.code)}
                                     className={cn(
-                                        "w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center gap-3 transition-colors",
-                                        language.code === i18n.language && "bg-gray-100 text-gray-900 font-medium"
+                                        dropdownItemClassName(language.code === i18n.language),
+                                        "gap-3 px-4 py-3"
                                     )}
                                 >
                                     <span className="text-lg">{language.flag}</span>
                                     <div className="flex flex-col">
                                         <span className="font-medium">{language.name}</span>
-                                        <span className="text-xs text-gray-500">{language.code}</span>
+                                        <span className="text-xs text-muted-foreground">{language.code}</span>
                                     </div>
                                 </button>
                             ))}

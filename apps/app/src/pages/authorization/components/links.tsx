@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { cn } from "@workspace/ui/lib/utils";
-import { authLinkClassName } from "../styles";
+import { authLinkClassName } from "./styles";
 
 const footerLinkClassName = cn(
     authLinkClassName,

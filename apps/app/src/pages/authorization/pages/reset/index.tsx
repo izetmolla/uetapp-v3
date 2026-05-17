@@ -19,7 +19,7 @@ import {
     authSeparatorClassName,
     authSeparatorLabelClassName,
     authSeparatorLineClassName,
-} from "../../styles";
+} from "../../components/styles";
 
 const FlowTroveLogo = ({ className }: { className?: string }) => {
     const navigate = useNavigate();
