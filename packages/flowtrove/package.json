@@ -18,6 +18,7 @@
     "@workspace/ui": "workspace:*",
     "@workspace/utils": "workspace:*",
     "axios": "^1.16.0",
+    "date-fns": "^4.1.0",
     "i18next": "^26.0.8",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.6",
@@ -57,11 +58,21 @@
     "./components/content-loader": "./src/components/content-loader/index.tsx",
     "./components/loader": "./src/components/loader.tsx",
     "./components/theme-customizer": "./src/components/theme-customizer/index.ts",
+
     "./components/datatable/types": "./src/components/datatable/types/index.ts",
     "./components/datatable/lib/*": "./src/components/datatable/lib/*.ts",
     "./components/datatable/hooks/*": "./src/components/datatable/hooks/*.ts",
     "./components/datatable/ui/*": "./src/components/datatable/ui/*.tsx",
     "./components/datatable/*": "./src/components/datatable/*.tsx",
+
+    "./components/data-table/types": "./src/components/data-table/types/index.ts",
+    "./components/data-table/lib/*": "./src/components/data-table/lib/*.ts",
+    "./components/data-table/hooks/*": "./src/components/data-table/hooks/*.ts",
+    "./components/data-table/ui/*": "./src/components/data-table/ui/*.tsx",
+    "./components/data-table/*": "./src/components/data-table/*.tsx",
+
+
+
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./store/*": "./src/store/*.ts",

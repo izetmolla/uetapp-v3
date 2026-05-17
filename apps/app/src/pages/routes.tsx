@@ -17,6 +17,7 @@ import contractsRoutes from "./contracts/routes"
 // Authorization routes
 import SignIn from "./authorization/pages/signin"
 import Reset from "./authorization/pages/reset"
+import cadminRoutes from "./cadmin/routes"
 
 
 
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
         path: "/", element: <TemplateLayout />, children: [
             { index: true, element: <Dashboard /> },
             { path: "*", element: <DynamicPage /> },
+            { path: "cadmin", hydrateFallbackElement: <Loader fullScreen />, children: cadminRoutes },
             { path: "secretary", hydrateFallbackElement: <Loader fullScreen />, children: secretaryRoutes },
             { path: "contracts", hydrateFallbackElement: <Loader fullScreen />, children: contractsRoutes },
         ]

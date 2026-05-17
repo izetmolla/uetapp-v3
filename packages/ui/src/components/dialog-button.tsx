@@ -1,88 +1,183 @@
-import type { FC, ReactNode } from "react";
-import { Button } from "@workspace/ui/components/button"
+"use client";
+
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@workspace/ui/components/dialog"
-import { create, type StateCreator } from "zustand";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog";
+import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { useId } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type FC,
+  type ReactNode,
+} from "react";
 
+// --- Size configuration (moved out for clarity and tree-shaking)
 
+const TAILWIND_SIZES = [
+  "sm:max-w-sm",
+  "sm:max-w-md",
+  "sm:max-w-lg",
+  "sm:max-w-xl",
+  "sm:max-w-2xl",
+  "sm:max-w-3xl",
+  "sm:max-w-4xl",
+  "sm:max-w-5xl",
+] as const;
 
-interface ButtonDialogProps {
-    className?: string;
-    view: ReactNode;
-    footer?: ReactNode;
-    description?: string;
-    title?: string;
-    button?: ReactNode;
-    buttonPorps?: React.ComponentProps<"button"> | {};
-    buttonContent?: string | ReactNode
-    maxWidth?: string;
-    modalClassName?: string; // New prop for modal width styling
-    id?: string; // Optional custom ID
-    children?: ReactNode;
-    btnClassName?: string;
-    name?: string;
-    icon?: ReactNode;
-}
-const ButtonDialog: FC<ButtonDialogProps> = ({ name, icon, className, children, view, footer, description, title, button, buttonPorps, buttonContent, maxWidth = "sm:max-w-[395px]", modalClassName, id, btnClassName }) => {
-    const dialogId = useId(); // Generate unique ID for this dialog instance
-    const uniqueId = id || dialogId; // Use custom ID or generated one
-    const { openDialogs, setDialogStatus } = useDialogStore();
-    const isOpen = openDialogs[uniqueId] || false;
+const PERCENTAGE_SIZES = ["30%", "40%", "50%", "60%", "70%", "80%", "90%"] as const;
 
-    return (
-        <Dialog open={isOpen} onOpenChange={(open) => setDialogStatus(uniqueId, open)}>
-            <DialogTrigger asChild className={cn(btnClassName, "cursor-pointer")}>
-                {children ? children : button ? button : (
-                    <Button variant="outline" {...buttonPorps}>
-                        {icon && icon}  {buttonContent ? buttonContent : name ? name : "Open Dialog"}
-                    </Button>
-                )}
-            </DialogTrigger>
-            <DialogContent className={cn(className, maxWidth, modalClassName)}>
-                <DialogHeader className={title ? "" : "hidden"}>
-                    <DialogTitle className={title ? "" : "hidden"}>{title}</DialogTitle>
-                    <DialogDescription className={description ? "" : "hidden"}>{description}</DialogDescription>
-                </DialogHeader>
-                {view}
-                {footer && <DialogFooter className={footer ? "" : "hidden"}>
-                    {footer}
-                </DialogFooter>}
-            </DialogContent>
-        </Dialog>
-    )
-}
+export type DialogSize =
+  | (typeof TAILWIND_SIZES)[number]
+  | (typeof PERCENTAGE_SIZES)[number]
+  | "auto";
 
+const PERCENTAGE_TO_CLASS: Record<(typeof PERCENTAGE_SIZES)[number], string> = {
+  "30%": "!w-[30vw] !h-[30vh] !max-w-[30vw] !max-h-[30vh] overflow-auto",
+  "40%": "!w-[40vw] !h-[40vh] !max-w-[40vw] !max-h-[40vh] overflow-auto",
+  "50%": "!w-[50vw] !h-[50vh] !max-w-[50vw] !max-h-[50vh] overflow-auto",
+  "60%": "!w-[60vw] !h-[60vh] !max-w-[60vw] !max-h-[60vh] overflow-auto",
+  "70%": "!w-[70vw] !h-[70vh] !max-w-[70vw] !max-h-[70vh] overflow-auto",
+  "80%": "!w-[80vw] !h-[80vh] !max-w-[80vw] !max-h-[80vh] overflow-auto",
+  "90%": "!w-[90vw] !h-[90vh] !max-w-[90vw] !max-h-[90vh] overflow-auto",
+};
 
-export interface DialogState {
-    openDialogs: Record<string, boolean>,
-    openDialog: (id: string) => void,
-    closeDialog: (id: string) => void,
-    setDialogStatus: (id: string, open: boolean) => void
+function getDialogContentClassName(size: DialogSize, className?: string): string {
+  if (size === "auto") {
+    return cn("max-h-[90vh] overflow-auto w-full max-w-2xl", className);
+  }
+  const percentageClass = PERCENTAGE_TO_CLASS[size as (typeof PERCENTAGE_SIZES)[number]];
+  if (percentageClass) {
+    return cn(percentageClass, className);
+  }
+  return cn(size, className);
 }
 
-const dialogStore: StateCreator<DialogState> = (set) => ({
-    openDialogs: {},
-    openDialog: (id: string) => set((state) => ({
-        openDialogs: { ...state.openDialogs, [id]: true }
-    })),
-    closeDialog: (id: string) => set((state) => ({
-        openDialogs: { ...state.openDialogs, [id]: false }
-    })),
-    setDialogStatus: (id: string, open: boolean) => set((state) => ({
-        openDialogs: { ...state.openDialogs, [id]: open }
-    })),
-})
+// --- Props
 
-export const useDialogStore = create(dialogStore);
+export interface DialogButtonProps {
+  /** Controlled open state. When provided, dialog is controlled by parent. */
+  open?: boolean;
+  /** Called when open state should change (e.g. close button, overlay click). */
+  onOpenChange?: (open: boolean) => void;
+  /** Convenience callback when dialog closes. */
+  onClose?: () => void;
+  title?: string;
+  description?: string;
+  children: ReactNode;
+  triggerText?: string;
+  triggerIcon?: ReactNode;
+  triggerButton?: ReactNode;
+  noButtonText?: boolean;
+  className?: string;
+  fullScreen?: boolean;
+  size?: DialogSize;
+  showCloseButton?: boolean;
+}
 
+// Support legacy `isOpen` prop name for backward compatibility
+type DialogButtonPropsWithLegacy = DialogButtonProps & {
+  isOpen?: boolean;
+};
 
-export default ButtonDialog;
+// --- Component
+
+const DialogButtonRoot: FC<DialogButtonPropsWithLegacy> = ({
+  open: openProp,
+  isOpen: isOpenProp,
+  onOpenChange,
+  onClose,
+  children,
+  triggerText,
+  triggerIcon,
+  triggerButton,
+  size = "sm:max-w-sm",
+  title,
+  description,
+  noButtonText,
+  className,
+  fullScreen,
+  showCloseButton = true,
+}) => {
+  const isControlled = openProp !== undefined || isOpenProp !== undefined;
+  const controlledOpen = openProp ?? isOpenProp ?? false;
+
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const open = isControlled ? controlledOpen : internalOpen;
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (!nextOpen) {
+        onClose?.();
+      }
+      onOpenChange?.(nextOpen);
+      if (!isControlled) {
+        setInternalOpen(nextOpen);
+      }
+    },
+    [isControlled, onClose, onOpenChange]
+  );
+
+  const contentClassName = useMemo(
+    () =>
+      fullScreen ? undefined : getDialogContentClassName(size, className),
+    [fullScreen, size, className]
+  );
+
+  const showHeader = Boolean(title ?? description);
+
+  const defaultTrigger = useMemo(
+    () => (
+      <Button variant="outline">
+        {triggerIcon ?? null}
+        {!noButtonText && (triggerText ?? "Open Dialog")}
+      </Button>
+    ),
+    [triggerIcon, noButtonText, triggerText]
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        {triggerButton ?? defaultTrigger}
+      </DialogTrigger>
+      {open && (
+        <DialogContent
+          showCloseButton={showCloseButton}
+          className={contentClassName}
+        >
+          <DialogHeader className={showHeader ? undefined : "hidden"}>
+            <DialogTitle className={title ? undefined : "hidden"}>
+              {title}
+            </DialogTitle>
+            <DialogDescription className={description ? undefined : "hidden"}>
+              {description}
+            </DialogDescription>
+          </DialogHeader>
+          {children}
+        </DialogContent>
+      )}
+    </Dialog>
+  );
+};
+
+// --- Compound component exports
+
+const DialogButton = Object.assign(DialogButtonRoot, {
+  DialogFooter,
+  DialogClose,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+});
+
+export default DialogButton;
