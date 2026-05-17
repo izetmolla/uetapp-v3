@@ -1,16 +1,10 @@
 import DynamicPage from "../dynamic"
-import type { RouteObject } from "react-router"
+import { Navigate, type RouteObject } from "react-router"
 import suplementsRoutes from "./pages/suplements/routes"
 import { Fragment } from "react/jsx-runtime"
 
 const secretaryRoutes: RouteObject[] = [
-    {
-        index: true,
-        lazy: async () => {
-            const m = await import("./pages/dashboard")
-            return { Component: m.default }
-        },
-    },
+    { index: true, element: <Navigate to="/secretary/suplements" /> },
     { path: "suplements", hydrateFallbackElement: <Fragment />, children: suplementsRoutes },
     { path: "*", element: <DynamicPage /> },
 ]
