@@ -13,6 +13,7 @@ import Dashboard from "./dashboard"
 
 import secretaryRoutes from "./secretary/routes"
 import contractsRoutes from "./contracts/routes"
+import accountRoutes from "./account/routes"
 
 // Authorization routes
 import SignIn from "./authorization/pages/signin"
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
         path: "/", element: <TemplateLayout />, children: [
             { index: true, element: <Dashboard /> },
             { path: "*", element: <DynamicPage /> },
+            { path: "account", hydrateFallbackElement: <Loader fullScreen />, children: accountRoutes },
             { path: "cadmin", hydrateFallbackElement: <Loader fullScreen />, children: cadminRoutes },
             { path: "secretary", hydrateFallbackElement: <Loader fullScreen />, children: secretaryRoutes },
             { path: "contracts", hydrateFallbackElement: <Loader fullScreen />, children: contractsRoutes },

@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
+	"github.com/uetedu/app/internal/account"
 	"github.com/uetedu/app/internal/admin"
 	"github.com/uetedu/app/internal/authorization"
 	"github.com/uetedu/app/internal/cadmin"
@@ -33,6 +34,10 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	// Cadmin Routes
 	cadmin.SetupApiRoutes(api, appClients)
 	cadmin.SetupWebRoutes(app, appClients)
+
+	// Account Routes
+	account.SetupApiRoutes(api, appClients)
+	account.SetupWebRoutes(app, appClients)
 
 	//Secretary Routes
 	secretary.SetupApiRoutes(api, appClients)
