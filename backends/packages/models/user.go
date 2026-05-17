@@ -48,3 +48,7 @@ func (b *User) BeforeCreate(_ *gorm.DB) (err error) {
 	b.ID = uuid.New().String()
 	return
 }
+
+func (b User) TableName() string {
+	return "users"
+}

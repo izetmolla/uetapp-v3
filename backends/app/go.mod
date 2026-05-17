@@ -4,16 +4,18 @@ go 1.26.2
 
 replace github.com/flowtrove/packages/models => ../packages/models
 
-replace github.com/flowtrove/packages/view => ../packages/view
 
 replace github.com/flowtrove/packages/render => ../packages/render
 
 replace github.com/flowtrove/packages/authorization => ../packages/authorization
 
+replace github.com/flowtrove/packages/datatable => ../packages/datatable
+
 require (
 	github.com/flowtrove/packages/authorization v0.0.0-00010101000000-000000000000
 	github.com/flowtrove/packages/models v0.0.0
-	github.com/flowtrove/packages/render v0.0.0-00010101000000-000000000000
+	github.com/flowtrove/packages/render v0.0.0
+	github.com/flowtrove/packages/datatable v0.0.0
 	github.com/gofiber/fiber/v3 v3.2.0
 	github.com/spf13/viper v1.21.0
 	gorm.io/driver/postgres v1.6.0

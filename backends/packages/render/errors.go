@@ -33,3 +33,27 @@ func (app *Render) WithStatus(status int) RenderOptionsFunc {
 		o.errorStatus = status
 	}
 }
+
+// WithCode returns a functional option that sets the code for the render.
+//
+// Example:
+//
+//	return app.View(c, app.WithCode("NOT_FOUND"))
+func (app *Render) WithCode(code string) RenderOptionsFunc {
+	return func(o *RenderOptions) {
+		o.errorCode = code
+	}
+}
+
+// WithDetails returns a functional option that sets the details for the render.
+//
+// Example:
+//
+//	return app.View(c, app.WithDetails(fiber.Map{
+//		"error": "Not found",
+//	}))
+func (app *Render) WithDetails(details map[string]any) RenderOptionsFunc {
+	return func(o *RenderOptions) {
+		o.errorDetails = details
+	}
+}

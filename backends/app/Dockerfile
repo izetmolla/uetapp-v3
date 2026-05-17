@@ -8,6 +8,7 @@ COPY app/go.mod app/go.sum ./
 COPY packages/models/ /packages/models/
 COPY packages/authorization/ /packages/authorization/
 COPY packages/render/ /packages/render/
+COPY packages/datatable/ /packages/datatable/
 RUN go mod download
 COPY app/ ./
 

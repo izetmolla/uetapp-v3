@@ -5,6 +5,7 @@ import (
 	"github.com/uetedu/app/config"
 	"github.com/uetedu/app/internal/admin"
 	"github.com/uetedu/app/internal/authorization"
+	"github.com/uetedu/app/internal/cadmin"
 	"github.com/uetedu/app/internal/enter"
 	"github.com/uetedu/app/internal/general"
 	"github.com/uetedu/app/internal/languages"
@@ -28,6 +29,10 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	// Handle Routes based on the API group
 	general.SetupRoutes(api, appClients)
 	enter.SetupRoutes(app, api, appClients)
+
+	// Cadmin Routes
+	cadmin.SetupApiRoutes(api, appClients)
+	cadmin.SetupWebRoutes(app, appClients)
 
 	//Secretary Routes
 	secretary.SetupApiRoutes(api, appClients)

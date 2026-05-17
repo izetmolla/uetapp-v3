@@ -18,7 +18,7 @@ interface ColumnsResponse extends ResponseWithError {
 
 export async function getUsersList(params: unknown) {
     return ApiService.fetchData<ResponseWithPagination<User>>({
-        url: withAPI('/admin/users/list'),
+        url: withAPI('/cadmin/users/list'),
         method: 'get',
         params,
     });
@@ -26,7 +26,7 @@ export async function getUsersList(params: unknown) {
 
 export async function getUsersColumns() {
     return ApiService.fetchData<ColumnsResponse>({
-        url: withAPI('/admin/users/columns'),
+        url: withAPI('/cadmin/users/list/columns'),
         method: 'get',
     });
 }

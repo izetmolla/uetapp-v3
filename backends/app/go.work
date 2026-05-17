@@ -6,4 +6,5 @@ use (
 	../packages/models
 	../packages/render
 	../packages/authorization
+	../packages/datatable
 )
