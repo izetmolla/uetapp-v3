@@ -9,7 +9,7 @@ export function ProfileSidebar() {
     const { user, profileCompletion } = useProfileStore();
 
     return (
-        <aside className="space-y-5 lg:sticky lg:top-[calc(var(--header-height)+var(--account-nav-height,3.5rem)+1rem)] lg:self-start lg:pt-1">
+        <aside className="space-y-5 lg:sticky lg:top-[calc(var(--account-nav-height,3.5rem)+1rem)] lg:self-start lg:pt-1">
             <Card className="shadow-sm">
                 <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium">Profile completeness</CardTitle>

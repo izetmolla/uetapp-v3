@@ -32,7 +32,7 @@ export function ProfileHeader() {
                 </div>
             </div>
 
-            <div className="relative border-t bg-card px-4 pb-3 pt-1 sm:px-5 sm:pb-4">
+            <div className="relative bg-card px-4 pb-3 pt-1 sm:px-5 sm:pb-4">
                 <div className="flex flex-col items-center gap-1.5 text-center sm:items-start sm:text-left">
                     <div className="relative -mt-12 sm:-mt-14">
                         <Avatar className="border-background size-20 border-[3px] shadow-md sm:size-24">

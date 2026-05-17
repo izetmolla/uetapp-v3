@@ -56,7 +56,7 @@ function AccountNavLink({
             end={end}
             className={({ isActive }) =>
                 cn(
-                    "relative inline-flex items-center gap-2 px-1 py-3.5 text-sm font-medium transition-colors",
+                    "relative inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-1 py-3.5 text-sm font-medium transition-colors",
                     "after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full after:transition-colors",
                     isActive
                         ? "text-foreground after:bg-primary"
@@ -88,18 +88,18 @@ const AccountLayout = () => {
             </header>
 
             <div className="space-y-6 lg:space-y-8 [--account-nav-height:3.5rem]">
-                <div className="bg-card rounded-xl border shadow-sm">
-                    <section className="overflow-hidden">
+                <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <section className="overflow-hidden rounded-t-xl">
                         <ProfileHeader />
                     </section>
 
                     <div
-                        className="sticky top-(--header-height) z-40 min-h-(--account-nav-height) border-t bg-muted/20 supports-[backdrop-filter]:bg-card/95 supports-[backdrop-filter]:backdrop-blur-sm"
+                        className="sticky top-0 z-30 min-h-(--account-nav-height) border-t bg-card shadow-sm supports-[backdrop-filter]:bg-card/95 supports-[backdrop-filter]:backdrop-blur-md"
                         data-account-nav
                     >
-                        <div className="flex flex-col gap-2 px-4 py-1 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                        <div className="flex min-w-0 items-center gap-2 px-4 py-1.5 sm:justify-between sm:px-6">
                             <nav
-                                className="-mb-px flex gap-5 overflow-x-auto sm:gap-7"
+                                className="-mb-px flex min-w-0 flex-1 flex-nowrap gap-4 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-7 [&::-webkit-scrollbar]:hidden"
                                 aria-label="Account sections"
                             >
                                 {accountNav.map((item) => (
@@ -107,11 +107,16 @@ const AccountLayout = () => {
                                 ))}
                             </nav>
 
-                            <div className="flex shrink-0 items-center gap-2 pb-2 sm:pb-0">
+                            <div className="flex shrink-0 items-center gap-1.5">
                                 {isOverview ? (
-                                    <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="size-8 shrink-0 gap-0 px-0 sm:h-8 sm:w-auto sm:gap-1.5 sm:px-2.5"
+                                        aria-label="Edit profile"
+                                    >
                                         <Pencil className="size-3.5" />
-                                        Edit profile
+                                        <span className="hidden sm:inline">Edit profile</span>
                                     </Button>
                                 ) : null}
                                 <Button
