@@ -146,7 +146,7 @@ export function NavUser() {
                                     </DropdownMenuRadioGroup>
                                 </DropdownMenuSubContent>
                             </DropdownMenuSub>
-                            {user?.roles.includes("admin:rw") && (
+                            {user?.roles?.includes("admin:rw") && (
                                 <DropdownMenuItem className="cursor-pointer" asChild>
                                     <Link to="/cadmin">
                                         <ShieldCog />

@@ -2,60 +2,45 @@ package config
 
 import (
 	"context"
-	"strings"
 
 	"github.com/flowtrove/packages/models"
 	"gorm.io/gorm"
 )
 
-// rolesOverlapOrPublic matches rows whose jsonb roles array contains any user role, or is empty (public).
-const rolesOverlapOrPublic = `(
-	EXISTS (
-		SELECT 1 FROM jsonb_array_elements_text(roles) AS role
-		WHERE role IN ?
-	)
-	OR roles = '[]'::jsonb
-)`
-
-func (app *AppClients) getServicesData(ctx context.Context, roles []string) ([]map[string]any, error) {
-	if len(roles) == 0 {
-		return []map[string]any{}, nil
-	}
+func (app *AppClients) getServicesData(ctx context.Context, userRoles []string) ([]map[string]any, error) {
 	services := []map[string]any{}
 	svc, err := gorm.G[models.Service](app.postgres).
-		Select("id, name, title, icon, description").
-		Where(rolesOverlapOrPublic, roles).
+		Select("id, name, title, icon, description, roles").
+		Where("status = ?", models.StatusActive).
+		Order("name ASC").
 		Find(ctx)
 	if err != nil {
 		return nil, err
 	}
 	for _, svc := range svc {
+		if !app.userCanAccessService(svc.Roles, userRoles) {
+			continue
+		}
 		services = append(services, map[string]any{
 			"id":          svc.ID,
 			"name":        svc.Name,
 			"title":       svc.Title,
 			"icon":        svc.Icon,
 			"description": svc.Description,
+			"roles":       svc.Roles,
 		})
 	}
 
 	return services, nil
 }
 
-/**
- * Get the navigation data
- * @param ctx context.Context
- * @param serviceID string
- * @return []models.ServiceNavigation, error
- */
-func (app *AppClients) getNavigationData(ctx context.Context, serviceID string, roles []string) ([]models.ServiceNavigation, error) {
+func (app *AppClients) getNavigationData(ctx context.Context, serviceID string, userRoles []string) ([]models.ServiceNavigation, error) {
 	if serviceID == "" {
 		return []models.ServiceNavigation{}, nil
 	}
 
 	navigations, err := gorm.G[models.ServiceNavigation](app.postgres).
-		Where("service_id IN (?)", serviceID).
-		Where(rolesOverlapOrPublic, roles).
+		Where("service_id = ?", serviceID).
 		Where("parent_id IS NULL").
 		Order("order_nr ASC").
 		Find(ctx)
@@ -63,51 +48,48 @@ func (app *AppClients) getNavigationData(ctx context.Context, serviceID string, 
 		return nil, err
 	}
 
+	filtered := make([]models.ServiceNavigation, 0, len(navigations))
 	for i := range navigations {
-		children, err := app.getNavigationChildren(ctx, serviceID, navigations[i].ID, roles)
+		if !app.userCanAccessNavigation(navigations[i].Roles, userRoles) {
+			continue
+		}
+		children, err := app.getNavigationChildren(ctx, serviceID, navigations[i].ID, userRoles)
 		if err != nil {
 			return nil, err
 		}
 		navigations[i].Children = children
+		filtered = append(filtered, navigations[i])
 	}
 
-	return navigations, nil
+	return filtered, nil
 }
 
-/**
- * Get the navigation children
- * @param ctx context.Context
- * @param serviceIDs []string
- * @param parentID string
- * @return []models.ServiceNavigation, error
- */
-func (app *AppClients) getNavigationChildren(ctx context.Context, serviceID string, parentID string, roles []string) ([]models.ServiceNavigation, error) {
+func (app *AppClients) getNavigationChildren(ctx context.Context, serviceID string, parentID string, userRoles []string) ([]models.ServiceNavigation, error) {
 	children, err := gorm.G[models.ServiceNavigation](app.postgres).
 		Where("service_id = ?", serviceID).
 		Where("parent_id = ?", parentID).
-		Where(rolesOverlapOrPublic, roles).
 		Order("order_nr ASC").
 		Find(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	filtered := make([]models.ServiceNavigation, 0, len(children))
 	for i := range children {
-		nestedChildren, err := app.getNavigationChildren(ctx, serviceID, children[i].ID, roles)
+		if !app.userCanAccessNavigation(children[i].Roles, userRoles) {
+			continue
+		}
+		nestedChildren, err := app.getNavigationChildren(ctx, serviceID, children[i].ID, userRoles)
 		if err != nil {
 			return nil, err
 		}
 		children[i].Children = nestedChildren
+		filtered = append(filtered, children[i])
 	}
 
-	return children, nil
+	return filtered, nil
 }
 
-/**
- * Format the navigation data
- * @param navigation []models.ServiceNavigation
- * @return []map[string]any
- */
 func formatNavigation(navigation []models.ServiceNavigation) []map[string]any {
 	navs := []map[string]any{}
 	for _, n := range navigation {
@@ -126,17 +108,4 @@ func formatNavigation(navigation []models.ServiceNavigation) []map[string]any {
 		})
 	}
 	return navs
-}
-
-func removeRolePrefix(roles []string) []string {
-	out := make([]string, 0, len(roles))
-	for _, role := range roles {
-		prefix, _, ok := strings.Cut(role, ":")
-		if ok {
-			out = append(out, prefix)
-			continue
-		}
-		out = append(out, role)
-	}
-	return out
 }

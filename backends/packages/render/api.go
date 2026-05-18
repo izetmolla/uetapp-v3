@@ -14,14 +14,21 @@ func (r *Render) Api(c fiber.Ctx, optsParams ...RenderOptionsFunc) error {
 		return c.JSON(opts.data)
 	}
 
-	// Set response headers
 	if opts.err != nil {
-		c.Status(fiber.StatusInternalServerError)
+		status := opts.errorStatus
+		if status == 0 {
+			status = fiber.StatusInternalServerError
+		}
+		c.Status(status)
+		code := opts.errorCode
+		if code == "" {
+			code = "INTERNAL_SERVER_ERROR"
+		}
 		return c.JSON(fiber.Map{
 			"error":   true,
 			"message": opts.err.Error(),
-			"code":    opts.errorCode,
-			"status":  opts.errorStatus,
+			"code":    code,
+			"status":  status,
 			"details": opts.errorDetails,
 		})
 	}

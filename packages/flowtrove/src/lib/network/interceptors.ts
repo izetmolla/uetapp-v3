@@ -50,6 +50,11 @@ function forceSignOut(message?: string): void {
     }
 }
 
+/** User is signed in but lacks rights; show the app unauthorized page, keep session. */
+function showUnauthorizedPage(): void {
+    useAuthorizationStore.getState().setAccessDenied(true)
+}
+
 BaseService.interceptors.request.use(
     async (config) => {
         const cfg = config as RetryableConfig
@@ -140,14 +145,19 @@ BaseService.interceptors.response.use(
 
         const status = response.status
         const code = getResponseCode(response.data)
+        const { isSignedIn } = useAuthorizationStore.getState()
 
-        // Permission failures are not auth failures. The user IS
-        // signed in, they simply don't have rights for this resource.
-        // Bail out without touching the session.
-        if (code && PERMISSION_CODES.has(code)) {
-            return Promise.reject(error)
-        }
-        if (status === 403) {
+        // Permission failures are not auth failures. The user IS signed in,
+        // they simply lack rights. Match by code first so a backend bug that
+        // returns the wrong HTTP status (e.g. 500 with INSUFFICIENT_PERMISSIONS)
+        // still shows the access-denied page.
+        const isAccessDenied =
+            (code !== undefined && PERMISSION_CODES.has(code)) ||
+            status === 403 ||
+            (isSignedIn && code === "UNAUTHORIZED")
+
+        if (isAccessDenied) {
+            showUnauthorizedPage()
             return Promise.reject(error)
         }
 

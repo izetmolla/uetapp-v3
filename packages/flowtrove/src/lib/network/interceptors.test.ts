@@ -211,6 +211,62 @@ describe("BaseService interceptor", () => {
 
         await expect(BaseService.get("/admin")).rejects.toBeDefined()
         expect(useAuthorizationStore.getState().isSignedIn).toBe(true)
+        expect(useAuthorizationStore.getState().accessDenied).toBe(true)
+    })
+
+    it("sets accessDenied on 500 INSUFFICIENT_PERMISSIONS (legacy wrong HTTP status)", async () => {
+        const access = makeJwt(Date.now() + 5 * 60_000)
+        useAuthorizationStore.getState().signInUser({
+            tokens: { access_token: access, refresh_token: "rt" },
+        })
+        useAuthorizationStore.getState().clearAccessDenied()
+
+        mock.push(() => ({
+            status: 500,
+            data: {
+                code: "INSUFFICIENT_PERMISSIONS",
+                message: "insufficient permissions",
+                status: 403,
+            },
+        }))
+
+        await expect(BaseService.get("/api/cadmin/users/list")).rejects.toBeDefined()
+        expect(useAuthorizationStore.getState().isSignedIn).toBe(true)
+        expect(useAuthorizationStore.getState().accessDenied).toBe(true)
+    })
+
+    it("sets accessDenied on 401 UNAUTHORIZED when signed in (role denied)", async () => {
+        const access = makeJwt(Date.now() + 5 * 60_000)
+        useAuthorizationStore.getState().signInUser({
+            tokens: { access_token: access, refresh_token: "rt" },
+        })
+        useAuthorizationStore.getState().clearAccessDenied()
+
+        mock.push(() => ({
+            status: 401,
+            data: { code: "UNAUTHORIZED", message: "unauthorized" },
+        }))
+
+        await expect(BaseService.get("/api/cadmin/users/list")).rejects.toBeDefined()
+        expect(useAuthorizationStore.getState().isSignedIn).toBe(true)
+        expect(useAuthorizationStore.getState().accessDenied).toBe(true)
+    })
+
+    it("sets accessDenied on 403 without signing out", async () => {
+        const access = makeJwt(Date.now() + 5 * 60_000)
+        useAuthorizationStore.getState().signInUser({
+            tokens: { access_token: access, refresh_token: "rt" },
+        })
+        useAuthorizationStore.getState().clearAccessDenied()
+
+        mock.push(() => ({
+            status: 403,
+            data: { message: "Forbidden" },
+        }))
+
+        await expect(BaseService.get("/admin")).rejects.toBeDefined()
+        expect(useAuthorizationStore.getState().isSignedIn).toBe(true)
+        expect(useAuthorizationStore.getState().accessDenied).toBe(true)
     })
 
     it("does NOT sign the user out on a network error", async () => {

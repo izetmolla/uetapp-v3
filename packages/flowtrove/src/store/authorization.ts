@@ -11,11 +11,15 @@ export interface AuthorizationState {
   isSignedIn: boolean
   redirectUrl?: string
   sessions: string[]
+  /** When true, the app shell should render the unauthorized access page (403 / permission 401). */
+  accessDenied: boolean
   signIn: (isSignedIn: boolean) => void
   signOut: () => void
   setAccessToken: (token: string) => void
   signInUser: ({ user, tokens }: { user?: User; tokens?: Tokens }) => void
   setRedirectUrl: (url: string) => void
+  setAccessDenied: (accessDenied: boolean) => void
+  clearAccessDenied: () => void
 }
 
 /**
@@ -52,7 +56,10 @@ const authorizationStore: StateCreator<AuthorizationState> = (set) => ({
   isSignedIn: false,
   redirectUrl: "",
   sessions: [],
+  accessDenied: false,
   setRedirectUrl: (url) => set({ redirectUrl: url }),
+  setAccessDenied: (accessDenied) => set({ accessDenied }),
+  clearAccessDenied: () => set({ accessDenied: false }),
   signIn: (isSignedIn) => set({ isSignedIn }),
   signOut: () => {
     // Fire-and-forget the backend call so the local state still clears
@@ -62,6 +69,7 @@ const authorizationStore: StateCreator<AuthorizationState> = (set) => ({
       user: undefined,
       tokens: undefined,
       isSignedIn: false,
+      accessDenied: false,
     })
   },
   setAccessToken: (access_token) =>
@@ -88,6 +96,13 @@ const useAuthorizationStore = create<AuthorizationState>()(
     persist(authorizationStore, {
       name: "authorization-storage",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        tokens: state.tokens,
+        isSignedIn: state.isSignedIn,
+        redirectUrl: state.redirectUrl,
+        sessions: state.sessions,
+      }),
     }),
     {
       name: "authorization-storage",

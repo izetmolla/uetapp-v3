@@ -1,6 +1,8 @@
 package contracts
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
 )
@@ -35,47 +37,32 @@ func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	app.Use(appClients.ViewNotFound)
 }
 
-func (c *Controller) ContractsMiddlewareApi(ctx fiber.Ctx) error {
-	// wsName := strings.TrimSpace(ctx.Params("ws", ctx.Query("ws")))
-	// if ctx.Method() == "POST" || ctx.Method() == "PUT" || ctx.Method() == "PATCH" || ctx.Method() == "DELETE" {
-	// 	if bodyWsName, ok := getWsNameFromPostMethodBody(ctx.Body()); ok {
-	// 		wsName = bodyWsName
-	// 	}
-	// }
-	// if wsName == "" {
-	// 	return ctx.Next()
-	// }
-	// context := ctx.Context()
-	// ws, err := c.app.GetWSAPI(ctx,
-	// 	c.app.WithWsSelectFields("id, id_number, name"),
-	// 	c.app.WithWsContext(context),
-	// 	c.app.WithWsName(wsName))
-	// if err != nil {
-	// 	return c.app.ApiError(ctx, err)
-	// }
-	// ctx.Locals("ws", ws)
+func (cc *Controller) contractsMiddleware(ctx fiber.Ctx, fromAPI bool) error {
+	render := cc.app.Render()
+	reqCtx := ctx.Context()
+	user, err := cc.app.USER(ctx, reqCtx, fromAPI)
+	if err != nil {
+		if fromAPI {
+			return cc.app.Api(ctx, render.WithError(err), render.WithStatus(fiber.StatusUnauthorized), render.WithCode("UNAUTHORIZED"))
+		}
+		return cc.app.View(ctx, render.WithError(err), render.WithStatus(fiber.StatusUnauthorized), render.WithCode("UNAUTHORIZED"))
+	}
+	hasRole, _, _ := cc.app.GetRole([]string{"admin", "contracts"}, user.Roles)
+	if !hasRole {
+		err := errors.New("insufficient permissions")
+		if fromAPI {
+			return cc.app.Api(ctx, render.WithError(err), render.WithStatus(fiber.StatusForbidden), render.WithCode("INSUFFICIENT_PERMISSIONS"))
+		}
+		return cc.app.View(ctx, render.WithError(err), render.WithStatus(fiber.StatusForbidden), render.WithCode("INSUFFICIENT_PERMISSIONS"))
+	}
+	ctx.Locals("user", user)
 	return ctx.Next()
 }
 
-func (c *Controller) ContractsMiddlewareView(ctx fiber.Ctx) error {
-	// // Keep in sync with [config.reservedWorkspacePathSegment]: /api must not be treated as a tenant slug.
-	// if ctx.Params("ws") == "api" {
-	// 	return ctx.Next()
-	// }
-	// context := ctx.Context()
-	// view := c.app.View()
+func (cc *Controller) ContractsMiddlewareApi(ctx fiber.Ctx) error {
+	return cc.contractsMiddleware(ctx, true)
+}
 
-	// ws, err := c.app.GetWS(ctx, c.app.WithWsSelectFields("id, id_number, name"), c.app.WithWsContext(context), c.app.WithWsName(ctx.Params("ws")))
-	// if err != nil {
-	// 	return c.app.RenderView(ctx,
-	// 		view.WithContext(context),
-	// 		view.WithViewTitle("Workspace not found"),
-	// 		view.WithViewError(err,
-	// 			view.WithViewErrorTitle("Error"),
-	// 			view.WithViewErrorStatus("Workspace not found"),
-	// 			view.WithViewErrorErrorCode(fiber.StatusNotFound),
-	// 		))
-	// }
-	// ctx.Locals("ws", ws)
-	return ctx.Next()
+func (cc *Controller) ContractsMiddlewareView(ctx fiber.Ctx) error {
+	return cc.contractsMiddleware(ctx, false)
 }

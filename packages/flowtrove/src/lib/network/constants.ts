@@ -36,7 +36,6 @@ export const REFRESH_TIMEOUT_MS = 15 * 1000
  */
 export const FATAL_AUTH_CODES: ReadonlySet<string> = new Set([
     "INVALID_CREDENTIALS",
-    "UNAUTHORIZED",
 ])
 
 /**

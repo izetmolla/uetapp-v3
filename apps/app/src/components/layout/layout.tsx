@@ -3,16 +3,25 @@ import React from "react";
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar";
 import { AppSidebar } from "./sidebar/app-sidebar";
 import { SiteHeader } from "./header";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import useAuthorizationStore from "@workspace/flowtrove/store/authorization";
+import Unauthorized401 from "../errors/401";
 
 const Layout = () => {
     const defaultOpen = true;
-    const isSignedIn = useAuthorizationStore(x => x.isSignedIn)
+    const location = useLocation();
+    const isSignedIn = useAuthorizationStore((x) => x.isSignedIn);
+    const accessDenied = useAuthorizationStore((x) => x.accessDenied);
+    const showUnauthorized =
+        accessDenied || location.pathname === "/unauthorized";
 
     if (!isSignedIn) {
         window.location.replace(`/sign-in?redirectUrl=${encodeURIComponent(window.location.href)}`)
         return null
+    }
+
+    if (showUnauthorized) {
+        return <Unauthorized401 />;
     }
 
     return (

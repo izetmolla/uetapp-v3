@@ -19,6 +19,7 @@ import accountRoutes from "./account/routes"
 import SignIn from "./authorization/pages/signin"
 import Reset from "./authorization/pages/reset"
 import cadminRoutes from "./cadmin/routes"
+import Unauthorized401 from "../components/errors/401"
 
 
 
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
     {
         path: "/", element: <TemplateLayout />, children: [
             { index: true, element: <Dashboard /> },
+            { path: "unauthorized", element: <Unauthorized401 /> },
             { path: "*", element: <DynamicPage /> },
             { path: "account", hydrateFallbackElement: <Loader fullScreen />, children: accountRoutes },
             { path: "cadmin", hydrateFallbackElement: <Loader fullScreen />, children: cadminRoutes },

@@ -37,6 +37,8 @@ export type NavigationItem = {
     isNew?: boolean;
     newTab?: boolean;
     prefetch?: "none" | "render" | "intent";
+    /** Role names required to see this item (enforced server-side; empty = public). */
+    roles?: string[];
     children?: NavigationItem[];
 };
 

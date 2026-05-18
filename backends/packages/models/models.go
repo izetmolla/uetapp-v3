@@ -53,10 +53,8 @@ func Models() []any {
 		// &Role{},
 		// &User{},
 		// &Session{},
-		// &Service{},
-		// &ServiceNavigation{},
-		// &Service{},
-		// &ServiceNavigation{},
+		&Service{},
+		&ServiceNavigation{},
 		// &Role{},
 	}
 

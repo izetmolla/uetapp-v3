@@ -23,16 +23,12 @@ import Icon from "@workspace/ui/components/icon"
 import { useNavigate } from "react-router"
 import Logo from "../../logo"
 
+import type { ServiceItem } from "../api";
+
 export function ServiceSwitcher({
     services,
 }: {
-    services: {
-        id: string
-        title: string
-        description: string
-        icon?: string
-        name: string
-    }[];
+    services: ServiceItem[];
 }) {
     const navigate = useNavigate()
     const { isMobile } = useSidebar()

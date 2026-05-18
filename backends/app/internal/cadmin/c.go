@@ -53,10 +53,9 @@ func (cc *Controller) CadminMiddlewareApi(c fiber.Ctx) error {
 	if err != nil {
 		return cc.app.Api(c, render.WithError(err), render.WithStatus(fiber.StatusUnauthorized), render.WithCode("UNAUTHORIZED"))
 	}
-	fmt.Println("user", user)
 	hasRole, _, _ := cc.app.GetRole([]string{"admin"}, user.Roles)
 	if !hasRole {
-		return cc.app.Api(c, render.WithError(errors.New("unauthorized")), render.WithStatus(fiber.StatusUnauthorized), render.WithCode("UNAUTHORIZED"))
+		return cc.app.Api(c, render.WithError(errors.New("insufficient permissions")), render.WithStatus(fiber.StatusForbidden), render.WithCode("INSUFFICIENT_PERMISSIONS"))
 	}
 	c.Locals("user", user)
 	return c.Next()
@@ -72,7 +71,7 @@ func (cc *Controller) CadminMiddlewareView(c fiber.Ctx) error {
 	hasRole, r, w := cc.app.GetRole([]string{"admin"}, user.Roles)
 	fmt.Println("hasRole", hasRole, "r", r, "w", w)
 	if !hasRole {
-		return cc.app.View(c, render.WithError(errors.New("unauthorized")), render.WithStatus(fiber.StatusUnauthorized), render.WithCode("UNAUTHORIZED"))
+		return cc.app.View(c, render.WithError(errors.New("insufficient permissions")), render.WithStatus(fiber.StatusForbidden), render.WithCode("INSUFFICIENT_PERMISSIONS"))
 	}
 	c.Locals("user", user)
 	return c.Next()
