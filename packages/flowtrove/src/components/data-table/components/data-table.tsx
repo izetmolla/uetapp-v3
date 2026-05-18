@@ -40,7 +40,7 @@ export function DataTableContent<TData>({
       {...props}
     >
       {children}
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -78,6 +78,7 @@ export function DataTableContent<TData>({
                       style={{
                         ...getCommonPinningStyles({ column: cell.column }),
                       }}
+                      className={cell.column.columnDef.meta?.className ?? ""}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

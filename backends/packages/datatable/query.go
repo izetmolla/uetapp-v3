@@ -144,16 +144,25 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 		}
 	}
 
-	// Sorting from `sorting=[{"id":"name","desc":true}, ...]`
-	if raw := q.Get("sorting"); raw != "" {
+	// Sorting from `sorting=[{"id":"name","desc":true}, ...]` or `sort=...` (nuqs URL key).
+	parseSortingJSON := func(raw string) {
+		if raw == "" {
+			return
+		}
 		var sorts []Sort
-		if err := json.Unmarshal([]byte(raw), &sorts); err == nil {
-			for _, s := range sorts {
-				if _, ok := validColumns[s.ID]; ok && s.ID != "" {
-					result.Sorts = append(result.Sorts, s)
-				}
+		if err := json.Unmarshal([]byte(raw), &sorts); err != nil {
+			return
+		}
+		for _, s := range sorts {
+			if _, ok := validColumns[s.ID]; ok && s.ID != "" {
+				result.Sorts = append(result.Sorts, s)
 			}
 		}
+	}
+
+	parseSortingJSON(q.Get("sorting"))
+	if len(result.Sorts) == 0 {
+		parseSortingJSON(q.Get("sort"))
 	}
 
 	// Column filters from `columnFilters=[{"id":"name","value":"john"}, ...]`
@@ -161,7 +170,10 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 		var filters []Filter
 		if err := json.Unmarshal([]byte(raw), &filters); err == nil {
 			for _, f := range filters {
-				if _, ok := validColumns[f.ID]; !ok || f.ID == "" || f.Value == "" {
+				if _, ok := validColumns[f.ID]; !ok || f.ID == "" {
+					continue
+				}
+				if f.Value == "" && len(f.Values) == 0 {
 					continue
 				}
 				result.Filters = append(result.Filters, f)

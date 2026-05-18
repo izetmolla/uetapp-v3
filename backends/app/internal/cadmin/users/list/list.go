@@ -5,6 +5,7 @@ import (
 	"github.com/flowtrove/packages/datatable/postgresql"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/uetedu/app/pkg/tablequery"
 )
 
 func (cc *Controller) GetUsersListAPI(c fiber.Ctx) error {
@@ -19,7 +20,7 @@ func (cc *Controller) GetUsersListAPI(c fiber.Ctx) error {
 		)
 	}
 
-	q, err := datatable.ExtractQuery(c.OriginalURL(), columns)
+	q, err := tablequery.Extract(c, columns)
 	if err != nil {
 		return cc.app.Api(c,
 			r.WithError(err),
@@ -42,7 +43,6 @@ func (cc *Controller) GetUsersListAPI(c fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"data":       users,
 		"pagination": datatable.RenderPagination(pagination),
-		"qqqq":       q,
 	})
 }
 
@@ -61,7 +61,7 @@ func (cc *Controller) GetUsersListView(c fiber.Ctx) error {
 		)
 	}
 
-	q, err := datatable.ExtractQuery(c.OriginalURL(), columns)
+	q, err := tablequery.Extract(c, columns)
 	if err != nil {
 		return cc.app.View(c,
 			r.WithContext(ctxPtr),

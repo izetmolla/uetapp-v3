@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
 	"github.com/uetedu/app/internal/cadmin/orgunits"
+	"github.com/uetedu/app/internal/cadmin/resources"
 	"github.com/uetedu/app/internal/cadmin/users"
 )
 
@@ -25,6 +26,7 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	api := apiGroup.Group("/cadmin", controller.CadminMiddlewareApi)
 	users.SetupApiRoutes(api, appClients)
 	orgunits.SetupApiRoutes(api, appClients)
+	resources.SetupApiRoutes(api, appClients)
 
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
 
@@ -37,6 +39,7 @@ func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	app := appGroup.Group("/cadmin", controller.CadminMiddlewareView)
 	users.SetupWebRoutes(app, appClients)
 	orgunits.SetupWebRoutes(app, appClients)
+	resources.SetupWebRoutes(app, appClients)
 	app.Get("/", appClients.WebView("Cadmin")) // Web endpoint for getting enter data
 
 	// api.Get("/enter", controller.GetEnterDataApi) // API endpoint for getting enter data

@@ -68,6 +68,9 @@ func (b *RawQueryBuilder[T]) Run() ([]T, datatable.Pagination, error) {
 	if b.where != "" {
 		fmt.Fprintf(&sql, " WHERE %s", b.where)
 	}
+	if orderBy := datatable.OrderByClause(b.q.Sorts, datatable.ColumnNameByID(b.columns)); orderBy != "" {
+		fmt.Fprintf(&sql, "%s", orderBy)
+	}
 	fmt.Fprintf(&sql, " %s\n", b.limit)
 
 	fmt.Fprintf(&totalSql, "SELECT COUNT(*) FROM %s", b.table)

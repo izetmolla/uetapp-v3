@@ -14,6 +14,8 @@ declare module "@tanstack/react-table" {
         icon?: React.FC<React.SVGProps<SVGSVGElement>>;
         /** When true, this column only appears in Advanced Filters, not in simple column filters. */
         enableOnlyAdvancedFilters?: boolean;
+        /** Applied to header and body cells (e.g. `!whitespace-normal` for wrapping text). */
+        className?: string;
     }
 }
 

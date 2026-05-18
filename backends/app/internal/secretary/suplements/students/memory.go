@@ -6,10 +6,11 @@ import (
 
 	"github.com/flowtrove/packages/datatable"
 	"github.com/gofiber/fiber/v3"
+	"github.com/uetedu/app/pkg/tablequery"
 )
 
 func queryMockStudents(c fiber.Ctx, columns []datatable.Column) ([]map[string]any, datatable.Pagination, error) {
-	q, err := datatable.ExtractQuery(c.OriginalURL(), columns)
+	q, err := tablequery.Extract(c, columns)
 	if err != nil {
 		return nil, datatable.Pagination{}, err
 	}

@@ -20,6 +20,9 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api.Get("/", controller.GetOrgUnitsListAPI)
 	api.Get("/columns", controller.GetOrgUnitsColumns)
+	api.Post("/", controller.CreateOrgUnit)
+	api.Put("/:id", controller.UpdateOrgUnit)
+	api.Delete("/", controller.DeleteOrgUnits)
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
 
 	// api.Get("/enter", controller.GetEnterDataApi) // API endpoint for getting enter data

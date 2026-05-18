@@ -305,7 +305,7 @@ export function DataTable<TData>({
       )}
     >
       {toolbar}
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -380,6 +380,7 @@ export function DataTable<TData>({
                     <TableCell
                       key={cell.id}
                       style={getCommonPinningStyles({ column: cell.column })}
+                      className={cell.column.columnDef.meta?.className ?? ""}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

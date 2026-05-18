@@ -16,6 +16,7 @@ import * as React from "react";
 import { dataTableConfig } from "../config/data-table";
 import { ARRAY_SEPARATOR, QUERY_KEYS } from "../lib/constants";
 import { getFiltersStateParser, getSortingStateParser } from "../lib/parsers";
+import { serializeServerTableParams } from "../lib/serialize-server-table-params";
 import type {
   ExtendedColumnFilter,
   ExtendedColumnSort,
@@ -163,7 +164,10 @@ export function useServerTableData<TData>(
 
   const query = useQuery({
     queryKey: resolvedQueryKey,
-    queryFn: () => queryFn(state),
+    queryFn: () =>
+      queryFn(
+        serializeServerTableParams(state) as unknown as ServerTableState<TData>,
+      ),
     placeholderData: (prev) => prev,
     enabled,
   });

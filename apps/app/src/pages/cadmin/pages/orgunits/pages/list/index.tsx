@@ -1,14 +1,16 @@
 import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getOrgUnitsColumns, getOrgUnitsList, type OrgUnit } from "./api";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";
 import { getActionsColumn, prependColumns } from "./components/table-columns";
 import TableConfigCustomizator from "./components/table-config-customizator";
-import QuickOrgUnitEdit from "./components/quick-edit";
 import type { DataTableRowAction } from "@workspace/flowtrove/components/data-table/types/data-table";
 import { useTranslation } from "react-i18next";
 import { OrgUnitsTableActionBar } from "./components/table-action-bar";
-
+import AddOrgUnitDialog from "./components/add-org-unit-dialog";
+import { Button } from "@workspace/ui/components/button";
+import { PlusIcon } from "lucide-react";
+import { useOrgUnitsListStore } from "./store";
 export const ORG_UNIT_FETCH_PERSISTANT = "orgunitspage"
 
 const breadcrumb: BreadcrumbItem[] = [
@@ -18,6 +20,7 @@ const breadcrumb: BreadcrumbItem[] = [
 const OrgUnitsListPage = () => {
     const { t } = useTranslation("admin");
     const [rowAction, setRowAction] = useState<DataTableRowAction<OrgUnit> | null>(null);
+    const { setIsAddOrgUnitDialogOpen } = useOrgUnitsListStore();
     const {
         columns,
         isLoading: columnsLoading,
@@ -40,6 +43,12 @@ const OrgUnitsListPage = () => {
         return null;
     }, [rowAction?.variant, rowAction?.row.original]);
 
+    useEffect(() => {
+        if (rowAction?.variant === "quickEdit") {
+            setIsAddOrgUnitDialogOpen(true);
+        }
+    }, [rowAction?.variant, setIsAddOrgUnitDialogOpen]);
+
     return (
         <ContentLoader
             breadcrumb={breadcrumb}
@@ -49,7 +58,15 @@ const OrgUnitsListPage = () => {
             showHeaderSeparator
             rightComponent={
                 <div className="flex w-full items-end justify-end mb-2 gap-1">
-                    <QuickOrgUnitEdit orgUnit={quickEditOrgUnit} isOpen={!!quickEditOrgUnit} onClose={() => setRowAction(null)} />
+                    <Button
+                        onClick={() => {
+                            setRowAction(null);
+                            setIsAddOrgUnitDialogOpen(true);
+                        }}
+                    >
+                        <PlusIcon className="size-4" />
+                        {t("Add Org Unit")}
+                    </Button>
                     <TableConfigCustomizator />
                 </div>
             }
@@ -78,7 +95,11 @@ const OrgUnitsListPage = () => {
                 actionBar={(table) => <OrgUnitsTableActionBar table={table} />}
             // onSelectionChange={setSelectedRows}
             />
-
+            <AddOrgUnitDialog
+                orgUnit={quickEditOrgUnit}
+                queryKey={[ORG_UNIT_FETCH_PERSISTANT, "orgunits"]}
+                onClose={() => setRowAction(null)}
+            />
         </ContentLoader>
     );
 }

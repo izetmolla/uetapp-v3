@@ -8,10 +8,16 @@ export function cn(...inputs: ClassValue[]) {
 
 
 export function generateAvatarFallback(string: string) {
-  const names = string?.split(" ").filter((name: string) => name);
-  const mapped = names?.map((name: string) => name?.charAt(0)?.toUpperCase());
+  const words = string?.trim().split(/\s+/).filter(Boolean) ?? [];
 
-  return mapped?.join("");
+  if (words.length === 0) return "";
+  if (words.length === 1) {
+    return words[0].charAt(0).toUpperCase();
+  }
+
+  const first = words[0].charAt(0).toUpperCase();
+  const last = words[words.length - 1].charAt(0).toUpperCase();
+  return `${first}${last}`;
 }
 
 

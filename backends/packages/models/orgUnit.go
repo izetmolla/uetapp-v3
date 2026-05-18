@@ -8,7 +8,7 @@ import (
 
 // Server specific settings.
 type OrgUnit struct {
-	ID          int64      `json:"id" gorm:"primaryKey;type:int64;autoIncrement"`
+	ID          int64      `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name        string     `json:"name" gorm:"size:255;"`
 	Slug        string     `json:"slug" gorm:"size:255;default:null;"`
 	Description string     `json:"description" gorm:"type:text;"`

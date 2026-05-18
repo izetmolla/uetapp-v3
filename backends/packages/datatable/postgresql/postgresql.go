@@ -26,24 +26,7 @@ import (
 //	    "pagination": datatable.RenderPagination(pagination),
 //	})
 func Find[T any](db *gorm.DB, q datatable.TableQuery, columns []datatable.Column) ([]T, datatable.Pagination, error) {
-	// Build a lookup from filter/sort ID to actual DB column name.
-	// By default we use AccessorKey; if it is empty we fall back to ID.
-	columnNameByID := make(map[string]string)
-	for _, col := range columns {
-		name := col.AccessorKey
-		if name == "" {
-			name = col.ID
-		}
-		if name == "" {
-			continue
-		}
-		if col.ID != "" {
-			columnNameByID[col.ID] = name
-		}
-		if col.AccessorKey != "" {
-			columnNameByID[col.AccessorKey] = name
-		}
-	}
+	columnNameByID := datatable.ColumnNameByID(columns)
 
 	query := db
 

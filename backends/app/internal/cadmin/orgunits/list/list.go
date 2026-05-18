@@ -5,6 +5,7 @@ import (
 	"github.com/flowtrove/packages/datatable/postgresql"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/uetedu/app/pkg/tablequery"
 )
 
 func (cc *Controller) GetOrgUnitsListAPI(c fiber.Ctx) error {
@@ -19,7 +20,7 @@ func (cc *Controller) GetOrgUnitsListAPI(c fiber.Ctx) error {
 		)
 	}
 
-	q, err := datatable.ExtractQuery(c.OriginalURL(), columns)
+	q, err := tablequery.Extract(c, columns)
 	if err != nil {
 		return cc.app.Api(c,
 			r.WithError(err),
@@ -54,7 +55,7 @@ func (cc *Controller) GetOrgUnitsListView(c fiber.Ctx) error {
 		return cc.app.View(c, r.WithContext(ctxPtr), r.WithTitle("Org Units List"), r.WithError(err))
 	}
 
-	q, err := datatable.ExtractQuery(c.OriginalURL(), columns)
+	q, err := tablequery.Extract(c, columns)
 	if err != nil {
 		return cc.app.View(c, r.WithContext(ctxPtr), r.WithTitle("Org Units List"), r.WithError(err))
 	}

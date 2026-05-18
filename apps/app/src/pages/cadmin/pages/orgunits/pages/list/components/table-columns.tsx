@@ -15,9 +15,8 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import type { OrgUnit } from "../api";
 import { Link } from "react-router";
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
-import { generateAvatarFallback } from "@workspace/ui/lib/utils";
-import LongText from "@workspace/ui/components/long-text";
+import EntityNameCell from "../../../components/entity-name-cell";
+import { withNameColumnLayout } from "../../../lib/name-column-override";
 
 
 
@@ -68,27 +67,19 @@ export function getActionsColumn(
 /** Actions column for use with useBackendColumns appendColumns */
 export function prependColumns(): Array<{ id: string } & Partial<ColumnDef<OrgUnit>>> {
     return [
-        {
+        withNameColumnLayout<OrgUnit>({
             id: "name",
             cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <Link to={`#`}>
-                        <div className="flex items-center gap-4">
-                            <Avatar>
-                                <AvatarImage src={row.original?.image} alt={row.getValue("name") ?? "-"} />
-                                <AvatarFallback>{generateAvatarFallback(row.getValue("name") ?? "-")}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <LongText className='max-w-36 '>
-                                    <strong>{row.getValue("name") || "-"}</strong>
-                                </LongText>
-                                <small>{row.original?.description ?? "-"}</small>
-                            </div>
-                        </div>
-                    </Link>
-                </div>
+                <Link to="#" className="block hover:opacity-90">
+                    <EntityNameCell
+                        name={String(row.getValue("name") ?? "")}
+                        description={row.original?.description}
+                        image={row.original?.image}
+                        subtitle={row.original?.unit ? `Unit: ${row.original.unit}` : undefined}
+                    />
+                </Link>
             ),
-        },
+        }),
     ]
 }
 
