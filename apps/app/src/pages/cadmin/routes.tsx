@@ -1,15 +1,17 @@
 import DynamicPage from "../dynamic"
 import { type RouteObject } from "react-router"
 import usersRoutes from "./pages/users/routes"
-import { Fragment } from "react/jsx-runtime"
+import orgUnitsRoutes from "./pages/orgunits/routes"
+import Loader from "@workspace/flowtrove/components/loader"
 
 const cadminRoutes: RouteObject[] = [
     {
         index: true,
-        hydrateFallbackElement: <Fragment />,
+        hydrateFallbackElement: <Loader fullScreen />,
         lazy: () => import("./pages/dashboard").then((m) => ({ Component: m.default })),
     },
-    { path: "users", hydrateFallbackElement: <Fragment />, children: usersRoutes },
+    { path: "users", hydrateFallbackElement: <Loader fullScreen />, children: usersRoutes },
+    { path: "orgunits", hydrateFallbackElement: <Loader fullScreen />, children: orgUnitsRoutes },
     { path: "*", element: <DynamicPage /> },
 ]
 

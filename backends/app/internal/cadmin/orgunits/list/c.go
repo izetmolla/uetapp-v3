@@ -18,8 +18,8 @@ func NewController(app *config.AppClients) *Controller {
 func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	api := apiGroup.Group("/list")
 	controller := NewController(appClients)
-	api.Get("/", controller.GetUsersListAPI)
-	api.Get("/columns", controller.GetUsersColumns)
+	api.Get("/", controller.GetOrgUnitsListAPI)
+	api.Get("/columns", controller.GetOrgUnitsColumns)
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
 
 	// api.Get("/enter", controller.GetEnterDataApi) // API endpoint for getting enter data
@@ -28,5 +28,5 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 
 func SetupWebRoutes(app fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	app.Get("/", controller.GetUsersListView)
+	app.Get("/", controller.GetOrgUnitsListView)
 }

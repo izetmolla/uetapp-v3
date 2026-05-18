@@ -46,6 +46,53 @@ func (cc *Controller) GetUsersListAPI(c fiber.Ctx) error {
 	})
 }
 
+func (cc *Controller) GetUsersListView(c fiber.Ctx) error {
+	ctxPtr := c.Context()
+	db := cc.app.Postgres()
+	r := cc.app.Render()
+	columns, err := cc.getUsersColumns()
+	if err != nil {
+		return cc.app.View(c,
+			r.WithContext(ctxPtr),
+			r.WithTitle("Users List"),
+			r.WithError(err),
+			r.WithStatus(fiber.StatusInternalServerError),
+			r.WithCode("INTERNAL_SERVER_ERROR"),
+		)
+	}
+
+	q, err := datatable.ExtractQuery(c.OriginalURL(), columns)
+	if err != nil {
+		return cc.app.View(c,
+			r.WithContext(ctxPtr),
+			r.WithTitle("Users List"),
+			r.WithError(err),
+			r.WithStatus(fiber.StatusBadRequest),
+			r.WithCode("BAD_REQUEST"),
+		)
+	}
+
+	users, pagination, err := postgresql.FindRaw[map[string]any](db, q, columns, models.User{}.TableName()).Run()
+	if err != nil {
+		return cc.app.View(c,
+			r.WithContext(ctxPtr),
+			r.WithTitle("Users List"),
+			r.WithError(err),
+			r.WithStatus(fiber.StatusInternalServerError),
+			r.WithCode("INTERNAL_SERVER_ERROR"),
+		)
+	}
+
+	datatable.FormatContent(&users, columns)
+	return cc.app.View(c,
+		r.WithContext(ctxPtr),
+		r.WithTitle("Users List"),
+		r.WithData(fiber.Map{
+			"data":       users,
+			"pagination": datatable.RenderPagination(pagination),
+		}))
+}
+
 func (cc *Controller) GetUsersColumns(c fiber.Ctx) error {
 	columns, err := cc.getUsersColumns()
 	if err != nil {

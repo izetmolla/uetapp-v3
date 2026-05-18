@@ -259,3 +259,7 @@ func (app *AppClients) WebView(params ...string) fiber.Handler {
 func (app *AppClients) USER(c fiber.Ctx, reqCtx context.Context, fromAPI ...bool) (*authorization.AuthData, error) {
 	return app.auth.User(c, reqCtx, fromAPI...)
 }
+
+func (app *AppClients) GetRole(endpointRoles, userRoles []string) (bool, bool, bool) {
+	return app.auth.GetRole(endpointRoles, userRoles)
+}

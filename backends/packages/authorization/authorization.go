@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/flowtrove/packages/authorization/ldap"
 	"github.com/flowtrove/packages/authorization/models"
@@ -270,6 +271,79 @@ func stringClaim(claims jwt.MapClaims, key string) string {
 		}
 	}
 	return ""
+}
+
+// GetRole checks authorization against endpoint role names and user role grants.
+//
+// endpointRoles are plain names required by the route (e.g. "admin", "hr").
+// userRoles use "name:perms" where perms is r (read), w (write), or rw (both).
+//
+// Returns:
+//   - hasRole: user has at least one endpoint role (name match before ":")
+//   - canRead: matched grant includes r or rw
+//   - canWrite: matched grant includes w or rw
+func (a *Authorization) GetRole(endpointRoles, userRoles []string) (hasRole, canRead, canWrite bool) {
+	if len(endpointRoles) == 0 || len(userRoles) == 0 {
+		return false, false, false
+	}
+
+	allowed := make(map[string]struct{}, len(endpointRoles))
+	for _, r := range endpointRoles {
+		r = strings.TrimSpace(r)
+		if r == "" {
+			continue
+		}
+		// Allow endpoint config like "admin:rw" — only the role name is compared.
+		if name, _, ok := strings.Cut(r, ":"); ok {
+			r = strings.TrimSpace(name)
+		}
+		allowed[r] = struct{}{}
+	}
+	if len(allowed) == 0 {
+		return false, false, false
+	}
+
+	for _, userRole := range userRoles {
+		name, perms, ok := parseUserRoleGrant(userRole)
+		if !ok {
+			continue
+		}
+		if _, ok := allowed[name]; !ok {
+			continue
+		}
+		hasRole = true
+		if roleGrantAllowsRead(perms) {
+			canRead = true
+		}
+		if roleGrantAllowsWrite(perms) {
+			canWrite = true
+		}
+	}
+	return hasRole, canRead, canWrite
+}
+
+func parseUserRoleGrant(userRole string) (name, perms string, ok bool) {
+	userRole = strings.TrimSpace(userRole)
+	if userRole == "" {
+		return "", "", false
+	}
+	name, perms, found := strings.Cut(userRole, ":")
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return "", "", false
+	}
+	if found {
+		perms = strings.TrimSpace(strings.ToLower(perms))
+	}
+	return name, perms, true
+}
+
+func roleGrantAllowsRead(perms string) bool {
+	return strings.Contains(perms, "r")
+}
+
+func roleGrantAllowsWrite(perms string) bool {
+	return strings.Contains(perms, "w")
 }
 
 // compile-time assertion that errors.New (and therefore errors.Is) still
