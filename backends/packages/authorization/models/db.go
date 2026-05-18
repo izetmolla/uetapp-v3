@@ -169,13 +169,19 @@ func (d *DBManager) getUserRolesFromDB(ctx context.Context, userID string) (json
 	if userID == "" {
 		return nil, errors.New("user ID cannot be empty")
 	}
-	var roles json.RawMessage
+	var user User
 	err := d.db.WithContext(ctx).
 		Table(d.GetUsersTableName()).
 		Select("roles").
 		Where("id = ?", userID).
-		Scan(&roles).Error
-	return roles, err
+		First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	if len(user.Roles) == 0 {
+		return json.RawMessage("[]"), nil
+	}
+	return user.Roles, nil
 }
 
 func (d *DBManager) GetSessionFromDB(ctx context.Context, sessionID string) (*Session, error) {

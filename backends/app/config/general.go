@@ -53,7 +53,7 @@ func (app *AppClients) GeneralData(c fiber.Ctx, reqCtx context.Context, serviceN
 		return nil, err
 	}
 
-	if !app.userCanAccessService(service.Roles, service.Name, userRoles) {
+	if len(service.Roles) > 0 && !app.userCanAccessService(service.Roles, service.Name, userRoles) {
 		return nil, ErrServiceAccessDenied
 	}
 

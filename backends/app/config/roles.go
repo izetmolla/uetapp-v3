@@ -2,10 +2,8 @@ package config
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 
-	"github.com/flowtrove/packages/authorization/utils"
 	"github.com/flowtrove/packages/models"
 )
 
@@ -93,20 +91,31 @@ func (app *AppClients) userCanAccessNavigation(navRoles models.JSONBStringArray,
 	return app.userCanAccessByRoles(requiredRoleNamesFromStrings(navRoles), userRoles)
 }
 
+func roleStringsFromJSONB(roles models.JSONBArray) []string {
+	out := make([]string, 0, len(roles))
+	for _, r := range roles {
+		if s, ok := r.(string); ok && s != "" {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
 // freshUserRoles returns the latest roles from the users table, falling back to token/session roles.
 func (app *AppClients) freshUserRoles(ctx context.Context, userID string, fallback []string) []string {
 	if userID == "" || app.postgres == nil {
 		return fallback
 	}
-	var raw json.RawMessage
+
+	var user models.User
 	if err := app.postgres.WithContext(ctx).
-		Table(models.User{}.TableName()).
+		Model(&models.User{}).
 		Select("roles").
 		Where("id = ?", userID).
-		Scan(&raw).Error; err != nil {
+		First(&user).Error; err != nil {
 		return fallback
 	}
-	fresh := utils.FormatRoles(raw)
+	fresh := roleStringsFromJSONB(user.Roles)
 	if len(fresh) > 0 {
 		return fresh
 	}
