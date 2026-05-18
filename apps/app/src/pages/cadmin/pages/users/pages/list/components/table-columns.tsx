@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { CircleDashed, Ellipsis, Text, Trash2, UserCheck, UserCog, UserX } from "lucide-react";
 
 import { DataTableColumnHeader } from "@workspace/flowtrove/components/data-table/components/data-table-column-header";
+import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
@@ -19,6 +20,7 @@ import { Link } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
 import LongText from "@workspace/ui/components/long-text";
+import UserRolesCell from "./user-roles-cell";
 
 const USER_STATUS_OPTIONS: { label: string; value: "active" | "inactive" }[] = [
     { label: "Active", value: "active" },
@@ -96,8 +98,8 @@ export function getActionsColumn(): ColumnDef<User>[] {
 
 
 
-/** Actions column for use with useBackendColumns appendColumns */
-export function prependColumns(): Array<{ id: string } & Partial<ColumnDef<User>>> {
+/** Column cell overrides for use with useBackendColumns */
+export function getColumnOverrides(): Array<{ id: string } & Partial<ColumnDef<User>>> {
     return [
         {
             id: "full_name",
@@ -120,9 +122,36 @@ export function prependColumns(): Array<{ id: string } & Partial<ColumnDef<User>
                 </div>
             ),
         },
-    ]
+        {
+            id: "roles",
+            cell: ({ row }) => <UserRolesCell roles={row.original.roles} />,
+            size: 220,
+            minSize: 160,
+        },
+        {
+            id: "last_login",
+            cell: ({ row }) => {
+                const raw = row.getValue("last_login");
+                if (raw == null || raw === "") {
+                    return <span className="text-muted-foreground text-xs">—</span>;
+                }
+                const date = new Date(String(raw));
+                if (Number.isNaN(date.getTime())) {
+                    return <span className="text-muted-foreground text-sm">{String(raw)}</span>;
+                }
+                return (
+                    <span className="text-muted-foreground text-sm tabular-nums">
+                        {formatDate(date, "MMM dd, yyyy · HH:mm")}
+                    </span>
+                );
+            },
+        },
+    ];
 }
 
+export function prependColumns(): Array<{ id: string } & Partial<ColumnDef<User>>> {
+    return getColumnOverrides();
+}
 
 export function getUsersTableColumns({
     setRowAction,

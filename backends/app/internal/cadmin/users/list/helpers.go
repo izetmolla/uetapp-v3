@@ -2,7 +2,9 @@ package list
 
 import (
 	"errors"
+	"strings"
 
+	"github.com/flowtrove/packages/datatable"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
@@ -15,6 +17,21 @@ var availableRoleNames = []string{
 	"student",
 	"teacher",
 	"hr",
+}
+
+func roleFilterOptions() []datatable.OptionItem {
+	opts := make([]datatable.OptionItem, 0, len(availableRoleNames))
+	for _, name := range availableRoleNames {
+		label := name
+		if len(name) > 0 {
+			label = strings.ToUpper(name[:1]) + name[1:]
+		}
+		opts = append(opts, datatable.OptionItem{
+			Label: label,
+			Value: name,
+		})
+	}
+	return opts
 }
 
 func (cc *Controller) loadEditableUser(db *gorm.DB, id string) (models.User, error) {

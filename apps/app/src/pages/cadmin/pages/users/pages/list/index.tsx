@@ -2,7 +2,7 @@ import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/da
 import { USER_FETCH_PERSISTANT, type User } from "./api";
 import { getUsersColumns, getUsersList } from "./api";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";
-import { getActionsColumn, prependColumns } from "./components/table-columns";
+import { getActionsColumn, getColumnOverrides } from "./components/table-columns";
 import StatsCard from "./components/stats-card";
 import TableConfigCustomizator from "./components/table-config-customizator";
 import QuickEditUser from "./components/quick-edit-user";
@@ -28,7 +28,7 @@ const UsersListPage = () => {
         fetchColumns: async () => getUsersColumns().then((res) => res.data),
         queryKey: [USER_FETCH_PERSISTANT, "columns"],
         appendColumns: getActionsColumn(),
-        overrideColumns: prependColumns(),
+        overrideColumns: getColumnOverrides(),
     });
 
     return (

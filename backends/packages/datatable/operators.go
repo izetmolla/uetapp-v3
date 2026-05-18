@@ -81,6 +81,33 @@ func ConditionsFromFiltersWithoutargs(filters []Filter, joinOperator string, col
 	return strings.Join(clauses, sep)
 }
 
+// conditionForJSONBRoleGrants matches users whose roles JSON array includes any selected role
+// (exact grant or role:perms prefix, e.g. admin or admin:rw).
+func conditionForJSONBRoleGrants(column string, f Filter) string {
+	values := f.Values
+	if len(values) == 0 && f.Value != "" {
+		values = []string{f.Value}
+	}
+	if len(values) == 0 {
+		return ""
+	}
+
+	parts := make([]string, 0, len(values))
+	for _, role := range values {
+		role = strings.TrimSpace(role)
+		if role == "" {
+			continue
+		}
+		exact := escapeSQLString(role)
+		prefix := escapeSQLString(role + ":%")
+		parts = append(parts, "EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE("+column+"::jsonb, '[]'::jsonb)) AS elem WHERE elem = "+exact+" OR elem LIKE "+prefix+")")
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+	return "(" + strings.Join(parts, " OR ") + ")"
+}
+
 // escapeSQLString escapes a string for use inside PostgreSQL single-quoted literal.
 func escapeSQLString(s string) string {
 	s = strings.ReplaceAll(s, `\`, `\\`)
@@ -90,6 +117,10 @@ func escapeSQLString(s string) string {
 
 // conditionForFilterRaw returns one condition fragment with values inlined (raw SQL).
 func conditionForFilterRaw(column string, f Filter) string {
+	if f.ID == "roles" {
+		return conditionForJSONBRoleGrants(column, f)
+	}
+
 	op := strings.ToLower(strings.TrimSpace(f.Operator))
 	if op == "" {
 		switch {
