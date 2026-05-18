@@ -261,5 +261,8 @@ func (app *AppClients) USER(c fiber.Ctx, reqCtx context.Context, fromAPI ...bool
 }
 
 func (app *AppClients) GetRole(endpointRoles, userRoles []string) (bool, bool, bool) {
+	if app.auth == nil {
+		return false, false, false
+	}
 	return app.auth.GetRole(endpointRoles, userRoles)
 }

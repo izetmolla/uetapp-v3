@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"slices"
 	"strings"
 
 	"github.com/flowtrove/packages/authorization/utils"
@@ -110,7 +109,7 @@ func (a *Authorization) UseAPIAuthorization(opts ...AuthConfigOptions) fiber.Han
 			if err != nil {
 				return jsonError(c, fiber.StatusInternalServerError, err, SERVER_ERROR)
 			}
-			if !hasAnyRole(cfg.roles, roles) {
+			if hasRole, _, _ := a.GetRole(cfg.roles, roles); !hasRole {
 				return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 					"error": fmt.Sprintf("insufficient permissions: %s", strings.Join(cfg.roles, ", ")),
 					"code":  INSUFFICIENT_PERMISSIONS,
@@ -196,7 +195,7 @@ func (a *Authorization) UseWEBAuthorization(opts ...AuthConfigOptions) fiber.Han
 
 		if len(cfg.roles) > 0 {
 			userRoles := utils.FormatRoles(session.User.Roles)
-			if !hasAnyRole(cfg.roles, userRoles) {
+			if hasRole, _, _ := a.GetRole(cfg.roles, userRoles); !hasRole {
 				return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 					"error": fmt.Sprintf("insufficient permissions: %s", strings.Join(cfg.roles, ", ")),
 					"code":  INSUFFICIENT_PERMISSIONS,
@@ -205,23 +204,6 @@ func (a *Authorization) UseWEBAuthorization(opts ...AuthConfigOptions) fiber.Han
 		}
 		return c.Next()
 	}
-}
-
-// hasAnyRole reports whether `userRoles` contains at least one of the
-// `required` roles.
-func hasAnyRole(required, userRoles []string) bool {
-	if len(required) == 0 {
-		return true
-	}
-	if len(userRoles) == 0 {
-		return false
-	}
-	for _, r := range required {
-		if slices.Contains(userRoles, r) {
-			return true
-		}
-	}
-	return false
 }
 
 // getAuthRedirectURL builds the sign-in URL with a `redirectUrl` query

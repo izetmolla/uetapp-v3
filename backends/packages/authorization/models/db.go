@@ -165,6 +165,19 @@ func (d *DBManager) Redis() *redis.Client {
 	return d.redis
 }
 
+func (d *DBManager) getUserRolesFromDB(ctx context.Context, userID string) (json.RawMessage, error) {
+	if userID == "" {
+		return nil, errors.New("user ID cannot be empty")
+	}
+	var roles json.RawMessage
+	err := d.db.WithContext(ctx).
+		Table(d.GetUsersTableName()).
+		Select("roles").
+		Where("id = ?", userID).
+		Scan(&roles).Error
+	return roles, err
+}
+
 func (d *DBManager) GetSessionFromDB(ctx context.Context, sessionID string) (*Session, error) {
 	if d == nil || d.db == nil {
 		return nil, errors.New("db manager is not initialized")
@@ -175,12 +188,22 @@ func (d *DBManager) GetSessionFromDB(ctx context.Context, sessionID string) (*Se
 	if d.redis != nil {
 		session, err := d.GetSessionFromRedis(ctx, sessionID)
 		if err == nil {
+			roles := session.Roles
+			if fresh, err := d.getUserRolesFromDB(ctx, session.UserID); err == nil && len(fresh) > 0 {
+				roles = fresh
+				_ = d.SetSessionToRedis(ctx, &SessionData{
+					ID:      session.ID,
+					UserID:  session.UserID,
+					Content: session.Content,
+					Roles:   roles,
+				})
+			}
 			return &Session{
 				ID:     session.ID,
 				UserID: session.UserID,
 				User: User{
 					ID:      session.UserID,
-					Roles:   session.Roles,
+					Roles:   roles,
 					Content: session.Content,
 				},
 			}, nil

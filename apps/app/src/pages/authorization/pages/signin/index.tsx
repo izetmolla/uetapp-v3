@@ -27,6 +27,9 @@ import {
     authSeparatorLineClassName,
 } from "../../components/styles";
 
+/** When true, email and password are shown together for direct sign-in. When false, email is checked first. */
+const show2fields = true;
+
 // Enhanced FlowTrove Logo Component
 const FlowTroveLogo = ({ className }: { className?: string }) => {
     const navigate = useNavigate();
@@ -56,16 +59,15 @@ const SignIn = () => {
         defaultValues: {
             email: "",
             password: "",
-            checkEmail: true
+            checkEmail: !show2fields,
         }
     })
-    // const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(show2fields);
     const [confirmedEmail, setConfirmedEmail] = useState<string | null>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (!showPassword) return;
+        if (!showPassword || show2fields) return;
         const timer = window.setTimeout(() => {
             passwordInputRef.current?.focus();
         }, 0);
@@ -127,7 +129,11 @@ const SignIn = () => {
 
 
     const onsubmit = (data: SignInSchema) => {
-        mutation.mutate({ ...form.getValues(), ...data })
+        mutation.mutate({
+            ...form.getValues(),
+            ...data,
+            checkEmail: show2fields ? false : data.checkEmail,
+        })
     }
 
     return (
@@ -164,6 +170,7 @@ const SignIn = () => {
                                                     onChange={(event) => {
                                                         field.onChange(event);
                                                         if (
+                                                            !show2fields &&
                                                             showPassword &&
                                                             confirmedEmail !== null &&
                                                             event.target.value !== confirmedEmail
@@ -181,7 +188,7 @@ const SignIn = () => {
                                         </FormItem>
                                     )}
                                 />
-                                {showPassword && (
+                                {(show2fields || showPassword) && (
                                     <FormField
                                         control={form.control}
                                         name="password"
@@ -208,7 +215,7 @@ const SignIn = () => {
                                     />
                                 )}
 
-                                {showPassword && (
+                                {(show2fields || showPassword) && (
                                     <div className="flex justify-end">
                                         <Link
                                             to={`/reset-password?email=${encodeURIComponent(form.getValues("email"))}`}
@@ -226,7 +233,7 @@ const SignIn = () => {
                                     type="submit"
                                 >
                                     {mutation.isPending && <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />}
-                                    {showPassword ? t("Sign in") : t("Continue with email")}
+                                    {show2fields || showPassword ? t("Sign in") : t("Continue with email")}
                                 </Button>
 
 

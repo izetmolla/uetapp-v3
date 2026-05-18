@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"net/url"
 	"reflect"
 	"strings"
@@ -20,23 +19,6 @@ func IsExcludedPath(excluded []string, path string) bool {
 		}
 	}
 	return false
-}
-
-// FormatRoles unmarshals a JSON role array into a []string. It returns
-// an empty slice rather than nil on any error so callers can safely
-// range over the result.
-func FormatRoles(roles json.RawMessage) []string {
-	if len(roles) == 0 {
-		return []string{}
-	}
-	var out []string
-	if err := json.Unmarshal(roles, &out); err != nil {
-		return []string{}
-	}
-	if out == nil {
-		return []string{}
-	}
-	return out
 }
 
 // StripPasswordFromUserModel clears the "Password" field on an arbitrary

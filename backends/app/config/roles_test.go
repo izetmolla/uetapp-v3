@@ -42,6 +42,7 @@ func TestUserCanAccessByRoles(t *testing.T) {
 		{name: "admin read only grant", required: []string{"admin"}, user: []string{"admin:r"}, want: true},
 		{name: "wrong role", required: []string{"admin"}, user: []string{"student:rw"}, want: false},
 		{name: "any of multiple required", required: []string{"admin", "secretary"}, user: []string{"secretary:rw"}, want: true},
+		{name: "admin rw matches admin or secretary endpoint", required: []string{"admin", "secretary"}, user: []string{"admin:rw"}, want: true},
 	}
 
 	for _, tt := range tests {

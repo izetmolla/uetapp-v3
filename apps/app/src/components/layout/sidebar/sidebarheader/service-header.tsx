@@ -3,14 +3,10 @@ import Logo from "../../logo";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@workspace/ui/components/sidebar";
 import { useNavigate } from "react-router";
 import { type FC } from "react";
-
+import type { ServiceItem } from "../api";
 
 interface ServiceHeaderProps {
-    service: {
-        title: string;
-        description: string;
-        name: string;
-    };
+    service: ServiceItem;
 }
 const ServiceHeader: FC<ServiceHeaderProps> = ({ service }) => {
     const navigate = useNavigate();

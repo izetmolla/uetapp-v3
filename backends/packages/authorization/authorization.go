@@ -184,7 +184,14 @@ func rolesFromAny(raw any) ([]string, error) {
 	case json.RawMessage:
 		return utils.FormatRoles(v), nil
 	case string:
-		return utils.FormatRoles(json.RawMessage(v)), nil
+		s := strings.TrimSpace(v)
+		if s == "" {
+			return nil, ErrInvalidRoles
+		}
+		if strings.HasPrefix(s, "[") {
+			return utils.FormatRoles(json.RawMessage(s)), nil
+		}
+		return []string{s}, nil
 	case []any:
 		out := make([]string, 0, len(v))
 		for _, x := range v {
@@ -297,7 +304,7 @@ func (a *Authorization) GetRole(endpointRoles, userRoles []string) (hasRole, can
 		if name, _, ok := strings.Cut(r, ":"); ok {
 			r = strings.TrimSpace(name)
 		}
-		allowed[r] = struct{}{}
+		allowed[strings.ToLower(r)] = struct{}{}
 	}
 	if len(allowed) == 0 {
 		return false, false, false
@@ -308,7 +315,7 @@ func (a *Authorization) GetRole(endpointRoles, userRoles []string) (hasRole, can
 		if !ok {
 			continue
 		}
-		if _, ok := allowed[name]; !ok {
+		if _, ok := allowed[strings.ToLower(name)]; !ok {
 			continue
 		}
 		hasRole = true

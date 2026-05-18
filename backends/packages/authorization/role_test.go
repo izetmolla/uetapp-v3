@@ -85,6 +85,22 @@ func TestGetRole(t *testing.T) {
 			wantRead:  false,
 			wantWrite: false,
 		},
+		{
+			name:      "admin rw grants secretary route via admin",
+			endpoint:  []string{"admin", "secretary"},
+			user:      []string{"admin:rw"},
+			wantRole:  true,
+			wantRead:  true,
+			wantWrite: true,
+		},
+		{
+			name:      "case insensitive role name",
+			endpoint:  []string{"admin"},
+			user:      []string{"Admin:rw"},
+			wantRole:  true,
+			wantRead:  true,
+			wantWrite: true,
+		},
 	}
 
 	for _, tt := range tests {

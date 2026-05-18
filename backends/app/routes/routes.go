@@ -7,6 +7,7 @@ import (
 	"github.com/uetedu/app/internal/admin"
 	"github.com/uetedu/app/internal/authorization"
 	"github.com/uetedu/app/internal/cadmin"
+	"github.com/uetedu/app/internal/contracts"
 	"github.com/uetedu/app/internal/enter"
 	"github.com/uetedu/app/internal/general"
 	"github.com/uetedu/app/internal/languages"
@@ -42,6 +43,10 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	//Secretary Routes
 	secretary.SetupApiRoutes(api, appClients)
 	secretary.SetupWebRoutes(app, appClients)
+
+	//Contracts Routes
+	contracts.SetupApiRoutes(api, appClients)
+	contracts.SetupWebRoutes(app, appClients)
 
 	api.Use(appClients.ApiNotFound)
 	app.Use(viewController.HandleDynamicPages)
