@@ -46,7 +46,9 @@ type User struct {
 }
 
 func (b *User) BeforeCreate(_ *gorm.DB) (err error) {
-	b.ID = uuid.New().String()
+	if b.ID == "" {
+		b.ID = uuid.New().String()
+	}
 	return
 }
 

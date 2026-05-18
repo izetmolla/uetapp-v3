@@ -38,7 +38,15 @@ spec:
           - name: JWT_SECRET
             value: "rjfedhgfierdfgivwrdfighvridfgvrhfsdvhrtfdgjhrdfhsgdftrdfg"
           - name: DATABASE_URL
-            value: "postgres://imolla:TopeTope1995@192.168.11.50:30080/uetapp_v3"          
+            value: "postgres://imolla:TopeTope1995@192.168.11.50:30080/uetapp_v3"  
+          - name: LDAP_URL
+            value: "ldap://192.168.11.61:389"
+          - name: LDAP_DIRECT_BIND
+            value: "true"
+          - name: LDAP_DOMAIN
+            value: "uet.com"
+          - name: LDAP_USER_FILTER
+            value: "(&(objectClass=user)(userPrincipalName=%s))"        
 
 ---
 apiVersion: v1
