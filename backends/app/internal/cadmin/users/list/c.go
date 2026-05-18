@@ -20,6 +20,15 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api.Get("/", controller.GetUsersListAPI)
 	api.Get("/columns", controller.GetUsersColumns)
+	api.Get("/stats", controller.GetUsersStatsAPI)
+	api.Post("/disable", controller.DisableUsers)
+	api.Post("/enable", controller.EnableUsers)
+	api.Get("/:id", controller.GetUserDetail)
+	api.Put("/:id/general", controller.UpdateUserGeneral)
+	api.Put("/:id/password", controller.UpdateUserPassword)
+	api.Put("/:id/roles", controller.UpdateUserRoles)
+	api.Put("/:id", controller.QuickUpdateUser)
+	api.Delete("/", controller.DeleteUsers)
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
 
 	// api.Get("/enter", controller.GetEnterDataApi) // API endpoint for getting enter data

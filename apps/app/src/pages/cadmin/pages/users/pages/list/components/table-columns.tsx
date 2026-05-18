@@ -1,8 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { CircleDashed, Ellipsis, Text } from "lucide-react";
+import { CircleDashed, Ellipsis, Text, Trash2, UserCheck, UserCog, UserX } from "lucide-react";
 
 import { DataTableColumnHeader } from "@workspace/flowtrove/components/data-table/components/data-table-column-header";
-import type { DataTableRowAction } from "@workspace/flowtrove/components/data-table/types/data-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
@@ -15,6 +14,7 @@ import {
     DropdownMenuTrigger,
     } from "@workspace/ui/components/dropdown-menu";
 import type { User } from "../api";
+import useUsersListStore from "../store";
 import { Link } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
@@ -26,20 +26,27 @@ const USER_STATUS_OPTIONS: { label: string; value: "active" | "inactive" }[] = [
 ];
 
 interface GetUsersTableColumnsProps {
-    setRowAction?: React.Dispatch<
-        React.SetStateAction<DataTableRowAction<User> | null>
-    >;
+    setRowAction?: React.Dispatch<React.SetStateAction<unknown>>;
 }
 
-
 /** Actions column for use with useBackendColumns appendColumns */
-export function getActionsColumn(
-    setRowAction?: React.Dispatch<React.SetStateAction<DataTableRowAction<User> | null>>
-): ColumnDef<User>[] {
+export function getActionsColumn(): ColumnDef<User>[] {
     return [
         {
             id: "actions",
             cell: function Cell({ row }) {
+                const { openQuickEdit, openDelete, openDisable, openEnable } = useUsersListStore();
+                const status = row.original.status;
+                const isDeleted = status === "deleted";
+                const canEnable =
+                    status === "disabled" ||
+                    status === "inactive" ||
+                    status === "suspended" ||
+                    status === "pending" ||
+                    status === "new";
+                const canDisable =
+                    status === "active" || status === "new" || status === "pending";
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -51,13 +58,33 @@ export function getActionsColumn(
                                 <Ellipsis className="size-4" aria-hidden="true" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem onSelect={() => setRowAction?.({ row, variant: "quickEdit" })}>Quick Edit</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={() => setRowAction?.({ row, variant: "delete" })}>
-                                Delete
-                                <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onSelect={() => openQuickEdit(row.original)}>
+                                <UserCog className="size-4 opacity-70" aria-hidden />
+                                Quick Edit
                             </DropdownMenuItem>
+                            {canEnable && !isDeleted ? (
+                                <DropdownMenuItem onSelect={() => openEnable(row.original)}>
+                                    <UserCheck className="size-4 opacity-70" aria-hidden />
+                                    Enable
+                                </DropdownMenuItem>
+                            ) : null}
+                            {canDisable && !isDeleted ? (
+                                <DropdownMenuItem onSelect={() => openDisable(row.original)}>
+                                    <UserX className="size-4 opacity-70" aria-hidden />
+                                    Disable
+                                </DropdownMenuItem>
+                            ) : null}
+                            {!isDeleted ? <DropdownMenuSeparator /> : null}
+                            {!isDeleted ? (
+                                <DropdownMenuItem
+                                    variant="destructive"
+                                    onSelect={() => openDelete(row.original)}
+                                >
+                                    <Trash2 className="size-4" aria-hidden />
+                                    Delete
+                                </DropdownMenuItem>
+                            ) : null}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );

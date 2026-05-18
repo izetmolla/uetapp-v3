@@ -14,6 +14,10 @@ const (
 	Active    UserStatus = "active"
 	Inactive  UserStatus = "inactive"
 	Suspended UserStatus = "suspended"
+	Disabled  UserStatus = "disabled"
+	Deleted   UserStatus = "deleted"
+	New       UserStatus = "new"
+	Pending   UserStatus = "pending"
 )
 
 // Server specific settings.

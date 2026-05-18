@@ -40,7 +40,7 @@ export interface ExtendedColumnFilter<TData> extends FilterItemSchema {
 
 export interface DataTableRowAction<TData> {
     row: Row<TData>;
-    variant: "quickEdit" | "design" | "view" | "delete";
+    variant: "quickEdit" | "design" | "view" | "delete" | "disable" | "enable";
 }
 
 /** Single column filter sent to server (id, value, and optional variant from column meta) */

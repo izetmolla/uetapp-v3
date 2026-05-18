@@ -1,16 +1,16 @@
 import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
-import { useMemo, useState } from "react";
-import { getUsersColumns, getUsersList, type User } from "./api";
+import { USER_FETCH_PERSISTANT, type User } from "./api";
+import { getUsersColumns, getUsersList } from "./api";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";
 import { getActionsColumn, prependColumns } from "./components/table-columns";
 import StatsCard from "./components/stats-card";
 import TableConfigCustomizator from "./components/table-config-customizator";
-import QuickUserEdit from "./components/quick-user-edit";
-import type { DataTableRowAction } from "@workspace/flowtrove/components/data-table/types/data-table";
+import QuickEditUser from "./components/quick-edit-user";
+import DeleteUserDialog from "./components/delete-user-dialog";
+import DisableUserDialog from "./components/disable-user-dialog";
+import EnableUserDialog from "./components/enable-user-dialog";
 import { useTranslation } from "react-i18next";
 import { UsersTableActionBar } from "./components/table-action-bar";
-
-export const USER_FETCH_PERSISTANT = "userspage"
 
 const breadcrumb: BreadcrumbItem[] = [
     { label: "Admin", to: "/admin" }
@@ -18,28 +18,18 @@ const breadcrumb: BreadcrumbItem[] = [
 
 const UsersListPage = () => {
     const { t } = useTranslation("admin");
-    const [rowAction, setRowAction] = useState<DataTableRowAction<User> | null>(null);
+
     const {
         columns,
         isLoading: columnsLoading,
         error,
         columnVisibility,
     } = useBackendColumns<User>({
-        fetchColumns: async () => getUsersColumns().then(res => res.data),
+        fetchColumns: async () => getUsersColumns().then((res) => res.data),
         queryKey: [USER_FETCH_PERSISTANT, "columns"],
-        appendColumns: getActionsColumn(setRowAction),
-        // prependColumns: prependColumns(),
-        overrideColumns: prependColumns()
+        appendColumns: getActionsColumn(),
+        overrideColumns: prependColumns(),
     });
-
-
-
-    const quickEditUser = useMemo(() => {
-        if (rowAction?.variant === "quickEdit" && rowAction?.row.original) {
-            return rowAction?.row.original;
-        }
-        return null;
-    }, [rowAction?.variant, rowAction?.row.original]);
 
     return (
         <ContentLoader
@@ -50,7 +40,6 @@ const UsersListPage = () => {
             showHeaderSeparator
             rightComponent={
                 <div className="flex w-full items-end justify-end mb-2 gap-1">
-                    <QuickUserEdit user={quickEditUser} isOpen={!!quickEditUser} onClose={() => setRowAction(null)} />
                     <TableConfigCustomizator />
                 </div>
             }
@@ -61,7 +50,7 @@ const UsersListPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getUsersList(state).then(res => res.data),
+                        fetch: (state) => getUsersList(state).then((res) => res.data),
                         queryKey: (state) => [USER_FETCH_PERSISTANT, "users", state],
                         initialPerPage: 10,
                     },
@@ -78,11 +67,13 @@ const UsersListPage = () => {
                 rowIdKey="id"
                 enableRowSelection
                 actionBar={(table) => <UsersTableActionBar table={table} />}
-            // onSelectionChange={setSelectedRows}
             />
-
+            <QuickEditUser />
+            <DeleteUserDialog />
+            <DisableUserDialog />
+            <EnableUserDialog />
         </ContentLoader>
     );
-}
+};
 
 export default UsersListPage;
