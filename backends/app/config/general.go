@@ -24,6 +24,7 @@ func (app *AppClients) GeneralData(c fiber.Ctx, reqCtx context.Context, serviceN
 	if err != nil {
 		return nil, err
 	}
+	userRoles := app.freshUserRoles(reqCtx, user.UserID, user.Roles)
 
 	service, err := gorm.G[models.Service](app.postgres).
 		Select("id, name, title, icon, description, roles").
@@ -31,27 +32,37 @@ func (app *AppClients) GeneralData(c fiber.Ctx, reqCtx context.Context, serviceN
 		First(reqCtx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			service, err = gorm.G[models.Service](app.postgres).
-				Where("name = ?", app.appService).
-				First(reqCtx)
+			if !app.userCanAccessService(nil, serviceName, userRoles) {
+				return nil, ErrServiceAccessDenied
+			}
+			services, err := app.getServicesData(reqCtx, userRoles)
 			if err != nil {
 				return nil, err
 			}
-		} else {
-			return nil, err
+			return map[string]any{
+				"current_service": serviceName,
+				"services":        services,
+				"service": map[string]any{
+					"name":  serviceName,
+					"title": serviceName,
+				},
+				"current_user_id": user.UserID,
+				"navigations":     []map[string]any{},
+			}, nil
 		}
+		return nil, err
 	}
 
-	if !app.userCanAccessService(service.Roles, user.Roles) {
+	if !app.userCanAccessService(service.Roles, service.Name, userRoles) {
 		return nil, ErrServiceAccessDenied
 	}
 
-	services, err := app.getServicesData(reqCtx, user.Roles)
+	services, err := app.getServicesData(reqCtx, userRoles)
 	if err != nil {
 		return nil, err
 	}
 
-	navigations, err := app.getNavigationData(reqCtx, service.ID, user.Roles)
+	navigations, err := app.getNavigationData(reqCtx, service.ID, userRoles)
 	if err != nil {
 		return nil, err
 	}

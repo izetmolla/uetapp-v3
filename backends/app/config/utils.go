@@ -18,7 +18,7 @@ func (app *AppClients) getServicesData(ctx context.Context, userRoles []string) 
 		return nil, err
 	}
 	for _, svc := range svc {
-		if !app.userCanAccessService(svc.Roles, userRoles) {
+		if !app.userCanAccessService(svc.Roles, svc.Name, userRoles) {
 			continue
 		}
 		services = append(services, map[string]any{

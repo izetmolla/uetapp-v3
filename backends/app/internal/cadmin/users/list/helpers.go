@@ -1,6 +1,7 @@
 package list
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -11,17 +12,27 @@ import (
 	"gorm.io/gorm"
 )
 
-var availableRoleNames = []string{
-	"admin",
-	"secretary",
-	"student",
-	"teacher",
-	"hr",
+func (cc *Controller) loadAvailableRoleNames(ctx context.Context) ([]string, error) {
+	var roles []models.Role
+	if err := cc.app.Postgres().WithContext(ctx).
+		Model(&models.Role{}).
+		Order("name ASC").
+		Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(roles))
+	for _, role := range roles {
+		name := strings.TrimSpace(role.Name)
+		if name != "" {
+			out = append(out, name)
+		}
+	}
+	return out, nil
 }
 
-func roleFilterOptions() []datatable.OptionItem {
-	opts := make([]datatable.OptionItem, 0, len(availableRoleNames))
-	for _, name := range availableRoleNames {
+func roleFilterOptions(names []string) []datatable.OptionItem {
+	opts := make([]datatable.OptionItem, 0, len(names))
+	for _, name := range names {
 		label := name
 		if len(name) > 0 {
 			label = strings.ToUpper(name[:1]) + name[1:]

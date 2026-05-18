@@ -18,6 +18,10 @@ type Role struct {
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }
 
+func (Role) TableName() string {
+	return "roles"
+}
+
 func (b *Role) BeforeCreate(_ *gorm.DB) (err error) {
 	return
 }

@@ -61,13 +61,33 @@ func TestUserCanAccessService(t *testing.T) {
 	public := models.JSONBArray{}
 	guarded := models.JSONBArray{"admin"}
 
-	if !app.userCanAccessService(public, nil) {
+	if !app.userCanAccessService(public, "", nil) {
 		t.Fatal("expected public service to be accessible")
 	}
-	if app.userCanAccessService(guarded, []string{"student:rw"}) {
+	if app.userCanAccessService(guarded, "admin", []string{"student:rw"}) {
 		t.Fatal("expected student to be denied admin service")
 	}
-	if !app.userCanAccessService(guarded, []string{"admin:rw"}) {
+	if !app.userCanAccessService(guarded, "admin", []string{"admin:rw"}) {
 		t.Fatal("expected admin to access admin service")
+	}
+}
+
+func TestUserCanAccessService_AdminBypassesContractsOnly(t *testing.T) {
+	app := testAppClients(t)
+
+	contractsOnly := models.JSONBArray{"contracts"}
+	if !app.userCanAccessService(contractsOnly, "contracts", []string{"admin:rw"}) {
+		t.Fatal("expected admin:rw to access a contracts-only service")
+	}
+	if app.userCanAccessService(contractsOnly, "contracts", []string{"student:rw"}) {
+		t.Fatal("expected student to be denied contracts-only service")
+	}
+}
+
+func TestUserCanAccessService_ContractsGrantWithoutDBRoles(t *testing.T) {
+	app := testAppClients(t)
+
+	if !app.userCanAccessService(nil, "contracts", []string{"contracts:rw"}) {
+		t.Fatal("expected contracts:rw to access contracts service by name")
 	}
 }

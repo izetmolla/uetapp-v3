@@ -47,9 +47,18 @@ func (cc *Controller) GetUserDetail(c fiber.Ctx) error {
 		return cc.userNotFoundResponse(c, err)
 	}
 
+	availableRoles, err := cc.loadAvailableRoleNames(c.Context())
+	if err != nil {
+		return cc.app.Api(c,
+			r.WithError(err),
+			r.WithStatus(fiber.StatusInternalServerError),
+			r.WithCode("INTERNAL_SERVER_ERROR"),
+		)
+	}
+
 	return cc.app.Api(c, r.WithData(fiber.Map{
 		"user":            userToDetailResponse(user),
-		"available_roles": availableRoleNames,
+		"available_roles": availableRoles,
 	}))
 }
 

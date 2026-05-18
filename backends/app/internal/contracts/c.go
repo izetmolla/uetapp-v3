@@ -32,7 +32,7 @@ func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	app := appGroup.Group("/contracts", controller.ContractsMiddlewareView)
 	// suplements.SetupWebRoutes(app, appClients)
-	app.Get("/", appClients.WebView("Secretary")) // Web endpoint for getting enter data
+	app.Get("/", appClients.WebView("Contracts"))
 
 	app.Use(appClients.ViewNotFound)
 }

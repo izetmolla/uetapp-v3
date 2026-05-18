@@ -1,6 +1,8 @@
 package list
 
 import (
+	"context"
+
 	"github.com/flowtrove/packages/datatable"
 	"github.com/flowtrove/packages/datatable/postgresql"
 	"github.com/flowtrove/packages/models"
@@ -11,7 +13,7 @@ import (
 func (cc *Controller) GetUsersListAPI(c fiber.Ctx) error {
 	db := cc.app.Postgres()
 	r := cc.app.Render()
-	columns, err := cc.getUsersColumns()
+	columns, err := cc.getUsersColumns(c.Context())
 	if err != nil {
 		return cc.app.Api(c,
 			r.WithError(err),
@@ -50,7 +52,7 @@ func (cc *Controller) GetUsersListView(c fiber.Ctx) error {
 	ctxPtr := c.Context()
 	db := cc.app.Postgres()
 	r := cc.app.Render()
-	columns, err := cc.getUsersColumns()
+	columns, err := cc.getUsersColumns(c.Context())
 	if err != nil {
 		return cc.app.View(c,
 			r.WithContext(ctxPtr),
@@ -94,7 +96,7 @@ func (cc *Controller) GetUsersListView(c fiber.Ctx) error {
 }
 
 func (cc *Controller) GetUsersColumns(c fiber.Ctx) error {
-	columns, err := cc.getUsersColumns()
+	columns, err := cc.getUsersColumns(c.Context())
 	if err != nil {
 		return cc.app.Api(c, cc.app.Render().WithError(err))
 	}
@@ -102,7 +104,12 @@ func (cc *Controller) GetUsersColumns(c fiber.Ctx) error {
 	return cc.app.Api(c, cc.app.Render().WithData(datatable.GetColumns(columns)))
 }
 
-func (cc *Controller) getUsersColumns() ([]datatable.Column, error) {
+func (cc *Controller) getUsersColumns(ctx context.Context) ([]datatable.Column, error) {
+	roleNames, err := cc.loadAvailableRoleNames(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	var columns = []datatable.Column{
 		{
 			ID:          "id",
@@ -210,7 +217,7 @@ func (cc *Controller) getUsersColumns() ([]datatable.Column, error) {
 				Label:       "Roles",
 				Variant:     "multiSelect",
 				Placeholder: "Filter by role...",
-				Options:     roleFilterOptions(),
+				Options:     roleFilterOptions(roleNames),
 			},
 		},
 		{
