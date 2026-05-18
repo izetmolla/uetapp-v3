@@ -84,10 +84,7 @@ const SessionsPage = () => {
                     }}
                     initialState={{
                         sorting: [{ id: "created_at", desc: true }],
-                        columnVisibility: {
-                            ...columnVisibility,
-                            method: false,
-                        },
+                        columnVisibility,
                     }}
                     getRowId={(row) => row.id}
                     enableToolbar

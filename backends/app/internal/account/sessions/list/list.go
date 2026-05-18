@@ -34,6 +34,9 @@ func (cc *Controller) GetSessionsListAPI(c fiber.Ctx) error {
 			r.WithCode("BAD_REQUEST"),
 		)
 	}
+	if len(q.Sorts) == 0 {
+		q.Sorts = []datatable.Sort{{ID: "created_at", Desc: true}}
+	}
 
 	baseQuery := db.Model(&models.Session{}).
 		Where("user_id = ?", authData.UserID).
@@ -72,6 +75,11 @@ func (cc *Controller) getSessionsColumns() ([]datatable.Column, error) {
 			Hidden:      true,
 		},
 		{
+			ID:          "user_id",
+			AccessorKey: "user_id",
+			Hidden:      true,
+		},
+		{
 			ID:                 "user_agent",
 			AccessorKey:        "user_agent",
 			Header:             "Device",
@@ -107,6 +115,7 @@ func (cc *Controller) getSessionsColumns() ([]datatable.Column, error) {
 				Placeholder: "Filter method...",
 				Options: []datatable.OptionItem{
 					{Label: "Credentials", Value: "credentials"},
+					{Label: "LDAP", Value: "ldap"},
 					{Label: "OAuth", Value: "oauth"},
 				},
 			},
@@ -130,6 +139,18 @@ func (cc *Controller) getSessionsColumns() ([]datatable.Column, error) {
 			EnableColumnFilter: false,
 			Meta: &datatable.ColumnMeta{
 				Label:   "Expires",
+				Variant: "dateRange",
+			},
+		},
+		{
+			ID:                 "updated_at",
+			AccessorKey:        "updated_at",
+			Header:             "Last activity",
+			EnableSorting:      true,
+			EnableColumnFilter: false,
+			Hidden:             true,
+			Meta: &datatable.ColumnMeta{
+				Label:   "Last activity",
 				Variant: "dateRange",
 			},
 		},

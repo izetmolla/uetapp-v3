@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/flowtrove/packages/authorization/ldap"
 	"github.com/flowtrove/packages/authorization/models"
 	"github.com/flowtrove/packages/authorization/utils"
 	jwtware "github.com/gofiber/contrib/v3/jwt"
@@ -38,6 +39,9 @@ type Authorization struct {
 
 	// Cached at boot to keep the cookie helpers allocation-free.
 	cookieDomain string
+
+	//ldap
+	ldapClient *ldap.Client
 }
 
 // AuthData is the authenticated principal extracted from either a JWT
@@ -73,6 +77,15 @@ func NewAuthorization(cfg *AuthorizationOptions) (*Authorization, error) {
 		signInRedirectURL: firstNonEmpty(cfg.SignInRedirectURL, cfg.AuthURL+"/sign-in"),
 		cookieSessionName: firstNonEmpty(cfg.CookieSessionName, DefaultCookieSessionName),
 	}
+
+	if cfg.LDAPConfig != nil {
+		ldapClient, err := ldap.New(*cfg.LDAPConfig)
+		if err != nil {
+			return nil, fmt.Errorf("%w: %v", ldap.ErrInvalidConfig, err)
+		}
+		a.ldapClient = ldapClient
+	}
+
 	a.cookieDomain = "." + utils.GetDomainWithoutWWW(a.authURL)
 
 	a.dbManager = models.New().
@@ -226,6 +239,8 @@ func (a *Authorization) GetAuthDataWEB(ctx fiber.Ctx, reqCtx context.Context) (A
 		Roles:     utils.FormatRoles(session.User.Roles),
 	}, nil
 }
+
+func (a *Authorization) LDAPClient() (bool, *ldap.Client) { return a.ldapClient != nil, a.ldapClient }
 
 // User returns the authenticated principal for the current request.
 // Pass fromAPI=true to read it out of the JWT instead of the session

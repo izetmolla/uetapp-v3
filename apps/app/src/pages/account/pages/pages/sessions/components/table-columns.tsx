@@ -56,9 +56,6 @@ export function prependSessionColumns(
                                     </Badge>
                                 ) : null}
                             </div>
-                            <p className="text-xs text-muted-foreground capitalize">
-                                {row.original.method ?? "credentials"}
-                            </p>
                         </div>
                     </div>
                 )
@@ -92,6 +89,14 @@ export function prependSessionColumns(
                 <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                     {row.original.ip_address ?? "—"}
                 </code>
+            ),
+        },
+        {
+            id: "method",
+            cell: ({ row }) => (
+                <Badge variant="secondary" className="capitalize">
+                    {row.original.method ?? "credentials"}
+                </Badge>
             ),
         },
     ]

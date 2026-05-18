@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/flowtrove/packages/authorization"
+	"github.com/flowtrove/packages/authorization/ldap"
 	"github.com/flowtrove/packages/models"
 	"github.com/flowtrove/packages/render"
 	"github.com/gofiber/fiber/v3"
@@ -20,6 +22,7 @@ type ConfigSettings struct {
 	DatabaseURL string
 	RedisURL    string
 	AuthURL     string
+	LDAPConfig  *ldap.Config
 }
 
 type Application interface {
@@ -65,6 +68,7 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 		SessionModel:         &models.Session{},
 		SessionTableName:     "sessions",
 		AuthURL:              cfg.AuthURL,
+		LDAPConfig:           cfg.LDAPConfig,
 	}); err != nil {
 		return nil, err
 	}
@@ -124,6 +128,63 @@ func GetConfigSettings() (*ConfigSettings, error) {
 		configSettings.DatabaseURL = viper.GetString("DATABASE_URL")
 	} else {
 		return nil, errors.New("DATABASE_URL is not set")
+	}
+
+	//LDAP Config
+	if viper.GetString("LDAP_URL") != "" {
+		configSettings.LDAPConfig = &ldap.Config{}
+		// URL:            "ldaps://ad.example.com:636",
+		configSettings.LDAPConfig.URL = viper.GetString("LDAP_URL")
+		// BindDN:         "...",
+		if bindDN := viper.GetString("LDAP_BIND_DN"); bindDN != "" {
+			configSettings.LDAPConfig.BindDN = bindDN
+			bindPassword := viper.GetString("LDAP_BIND_PASSWORD")
+			if bindPassword == "" {
+				return nil, errors.New("LDAP_BIND_PASSWORD is required when LDAP_BIND_DN is set")
+			}
+			configSettings.LDAPConfig.BindPassword = bindPassword
+		}
+		// BaseDN:         "DC=example,DC=com",
+		if viper.GetString("LDAP_BASE_DN") != "" {
+			configSettings.LDAPConfig.BaseDN = viper.GetString("LDAP_BASE_DN")
+		}
+		// UserFilter:     "(&(objectClass=user)(mail=%s))",
+		if viper.GetString("LDAP_USER_FILTER") != "" {
+			configSettings.LDAPConfig.UserFilter = viper.GetString("LDAP_USER_FILTER")
+		}
+		// UserAttribute:  "mail",
+		if viper.GetString("LDAP_USER_ATTRIBUTE") != "" {
+			configSettings.LDAPConfig.UserAttribute = viper.GetString("LDAP_USER_ATTRIBUTE")
+		}
+		// NameAttributes: []string{"displayName", "cn"},
+		if viper.GetString("LDAP_NAME_ATTRIBUTES") != "" {
+			configSettings.LDAPConfig.NameAttributes = strings.Split(viper.GetString("LDAP_NAME_ATTRIBUTES"), ",")
+		}
+		// RoleAttribute:  "memberOf", // AD groups → User.Roles
+		if viper.GetString("LDAP_ROLE_ATTRIBUTE") != "" {
+			configSettings.LDAPConfig.RoleAttribute = viper.GetString("LDAP_ROLE_ATTRIBUTE")
+		}
+		// Attributes:     []string{"title", "department", "sAMAccountName"},
+		if viper.GetString("LDAP_ATTRIBUTES") != "" {
+			configSettings.LDAPConfig.Attributes = strings.Split(viper.GetString("LDAP_ATTRIBUTES"), ",")
+		}
+		if viper.GetBool("LDAP_INSECURE_SKIP_VERIFY") {
+			configSettings.LDAPConfig.InsecureSkipVerify = true
+		}
+		if sn := viper.GetString("LDAP_TLS_SERVER_NAME"); sn != "" {
+			configSettings.LDAPConfig.TLSServerName = sn
+		}
+		if viper.GetBool("LDAP_DIRECT_BIND") {
+			configSettings.LDAPConfig.DirectBind = true
+		}
+		if domain := viper.GetString("LDAP_DOMAIN"); domain != "" {
+			configSettings.LDAPConfig.Domain = strings.TrimPrefix(domain, "@")
+		}
+		if bindTpl := viper.GetString("LDAP_USER_BIND_DN"); bindTpl != "" {
+			configSettings.LDAPConfig.UserBindDN = bindTpl
+		} else if configSettings.LDAPConfig.DirectBind && configSettings.LDAPConfig.Domain == "" {
+			configSettings.LDAPConfig.UserBindDN = "%s"
+		}
 	}
 
 	return &configSettings, nil

@@ -4,7 +4,6 @@ go 1.26.2
 
 replace github.com/flowtrove/packages/models => ../packages/models
 
-
 replace github.com/flowtrove/packages/render => ../packages/render
 
 replace github.com/flowtrove/packages/authorization => ../packages/authorization
@@ -13,9 +12,9 @@ replace github.com/flowtrove/packages/datatable => ../packages/datatable
 
 require (
 	github.com/flowtrove/packages/authorization v0.0.0-00010101000000-000000000000
+	github.com/flowtrove/packages/datatable v0.0.0
 	github.com/flowtrove/packages/models v0.0.0
 	github.com/flowtrove/packages/render v0.0.0
-	github.com/flowtrove/packages/datatable v0.0.0
 	github.com/gofiber/fiber/v3 v3.2.0
 	github.com/spf13/viper v1.21.0
 	gorm.io/driver/postgres v1.6.0
@@ -23,11 +22,14 @@ require (
 )
 
 require (
+	github.com/Azure/go-ntlmssp v0.1.0 // indirect
 	github.com/MicahParks/keyfunc/v2 v2.1.0 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667 // indirect
+	github.com/go-ldap/ldap/v3 v3.4.13 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gofiber/contrib/v3/jwt v1.1.2 // indirect

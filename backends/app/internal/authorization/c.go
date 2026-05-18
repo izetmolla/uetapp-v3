@@ -2,7 +2,9 @@ package authorization
 
 import (
 	"errors"
+	"strings"
 
+	ldappkg "github.com/flowtrove/packages/authorization/ldap"
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
 )
@@ -43,18 +45,37 @@ func (cc *Controller) SignInApi(c fiber.Ctx) error {
 	ctxReq := c.Context()
 	r := cc.app.Render()
 	auth := cc.app.Auth()
+	method := "credentials"
+	passwordCheck := true
 
 	var req SignInRequest
 	if err := c.Bind().JSON(&req); err != nil {
 		return cc.app.Api(c, r.WithError(err))
 	}
 
+	email := strings.TrimSpace(req.Email)
+	password := req.Password
+
+	ok, ldapClient := auth.LDAPClient()
+	if ok {
+		_, err := ldapClient.Login(ldapClient.UsernameWithDomain(email), password)
+		if err != nil {
+			if !errors.Is(err, ldappkg.ErrInvalidCredentials) {
+				return cc.app.Api(c, r.WithError(err))
+			}
+		} else {
+			passwordCheck = false
+			method = "ldap"
+		}
+	}
 	res, err := auth.SignIn(
 		auth.WithContext(ctxReq),
-		auth.WithEmail(req.Email),
-		auth.WithPassword(req.Password),
+		auth.WithEmail(email),
+		auth.WithPassword(password),
 		auth.WithIPAddress(c.IP()),
 		auth.WithUserAgent(c.Get("User-Agent")),
+		auth.WithMethod(method),
+		auth.WithPasswordCheck(passwordCheck),
 	)
 	if err != nil {
 		return cc.app.Api(c, r.WithError(err))
@@ -76,11 +97,13 @@ func (c *Controller) SignInCheckEmail(ctx fiber.Ctx) error {
 	if c == nil || c.app == nil || c.app.Auth() == nil {
 		return c.app.Api(ctx, c.app.Render().WithError(errors.New("Authorization not initialized")))
 	}
+
 	var req SignInRequest
 	if err := ctx.Bind().JSON(&req); err != nil {
 		return c.app.Api(ctx, c.app.Render().WithError(errors.New("Invalid request")))
 	}
 	auth := c.app.Auth()
+
 	res, err := auth.CheckEmail(auth.WithContext(ctx), auth.WithEmail(req.Email))
 	if err != nil {
 		return c.app.Api(ctx, c.app.Render().WithError(err))
@@ -119,4 +142,27 @@ func (c *Controller) SignOut(ctx fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{
 		"message": "signed out",
 	})
+}
+
+func ldapLookupKeys(ldapUser *ldappkg.User, login string) []string {
+	seen := make(map[string]struct{})
+	add := func(v string) {
+		v = strings.TrimSpace(v)
+		if v == "" {
+			return
+		}
+		if _, ok := seen[v]; ok {
+			return
+		}
+		seen[v] = struct{}{}
+	}
+	add(ldapUser.LoginEmail(login))
+	add(login)
+	add(ldapUser.Username)
+	add(ldapUser.Get("sAMAccountName"))
+	keys := make([]string, 0, len(seen))
+	for k := range seen {
+		keys = append(keys, k)
+	}
+	return keys
 }

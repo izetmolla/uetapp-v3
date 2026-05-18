@@ -1,6 +1,7 @@
 package authorization
 
 import (
+	"github.com/flowtrove/packages/authorization/ldap"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
@@ -34,6 +35,9 @@ type AuthorizationOptions struct {
 
 	// PasswordCost overrides the bcrypt cost. 0 means use DefaultPasswordCost.
 	PasswordCost int
+
+	// ldap
+	LDAPConfig *ldap.Config
 }
 
 // AuthorizationError is a structured error returned to API consumers when

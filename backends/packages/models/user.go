@@ -20,11 +20,12 @@ const (
 type User struct {
 	ID string `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 
-	FirstName string `json:"first_name" gorm:"size:50;"`
-	LastName  string `json:"last_name" gorm:"size:50;"`
-	Email     string `json:"email" gorm:"size:50;default:null;"`
-	Username  string `json:"username" gorm:"size:50;unique;default:null;"`
-	Password  string `json:"password" gorm:"size:100;"`
+	FirstName    string `json:"first_name" gorm:"size:50;"`
+	LastName     string `json:"last_name" gorm:"size:50;"`
+	Email        string `json:"email" gorm:"size:50;default:null;"`
+	Username     string `json:"username" gorm:"size:50;unique;default:null;"`
+	LdapUsername string `json:"ldap_username" gorm:"size:50;default:null;"`
+	Password     string `json:"password" gorm:"size:100;"`
 
 	Image string `json:"image" gorm:"size:200;"`
 

@@ -143,6 +143,7 @@ type AuthorizeOptions struct {
 	userAgent string
 	content   json.RawMessage
 	roles     json.RawMessage
+	method    string
 }
 
 // AuthorizeOptionsFunc is the functional-option type used with Authorize,
@@ -154,6 +155,7 @@ func defaultAuthorizeOptions() AuthorizeOptions {
 		ctx:     context.Background(),
 		roles:   json.RawMessage("[]"),
 		content: json.RawMessage("{}"),
+		method:  "credentials",
 	}
 }
 
@@ -200,6 +202,11 @@ func (tm *TokenManager) WithContent(content json.RawMessage) AuthorizeOptionsFun
 			o.content = content
 		}
 	}
+}
+
+// WithMethod records the method on the session row.
+func (tm *TokenManager) WithMethod(method string) AuthorizeOptionsFunc {
+	return func(o *AuthorizeOptions) { o.method = method }
 }
 
 // WithSessionID forces a particular session id (used internally by the
@@ -255,6 +262,7 @@ func (tm *TokenManager) createSession(o *AuthorizeOptions) (string, error) {
 		UserID:    o.userID,
 		IPAddress: o.ipAddress,
 		UserAgent: o.userAgent,
+		Method:    o.method,
 	}
 	if err := tm.db.DB().WithContext(o.ctx).Create(&session).Error; err != nil {
 		return "", err

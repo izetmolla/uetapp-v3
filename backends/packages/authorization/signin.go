@@ -34,19 +34,21 @@ type SignInResponse struct {
 // SignInOptions is the input bag built by the WithXxx functional options
 // below and consumed by SignIn / CheckEmail.
 type SignInOptions struct {
-	Ctx       context.Context
-	Email     string
-	Password  string
-	Content   json.RawMessage
-	IPAddress string
-	UserAgent string
+	Ctx           context.Context
+	Email         string
+	Password      string
+	Content       json.RawMessage
+	IPAddress     string
+	UserAgent     string
+	Method        string
+	PasswordCheck bool
 }
 
 // SignInOptionsFunc mutates a SignInOptions in place.
 type SignInOptionsFunc func(*SignInOptions)
 
 func defaultSignInOptions() SignInOptions {
-	return SignInOptions{Ctx: context.Background()}
+	return SignInOptions{Ctx: context.Background(), Method: "credentials", PasswordCheck: true}
 }
 
 // NewSignInOptions applies the provided functional options on top of
@@ -106,6 +108,16 @@ func (a *Authorization) WithUserAgent(userAgent string) SignInOptionsFunc {
 	return func(o *SignInOptions) { o.UserAgent = userAgent }
 }
 
+// WithMethod records the method on the session row.
+func (a *Authorization) WithMethod(method string) SignInOptionsFunc {
+	return func(o *SignInOptions) { o.Method = method }
+}
+
+// Skip Password Check
+func (a *Authorization) WithPasswordCheck(passwordCheck bool) SignInOptionsFunc {
+	return func(o *SignInOptions) { o.PasswordCheck = passwordCheck }
+}
+
 // --- SignIn / CheckEmail --------------------------------------------------
 
 // SignIn authenticates a user with email + password, creates a session,
@@ -131,10 +143,54 @@ func (a *Authorization) SignIn(opts ...SignInOptionsFunc) (SignInResponse, error
 		}, fmt.Errorf("find user: %w", err)
 	}
 
-	if !a.passwordManager.IsValidPassword(user.Password, options.Password) {
+	if options.PasswordCheck && !a.passwordManager.IsValidPassword(user.Password, options.Password) {
 		return SignInResponse{
 			Error: AuthorizationError{Error: ErrInvalidCredentials, Field: "password"},
 		}, ErrInvalidCredentials
+	}
+
+	content, err := normalizeContent(options.Content)
+	if err != nil {
+		return SignInResponse{}, err
+	}
+
+	tm := a.tokenManager
+	tokens, sessionID, err := tm.Authorize(
+		tm.WithContext(options.Ctx),
+		tm.WithUserID(user.ID),
+		tm.WithRoles(user.Roles),
+		tm.WithIPAddress(options.IPAddress),
+		tm.WithUserAgent(options.UserAgent),
+		tm.WithContent(content),
+		tm.WithMethod(options.Method),
+	)
+	if err != nil {
+		return SignInResponse{}, fmt.Errorf("issue tokens: %w", err)
+	}
+
+	utils.StripPasswordFromUserModel(user)
+	return SignInResponse{
+		Tokens:    tokens,
+		SessionID: sessionID,
+		User:      user,
+	}, nil
+}
+
+// SignInAfterLDAP issues tokens for a user already authenticated via LDAP.
+// The local password is not checked; email must match an existing users row.
+func (a *Authorization) SignInAfterLDAP(opts ...SignInOptionsFunc) (SignInResponse, error) {
+	options := NewSignInOptions(opts...)
+
+	user, err := a.dbManager.FindUser(options.Ctx, options.Email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return SignInResponse{
+				Error: AuthorizationError{Error: ErrUserNotFound, Field: "email"},
+			}, ErrUserNotFound
+		}
+		return SignInResponse{
+			Error: AuthorizationError{Error: err, Field: "email"},
+		}, fmt.Errorf("find user: %w", err)
 	}
 
 	content, err := normalizeContent(options.Content)
