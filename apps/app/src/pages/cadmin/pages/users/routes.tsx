@@ -20,6 +20,14 @@ const usersRoutes: RouteObject[] = [
         },
     },
     {
+        path: "roles",
+        hydrateFallbackElement: <Fragment />,
+        lazy: async () => {
+            const m = await import("./pages/roles")
+            return { Component: m.default }
+        },
+    },
+    {
         path: ":id",
         hydrateFallbackElement: <Fragment />,
         lazy: async () => {

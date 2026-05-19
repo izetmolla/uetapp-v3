@@ -20,6 +20,7 @@ func Models() []any {
 		// &Department{},
 		// &StudyLevel{},
 		// &Resource{},
+		// &Role{},
 
 		// &OrgUnit{},
 		// &Theme{},

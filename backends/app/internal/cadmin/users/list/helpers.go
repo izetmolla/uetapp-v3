@@ -16,6 +16,7 @@ func (cc *Controller) loadAvailableRoleNames(ctx context.Context) ([]string, err
 	var roles []models.Role
 	if err := cc.app.Postgres().WithContext(ctx).
 		Model(&models.Role{}).
+		Where("status = ? OR status = '' OR status IS NULL", models.StatusActive).
 		Order("name ASC").
 		Find(&roles).Error; err != nil {
 		return nil, err

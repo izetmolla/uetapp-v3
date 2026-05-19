@@ -5,6 +5,7 @@ import (
 	"github.com/uetedu/app/config"
 	"github.com/uetedu/app/internal/cadmin/users/enroll"
 	"github.com/uetedu/app/internal/cadmin/users/list"
+	"github.com/uetedu/app/internal/cadmin/users/roles"
 )
 
 type Controller struct {
@@ -20,6 +21,7 @@ func NewController(app *config.AppClients) *Controller {
 func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	api := apiGroup.Group("/users")
 	list.SetupApiRoutes(api, appClients)
+	roles.SetupApiRoutes(api, appClients)
 	enroll.SetupApiRoutes(api, appClients)
 
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
@@ -31,6 +33,7 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	app := appGroup.Group("/users")
 	list.SetupWebRoutes(app, appClients)
+	roles.SetupWebRoutes(app, appClients)
 	enroll.SetupWebRoutes(app, appClients)
 	app.Get("/", appClients.WebView("Users")) // Web endpoint for getting enter data
 
