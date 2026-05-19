@@ -3,11 +3,10 @@ package config
 import (
 	"context"
 	"errors"
+	"fmt"
 
-	"github.com/flowtrove/packages/models"
 	"github.com/flowtrove/packages/render"
 	"github.com/gofiber/fiber/v3"
-	"gorm.io/gorm"
 )
 
 // ErrServiceAccessDenied is returned when the user cannot access the requested service.
@@ -26,33 +25,11 @@ func (app *AppClients) GeneralData(c fiber.Ctx, reqCtx context.Context, serviceN
 	}
 	userRoles := app.freshUserRoles(reqCtx, user.UserID, user.Roles)
 
-	service, err := gorm.G[models.Service](app.postgres).
-		Select("id, name, title, icon, description, roles").
-		Where("name = ?", serviceName).
-		First(reqCtx)
+	service, err := app.getServiceData(reqCtx, serviceName)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if !app.userCanAccessService(nil, serviceName, userRoles) {
-				return nil, ErrServiceAccessDenied
-			}
-			services, err := app.getServicesData(reqCtx, userRoles)
-			if err != nil {
-				return nil, err
-			}
-			return map[string]any{
-				"current_service": serviceName,
-				"services":        services,
-				"service": map[string]any{
-					"name":  serviceName,
-					"title": serviceName,
-				},
-				"current_user_id": user.UserID,
-				"navigations":     []map[string]any{},
-			}, nil
-		}
 		return nil, err
 	}
-
+	fmt.Println("service.Roles", service.Roles)
 	if len(service.Roles) > 0 && !app.userCanAccessService(service.Roles, service.Name, userRoles) {
 		return nil, ErrServiceAccessDenied
 	}

@@ -48,6 +48,7 @@ export interface ContentLoaderProps {
     description?: string;
     /** Show loading spinner or customLoader. */
     isLoading?: boolean;
+    header?: ReactNode;
     /** When true, header is shown while loading; otherwise only when content or error is shown. */
     showHeaderOnLoader?: boolean;
     /** When set, error state is shown with optional header. */

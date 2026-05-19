@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"errors"
 
 	"github.com/flowtrove/packages/models"
 	"gorm.io/gorm"
@@ -32,6 +33,23 @@ func (app *AppClients) getServicesData(ctx context.Context, userRoles []string) 
 	}
 
 	return services, nil
+}
+
+func (app *AppClients) getServiceData(ctx context.Context, serviceName string) (models.Service, error) {
+	if serviceName == "" {
+		serviceName = app.appService
+	}
+	service, err := gorm.G[models.Service](app.postgres).
+		Select("id, name, title, icon, description, roles").
+		Where("name = ?", serviceName).
+		First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return app.getServiceData(ctx, app.appService)
+		}
+		return models.Service{}, err
+	}
+	return service, nil
 }
 
 func (app *AppClients) getNavigationData(ctx context.Context, serviceID string, userRoles []string) ([]models.ServiceNavigation, error) {

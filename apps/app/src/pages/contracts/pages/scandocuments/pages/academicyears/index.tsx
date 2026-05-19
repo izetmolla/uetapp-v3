@@ -3,17 +3,38 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Progress } from "@workspace/ui/components/progress";
 import { academicYears } from "../../data/mockData";
 import { PageHeader, PageShell } from "../../components/page-shell";
-import { GridSkeleton, MaybeSkeleton, useSimulatedLoad } from "../../components/skeleton-page";
+import { GridSkeleton } from "../../components/skeleton-page";
 import { Link } from "react-router";
+import { type GetAcademicYearsResponse, getAcademicYears } from "./api";
+import { useQuery } from "@tanstack/react-query";
+import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
+import ContentLoader from "@workspace/flowtrove/components/content-loader";
+import { useState } from "react";
 
 
 
 const AcademicYearsPage = () => {
-    const loading = useSimulatedLoad();
+    const [filter] = useState<string>("");
+    const queryKey = ["academic-years", filter];
+
+    const { data, isLoading, error } = useQuery({
+        queryFn: () => getAcademicYears({ filter }),
+        queryKey: queryKey,
+        ...withInitialData<GetAcademicYearsResponse>(),
+    });
+
+    console.log("data", data);
     return (
         <PageShell>
-            <PageHeader title="Scanned Documents" subtitle="Browse documents by academic year" />
-            <MaybeSkeleton loading={loading} skeleton={<GridSkeleton />}>
+            <ContentLoader
+                isLoading={isLoading}
+                error={withError(error, data)}
+                title="Academic Years"
+                breadcrumb={[{ label: "Contracts", to: "/contracts" }]}
+                forMeta
+                customLoader={<GridSkeleton />}
+                header={<PageHeader title="Scanned Documents" subtitle="Browse documents by academic year" />}
+            >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {academicYears.map((y) => (
                         <Link
@@ -63,8 +84,9 @@ const AcademicYearsPage = () => {
                         </Link>
                     ))}
                 </div>
-            </MaybeSkeleton>
+            </ContentLoader>
         </PageShell>
+
     );
 }
 

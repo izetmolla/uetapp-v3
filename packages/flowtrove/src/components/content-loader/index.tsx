@@ -22,6 +22,7 @@ function useHeaderProps(
     customTitle,
     forMeta,
     errorMessage,
+    header,
   } = props;
 
   return useMemo(
@@ -36,6 +37,7 @@ function useHeaderProps(
       showHeaderSeparator: props.showHeaderSeparator,
       headerSeparatorMarginY: props.headerSeparatorMarginY,
       headerClassName: props.headerClassName,
+      header,
     }),
     [
       title,
@@ -48,6 +50,7 @@ function useHeaderProps(
       props.showHeaderSeparator,
       props.headerSeparatorMarginY,
       props.headerClassName,
+      header,
     ]
   );
 }
@@ -68,6 +71,7 @@ const ContentLoader: FC<ContentLoaderProps> = (props) => {
     children,
     customLoader,
     breadcrumb,
+    header,
   } = props;
 
   const [title, setTitle] = useState(titleProp ?? "");
@@ -145,6 +149,7 @@ const ContentLoader: FC<ContentLoaderProps> = (props) => {
 
   return (
     <ContentLoaderContext.Provider value={contextValue}>
+      {header && header}
       {content}
     </ContentLoaderContext.Provider>
   );
