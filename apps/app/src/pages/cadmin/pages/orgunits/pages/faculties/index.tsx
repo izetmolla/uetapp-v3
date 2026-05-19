@@ -37,7 +37,7 @@ const FacultiesPage = () => {
     const listQueryKey = [FACULTIES_FETCH_KEY, "list"] as const;
 
     const { columns, isLoading, error, columnVisibility } = useBackendColumns<Faculty>({
-        fetchColumns: async () => getFacultiesColumns().then((res) => res.data),
+        fetchColumns: async () => getFacultiesColumns(),
         queryKey: [FACULTIES_FETCH_KEY, "columns"],
         appendColumns: getActionsColumn(setRowAction),
         overrideColumns: prependColumns(),
@@ -105,7 +105,7 @@ const FacultiesPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getFacultiesList(state).then((res) => res.data),
+                        fetch: (state) => getFacultiesList(state),
                         queryKey: (state) => [FACULTIES_FETCH_KEY, "list", state],
                         initialPerPage: 10,
                     },

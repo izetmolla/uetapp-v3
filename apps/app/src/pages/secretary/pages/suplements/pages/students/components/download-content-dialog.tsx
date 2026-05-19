@@ -41,7 +41,7 @@ const DownloadContentDialog: React.FC<DownloadContentDialogProps> = ({ onOpenCha
     const [doccumentName, setDoccumentName] = useState(`${studentToDownload?.first_name} ${studentToDownload?.last_name} - ${studentToDownload?.study_profile_name} - ${studentToDownload?.study_program_name}`);
     const mutation = useMutation({
         mutationFn: createSingleSupplementRequest,
-        onSuccess: ({ data }) => {
+        onSuccess: (data) => {
             console.log(data);
             if (data?.error) {
                 console.error("Error creating supplement request:", data.error);

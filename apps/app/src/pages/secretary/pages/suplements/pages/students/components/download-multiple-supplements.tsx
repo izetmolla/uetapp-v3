@@ -63,9 +63,9 @@ const DownloadMultipleSupplements = ({ students, templates }: { students?: Row<S
                     // Wait 2 seconds before proceeding to allow user to see the progress
                     await new Promise(resolve => setTimeout(resolve, 2000));
 
-                    if (result?.data?.error) {
-                        console.error("Error creating supplement request:", result.data.error);
-                        toast.error(`Gabim gjate krijimit te suplementit per ${student.first_name} ${student.last_name}: ${result.data?.message}`);
+                    if (result?.error) {
+                        console.error("Error creating supplement request:", result.error);
+                        toast.error(`Gabim gjate krijimit te suplementit per ${student.first_name} ${student.last_name}: ${result?.message}`);
                         
                         // Mark as failed
                         setDownloadStatuses(prev => prev.map((status, idx) => 
@@ -78,8 +78,8 @@ const DownloadMultipleSupplements = ({ students, templates }: { students?: Row<S
                         setIsDownloading(false);
                         toast.warning(`Shkarkimi u ndal. Klikoni "Vazhdo" per te vazhduar nga ${student.first_name} ${student.last_name}`);
                         return;
-                    } else if (result?.data?.download_url) {
-                        const downloadWindow = window.open(result.data.download_url, '_blank');
+                    } else if (result?.download_url) {
+                        const downloadWindow = window.open(result.download_url, '_blank');
                         
                         if (downloadWindow) {
                             // Wait for the download window/tab to be closed before continuing

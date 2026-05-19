@@ -68,7 +68,7 @@ const DepartmentFormDialog: FC<DepartmentFormDialogProps> = ({ open, setOpen, re
 
     const { data: facultiesData } = useQuery({
         queryKey: ["facultiesOptions"],
-        queryFn: () => getFacultiesList({ page: 1, perPage: 500 }).then((res) => res.data),
+        queryFn: () => getFacultiesList({ page: 1, perPage: 500 }),
         enabled: open,
     });
 

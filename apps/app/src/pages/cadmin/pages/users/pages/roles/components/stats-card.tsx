@@ -9,7 +9,7 @@ import { getRolesStats } from "./stats-card/api";
 const StatsCard = () => {
     const { data, isLoading, isError } = useQuery({
         queryKey: [ROLES_FETCH_PERSISTANT, "stats"],
-        queryFn: () => getRolesStats().then((res) => res.data.stats),
+        queryFn: async () => (await getRolesStats()).stats,
         staleTime: 60_000,
     });
 

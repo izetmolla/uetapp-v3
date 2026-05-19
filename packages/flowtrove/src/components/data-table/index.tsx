@@ -94,8 +94,8 @@ export interface DataTableProps<TData> {
  *       fetch: async (state) => {
  *         const res = await getUsersList(toParams(state));
  *         return {
- *           data: res.data.users,
- *           pagination: { pageCount: res.data.pagination.total_pages, total: res.data.pagination.total },
+ *           data: res.data,
+ *           pagination: res.pagination,
  *         };
  *       },
  *       queryKey: ["users"],

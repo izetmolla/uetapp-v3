@@ -47,7 +47,7 @@ const ResetPassword = () => {
     // const [password, setPassword] = useState("");
     const mutation = useMutation({
         mutationFn: resetPassword,
-        onSuccess: ({ data }) => {
+        onSuccess: (data) => {
             if (data.error) {
                 if (data.error.message != "") {
                     form.setError(data.error.field as keyof ResetPasswordSchema, { message: data.error.message })

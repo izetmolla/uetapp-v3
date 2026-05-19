@@ -1,7 +1,6 @@
 import { GraduationCap, Folder, Users, Building2, CheckCircle2, ArrowRight } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Progress } from "@workspace/ui/components/progress";
-import { academicYears } from "../../data/mockData";
 import { PageHeader, PageShell } from "../../components/page-shell";
 import { GridSkeleton } from "../../components/skeleton-page";
 import { Link } from "react-router";
@@ -10,36 +9,36 @@ import { useQuery } from "@tanstack/react-query";
 import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 
 
 const AcademicYearsPage = () => {
+    const { t } = useTranslation("contracts");
     const [filter] = useState<string>("");
     const queryKey = ["academic-years", filter];
-
     const { data, isLoading, error } = useQuery({
         queryFn: () => getAcademicYears({ filter }),
         queryKey: queryKey,
         ...withInitialData<GetAcademicYearsResponse>(),
     });
 
-    console.log("data", data);
     return (
         <PageShell>
             <ContentLoader
                 isLoading={isLoading}
                 error={withError(error, data)}
-                title="Academic Years"
+                title={t("Academic Years")}
                 breadcrumb={[{ label: "Contracts", to: "/contracts" }]}
                 forMeta
                 customLoader={<GridSkeleton />}
-                header={<PageHeader title="Scanned Documents" subtitle="Browse documents by academic year" />}
+                header={<PageHeader title={t("Scanned Documents")} subtitle={t("Browse documents by academic year")} />}
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {academicYears.map((y) => (
+                    {data?.academic_years?.map((y, i) => (
                         <Link
-                            key={y.id}
-                            to={`${y.id}`}
+                            key={i}
+                            to={`${y.year}`}
                             className="glass-card glow-hover rounded-2xl p-6 group relative overflow-hidden"
                             style={{
                                 background: `radial-gradient(120% 80% at 50% -20%, ${y.accent}22, transparent 60%), var(--card)`,
@@ -52,16 +51,16 @@ const AcademicYearsPage = () => {
                                 >
                                     <GraduationCap className="w-7 h-7" />
                                 </div>
-                                <h3 className="font-display text-2xl font-semibold">{y.label}</h3>
+                                <h3 className="font-display text-2xl font-semibold">{y.year}</h3>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-5">
-                                <Stat icon={<Folder className="w-3.5 h-3.5" />} label="Folders" value={y.folders} />
-                                <Stat icon={<Users className="w-3.5 h-3.5" />} label="Students" value={y.students.toLocaleString()} />
-                                <Stat icon={<Building2 className="w-3.5 h-3.5" />} label="Faculties" value={y.faculties} />
+                                <Stat icon={<Folder className="w-3.5 h-3.5" />} label={t("Folders")} value={y.folders} />
+                                <Stat icon={<Users className="w-3.5 h-3.5" />} label={t("Students")} value={y.students.toLocaleString()} />
+                                <Stat icon={<Building2 className="w-3.5 h-3.5" />} label={t("Faculties")} value={y.faculties} />
                                 <div className="bg-secondary/40 rounded-lg p-2.5">
                                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1.5">
-                                        <CheckCircle2 className="w-3.5 h-3.5" /> Completion
+                                        <CheckCircle2 className="w-3.5 h-3.5" /> {t("Completion")}
                                     </div>
                                     <Progress value={y.completion} className="h-1.5" />
                                     <div className="text-xs mt-1 font-medium">{y.completion}%</div>

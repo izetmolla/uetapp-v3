@@ -27,7 +27,7 @@ const OrgUnitsListPage = () => {
         error,
         columnVisibility,
     } = useBackendColumns<OrgUnit>({
-        fetchColumns: async () => getOrgUnitsColumns().then(res => res.data),
+        fetchColumns: async () => getOrgUnitsColumns(),
         queryKey: [ORG_UNIT_FETCH_PERSISTANT, "columns"],
         appendColumns: getActionsColumn(setRowAction),
         // prependColumns: prependColumns(),
@@ -76,7 +76,7 @@ const OrgUnitsListPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getOrgUnitsList(state).then(res => res.data),
+                        fetch: (state) => getOrgUnitsList(state),
                         queryKey: (state) => [ORG_UNIT_FETCH_PERSISTANT, "orgunits", state],
                         initialPerPage: 10,
                     },

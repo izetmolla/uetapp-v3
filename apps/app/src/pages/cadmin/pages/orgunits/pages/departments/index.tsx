@@ -35,7 +35,7 @@ const DepartmentsPage = () => {
     const listQueryKey = [DEPARTMENTS_FETCH_KEY, "list"] as const;
 
     const { columns, isLoading, error, columnVisibility } = useBackendColumns<Department>({
-        fetchColumns: async () => getDepartmentsColumns().then((res) => res.data),
+        fetchColumns: async () => getDepartmentsColumns(),
         queryKey: [DEPARTMENTS_FETCH_KEY, "columns"],
         appendColumns: getActionsColumn(setRowAction),
         overrideColumns: prependColumns(),
@@ -103,7 +103,7 @@ const DepartmentsPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getDepartmentsList(state).then((res) => res.data),
+                        fetch: (state) => getDepartmentsList(state),
                         queryKey: (state) => [DEPARTMENTS_FETCH_KEY, "list", state],
                         initialPerPage: 10,
                     },

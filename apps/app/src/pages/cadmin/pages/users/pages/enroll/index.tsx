@@ -95,7 +95,7 @@ const EnrollPage = () => {
                 ? rowsToApply
                 : rowsToApply.filter((r) => r.action === "insert" || r.action === "update")
             const res = await applyEnrollChanges(rows, skipErrors, preview?.file_columns)
-            const body = res.data
+            const body = res
             setApplyResult(body)
             if (body.inserted > 0 || body.updated > 0) {
                 toast.success(`Imported: ${body.inserted} created, ${body.updated} updated`)

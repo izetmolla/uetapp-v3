@@ -34,7 +34,7 @@ const StudentsListPage = () => {
         error,
         columnVisibility,
     } = useBackendColumns<Student>({
-        fetchColumns: async () => getStudentsColumns().then((res) => res.data),
+        fetchColumns: async () => getStudentsColumns(),
         queryKey: [STUDENTS_FETCH_KEY, "columns"],
         appendColumns: getActionsColumn(onDownload),
         overrideColumns: overrideColumns(),
@@ -42,12 +42,12 @@ const StudentsListPage = () => {
 
     useQuery({
         queryKey: [STUDENTS_FETCH_KEY, "templates"],
-        queryFn: () =>
-            getStudentsList({ pagination: { page: 1, perPage: 1 } }).then((res) => {
-                const next = res.data?.templates ?? [];
-                setTemplates(next);
-                return next;
-            }),
+        queryFn: async () => {
+            const res = await getStudentsList({ pagination: { page: 1, perPage: 1 } });
+            const next = res?.templates ?? [];
+            setTemplates(next);
+            return next;
+        },
         staleTime: 60_000,
     });
 
@@ -65,8 +65,7 @@ const StudentsListPage = () => {
                     type: "server",
                     options: {
                         fetch: async (state) => {
-                            const res = await getStudentsList(state);
-                            const body = res.data;
+                            const body = await getStudentsList(state);
                             if (body?.templates?.length) {
                                 setTemplates(body.templates);
                             }

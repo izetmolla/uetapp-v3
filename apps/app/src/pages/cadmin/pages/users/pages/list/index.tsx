@@ -29,7 +29,7 @@ const UsersListPage = () => {
         error,
         columnVisibility,
     } = useBackendColumns<User>({
-        fetchColumns: async () => getUsersColumns().then((res) => res.data),
+        fetchColumns: async () => getUsersColumns(),
         queryKey: [USER_FETCH_PERSISTANT, "columns"],
         appendColumns: getActionsColumn(),
         overrideColumns: getColumnOverrides(),
@@ -58,7 +58,7 @@ const UsersListPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getUsersList(state).then((res) => res.data),
+                        fetch: (state) => getUsersList(state),
                         queryKey: (state) => [USER_FETCH_PERSISTANT, "users", state],
                         initialPerPage: 10,
                     },

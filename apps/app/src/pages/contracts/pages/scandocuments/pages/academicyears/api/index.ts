@@ -2,8 +2,8 @@ import ApiService, { withAPI } from "@workspace/flowtrove/lib/network";
 
 
 export type AcademicYear = {
-    id: string;
-    label: string;
+    id: number;
+    year: string;
     folders: number;
     students: number;
     faculties: number;
@@ -12,12 +12,12 @@ export type AcademicYear = {
     accent: string;
 };
 
-export interface GetAcademicYearsResponse  {
+export interface GetAcademicYearsResponse {
     academic_years: AcademicYear[];
 }
 export async function getAcademicYears(params: Record<string, unknown>) {
     return ApiService.fetchData<GetAcademicYearsResponse>({
-        url: withAPI("/contracts/scandocuments/academic-years"),
+        url: withAPI("/contracts/scandocuments/academic-years/list"),
         method: "get",
         params,
     });

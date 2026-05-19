@@ -4,12 +4,11 @@
  * `ApiService` wraps the raw axios client with three thin helpers
  * shaped around the patterns this codebase uses everywhere:
  *
- *   - `fetchData`        - call an endpoint and resolve to the full
- *                          AxiosResponse so the caller can inspect
- *                          headers/status.
- *   - `fetchDataBody`    - same, but resolves to just `response.data`
- *                          for the common case where the body is
- *                          everything you care about.
+ *   - `fetchData`        - call an endpoint and resolve to the JSON body
+ *                          (`response.data`). Use directly in react-query
+ *                          `queryFn` without extra `.then` unwrapping.
+ *   - `fetchDataBody`    - alias of `fetchData` (kept for compatibility).
+ *   - `fetchDataResponse` - full AxiosResponse when headers/status matter.
  *   - `uploadFileData`   - multipart upload helper with progress and
  *                          structured success/error callbacks.
  *
@@ -56,7 +55,29 @@ export interface ResponseWithPagination<T> extends ResponseWithError {
 const ApiService = {
     fetchData<Response = unknown, Request = Record<string, unknown>>(
         param: AxiosRequestConfig<Request>,
-    ) {
+    ): Promise<Response> {
+        return new Promise<Response>((resolve, reject) => {
+            BaseService(param)
+                .then((response: AxiosResponse<Response>) => {
+                    resolve(response.data)
+                })
+                .catch((errors: AxiosError) => {
+                    reject(errors)
+                })
+        })
+    },
+
+    /** Alias of `fetchData` — resolves to the JSON response body. */
+    fetchDataBody<Response = unknown, Request = Record<string, unknown>>(
+        param: AxiosRequestConfig<Request>,
+    ): Promise<Response> {
+        return this.fetchData<Response, Request>(param)
+    },
+
+    /** Full Axios response (headers, status, etc.). */
+    fetchDataResponse<Response = unknown, Request = Record<string, unknown>>(
+        param: AxiosRequestConfig<Request>,
+    ): Promise<AxiosResponse<Response>> {
         return new Promise<AxiosResponse<Response>>((resolve, reject) => {
             BaseService(param)
                 .then((response: AxiosResponse<Response>) => {
@@ -66,14 +87,6 @@ const ApiService = {
                     reject(errors)
                 })
         })
-    },
-
-    /** Same as fetchData but resolves to `response.data` (typed body). */
-    async fetchDataBody<Response = unknown, Request = Record<string, unknown>>(
-        param: AxiosRequestConfig<Request>,
-    ): Promise<Response> {
-        const r = await this.fetchData<Response, Request>(param)
-        return r.data
     },
 
     uploadFileData<Response = unknown, Request = Record<string, unknown>>(

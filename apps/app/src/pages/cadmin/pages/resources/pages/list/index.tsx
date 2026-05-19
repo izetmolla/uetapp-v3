@@ -35,7 +35,7 @@ const ResourcesListPage = () => {
     const listQueryKey = [RESOURCES_FETCH_KEY, "list"] as const;
 
     const { columns, isLoading, error, columnVisibility } = useBackendColumns<Resource>({
-        fetchColumns: async () => getResourcesColumns().then((res) => res.data),
+        fetchColumns: async () => getResourcesColumns(),
         queryKey: [RESOURCES_FETCH_KEY, "columns"],
         appendColumns: getActionsColumn(setRowAction),
         overrideColumns: prependColumns(),
@@ -103,7 +103,7 @@ const ResourcesListPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getResourcesList(state).then((res) => res.data),
+                        fetch: (state) => getResourcesList(state),
                         queryKey: (state) => [RESOURCES_FETCH_KEY, "list", state],
                         initialPerPage: 10,
                     },

@@ -9,7 +9,7 @@ import { getUsersStats } from "./stats-card/api";
 const StatsCard = () => {
     const { data, isLoading, isError } = useQuery({
         queryKey: [USER_FETCH_PERSISTANT, "stats"],
-        queryFn: () => getUsersStats().then((res) => res.data.stats),
+        queryFn: async () => (await getUsersStats()).stats,
         staleTime: 60_000,
     });
 

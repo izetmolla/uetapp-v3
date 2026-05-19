@@ -1,54 +1,77 @@
-import { BookOpen, FlaskConical, Briefcase, Microscope, Award, Users, Clock } from "lucide-react";
+import { Users, Clock } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
-import { findFaculty, studyLevels } from "../../data/mockData";
 import { Crumbs } from "../../components/crumbs";
 import { PageHeader, PageShell } from "../../components/page-shell";
-import { GridSkeleton, MaybeSkeleton, useSimulatedLoad } from "../../components/skeleton-page";
+import { GridSkeleton } from "../../components/skeleton-page";
 import { Link, useParams } from "react-router";
+import ContentLoader from "@workspace/flowtrove/components/content-loader";
+import { useQuery } from "@tanstack/react-query";
+import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
+import { getStudyLevels, type GetStudyLevelsResponse, type StudyLevel } from "./api";
+import { useMemo } from "react";
+import Icon from "@workspace/ui/components/icon";
 
 
-const iconMap = {
-  book: BookOpen,
-  flask: FlaskConical,
-  briefcase: Briefcase,
-  microscope: Microscope,
-  award: Award,
-};
 
 
 const StudyLevelsPage = () => {
-  const { year = "", facultySlug = "" } = useParams();
+  const { year = "", faculty_slug = "" } = useParams();
   console.log("year", year);
-  console.log("facultySlug", facultySlug);
-  const faculty = findFaculty(facultySlug);
-  const loading = useSimulatedLoad();
+  console.log("faculty_slug", faculty_slug);
 
-  if (!faculty) return <div>Faculty not found</div>;
+  // if (!faculty) return <div>Faculty not found</div>;
+  const queryKey = ["studyLevels", year, faculty_slug];
+  // const grouped = {
+  //   Undergraduate: studyLevels.filter((l) => l.group === "Undergraduate"),
+  //   Postgraduate: studyLevels.filter((l) => l.group === "Postgraduate"),
+  //   Vocational: studyLevels.filter((l) => l.group === "Vocational"),
+  // };
 
-  const grouped = {
-    Undergraduate: studyLevels.filter((l) => l.group === "Undergraduate"),
-    Postgraduate: studyLevels.filter((l) => l.group === "Postgraduate"),
-    Vocational: studyLevels.filter((l) => l.group === "Vocational"),
-  };
 
+  const { data, isLoading, error } = useQuery({
+    queryFn: () => getStudyLevels({ year, faculty_slug }),
+    queryKey: queryKey,
+    ...withInitialData<GetStudyLevelsResponse>(),
+  });
+
+
+  const grouped = useMemo(() => {
+    const g: { group: string; items: StudyLevel[] }[] = [];
+    data?.study_levels.forEach((l) => {
+      const group = g.find((g) => g.group === l.group);
+      if (group) {
+        group.items.push(l);
+      } else {
+        g.push({ group: l.group, items: [l] });
+      }
+    });
+    return g as { group: string; items: StudyLevel[] }[];
+  }, [data?.study_levels]) as { group: string; items: StudyLevel[] }[];
+  console.log("grouped", grouped);
   return (
     <PageShell>
       <Crumbs
         items={[
           { label: "Documents", to: "/documents" },
           { label: year.replace("-", " – "), to: `${year}` },
-          { label: faculty.short },
+          { label: data?.faculty?.short ?? "" },
         ]}
       />
-      <PageHeader title="Study Levels" subtitle={faculty.name} />
+      <PageHeader title="Study Levels" subtitle={data?.faculty?.name ?? ""} />
 
-      <MaybeSkeleton loading={loading} skeleton={<GridSkeleton count={5} />}>
+      <ContentLoader
+        isLoading={isLoading}
+        error={withError(error, data)}
+        forMeta
+        customLoader={<GridSkeleton count={5} />}
+      >
+
         <div className="space-y-10">
-          <Section title="Undergraduate Programs" items={grouped.Undergraduate} year={year} facultySlug={facultySlug} />
-          <Section title="Postgraduate Programs" items={grouped.Postgraduate} year={year} facultySlug={facultySlug} />
-          <Section title="Vocational Programs" items={grouped.Vocational} year={year} facultySlug={facultySlug} />
+          {grouped?.map((l) => (
+            <Section key={l.group} title={l.group} items={l.items} year={year} faculty_slug={faculty_slug} />
+          ))}
         </div>
-      </MaybeSkeleton>
+      </ContentLoader>
     </PageShell>
   );
 }
@@ -57,15 +80,15 @@ function Section({
   title,
   items,
   year,
-  facultySlug,
+  faculty_slug,
 }: {
   title: string;
-  items: typeof studyLevels;
+  items: StudyLevel[];
   year: string;
-  facultySlug: string;
+  faculty_slug: string;
 }) {
   console.log("year", year);
-  console.log("facultySlug", facultySlug);
+  console.log("faculty_slug", faculty_slug);
   return (
     <section>
       <div className="flex items-center gap-4 mb-4">
@@ -76,7 +99,6 @@ function Section({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {items.map((l) => {
-          const Icon = iconMap[l.iconKey];
           return (
             <Link
               key={l.slug}
@@ -94,7 +116,7 @@ function Section({
                   borderColor: `${l.accent}55`,
                 }}
               >
-                <Icon className="w-7 h-7" />
+                <Icon name={l.icon} className="w-7 h-7"/>
               </div>
               <h3 className="font-display text-lg font-semibold">{l.name}</h3>
               <p className="text-xs text-muted-foreground mt-1 mb-3">{l.description}</p>

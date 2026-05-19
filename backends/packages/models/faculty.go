@@ -24,6 +24,13 @@ type Faculty struct {
 
 	Departments []Department `json:"departments" gorm:"foreignKey:FacultyID;references:ID"`
 
+	Short      string `json:"short" gorm:"size:255;"`
+	Students   int64  `json:"students" gorm:"-"`
+	Folders    int64  `json:"folders" gorm:"-"`
+	Completion int64  `json:"completion" gorm:"-"`
+	Accent     string `json:"accent" gorm:"size:255;"`
+	Icon       string `json:"icon" gorm:"size:255;"`
+
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`

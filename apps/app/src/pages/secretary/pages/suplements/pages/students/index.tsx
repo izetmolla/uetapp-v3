@@ -15,7 +15,7 @@ const Supplements = () => {
     const validFilters = getValidFilters(search.filters);
     const { isLoading, error, data } = useQuery({
         queryKey: ["getSupplementStudents", search, validFilters],
-        queryFn: () => getSupplementStudents({ ...search, filters: validFilters }).then((res) => res.data),
+        queryFn: () => getSupplementStudents({ ...search, filters: validFilters }),
         placeholderData: keepPreviousData,
     });
 

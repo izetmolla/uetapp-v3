@@ -36,7 +36,7 @@ const AcademicYearsPage = () => {
     const listQueryKey = [ACADEMIC_YEARS_FETCH_KEY, "list"] as const;
 
     const { columns, isLoading: columnsLoading, error, columnVisibility } = useBackendColumns<AcademicYear>({
-        fetchColumns: async () => getAcademicYearsColumns().then((res) => res.data),
+        fetchColumns: async () => getAcademicYearsColumns(),
         queryKey: [ACADEMIC_YEARS_FETCH_KEY, "columns"],
         appendColumns: getActionsColumn(setRowAction),
         overrideColumns: prependColumns(),
@@ -104,7 +104,7 @@ const AcademicYearsPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getAcademicYearsList(state).then((res) => res.data),
+                        fetch: (state) => getAcademicYearsList(state),
                         queryKey: (state) => [ACADEMIC_YEARS_FETCH_KEY, "list", state],
                         initialPerPage: 10,
                     },

@@ -23,7 +23,7 @@ const RolesListPage = () => {
     const openCreateRole = useRolesListStore((s) => s.openCreateRole);
 
     const { columns, isLoading: columnsLoading, error, columnVisibility } = useBackendColumns<Role>({
-        fetchColumns: async () => getRolesColumns().then((res) => res.data),
+        fetchColumns: async () => getRolesColumns(),
         queryKey: [ROLES_FETCH_PERSISTANT, "columns"],
         appendColumns: getActionsColumn(),
         overrideColumns: getColumnOverrides(),
@@ -52,7 +52,7 @@ const RolesListPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getRolesList(state).then((res) => res.data),
+                        fetch: (state) => getRolesList(state),
                         queryKey: (state) => [ROLES_FETCH_PERSISTANT, "roles", state],
                         initialPerPage: 10,
                     },

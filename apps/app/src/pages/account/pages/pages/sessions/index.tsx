@@ -11,7 +11,6 @@ import {
     getSessionsColumns,
     getSessionsList,
     type Session,
-    type SessionsListResponse,
 } from "./api"
 import { prependSessionColumns } from "./components/table-columns"
 
@@ -26,16 +25,14 @@ const SessionsPage = () => {
         error,
         columnVisibility,
     } = useBackendColumns<Session>({
-        fetchColumns: async () =>
-            getSessionsColumns().then((res) => res.data as BackendColumnsResponse),
+        fetchColumns: async () => getSessionsColumns() as Promise<BackendColumnsResponse>,
         queryKey: [SESSIONS_FETCH_PERSISTENT, "columns"],
         overrideColumns: prependSessionColumns(currentSessionId),
     })
 
     const fetchSessions = useMemo(
         () => async (state: unknown) => {
-            const res = await getSessionsList(state)
-            const body = res.data as SessionsListResponse
+            const body = await getSessionsList(state)
             setCurrentSessionId(body.current_session_id)
             return body
         },

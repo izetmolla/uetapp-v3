@@ -76,7 +76,7 @@ const SignIn = () => {
 
     const mutation = useMutation({
         mutationFn: signIn,
-        onSuccess: ({ data }) => {
+        onSuccess: (data) => {
             if (data?.error) {
                 if (data?.error?.field != "") {
                     form.setError(t(data.error.field as string) as "email" | "password" | "checkEmail", { message: data.error.message })

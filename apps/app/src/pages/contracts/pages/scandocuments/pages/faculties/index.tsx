@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, Cpu, BookOpen, Scale, Stethoscope, ArrowRight } from "lucide-react";
+import {  ArrowRight } from "lucide-react";
 import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
 import { Badge } from "@workspace/ui/components/badge";
@@ -7,58 +7,71 @@ import { Button } from "@workspace/ui/components/button";
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@workspace/ui/components/table";
-import { faculties } from "../../data/mockData";
 import { Crumbs } from "../../components/crumbs";
 import { PageHeader, PageShell } from "../../components/page-shell";
-import { GridSkeleton, MaybeSkeleton, TableSkeleton, useSimulatedLoad } from "../../components/skeleton-page";
+import { GridSkeleton, TableSkeleton } from "../../components/skeleton-page";
 import { Link, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
+import ContentLoader from "@workspace/flowtrove/components/content-loader";
+import { useQuery } from "@tanstack/react-query";
+import { getFaculties, type GetFacultiesResponse } from "./api";
+import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
+import type { Faculty } from "./api";
+import Icon from "@workspace/ui/components/icon";
 
 
 
-const iconMap = {
-    trending: TrendingUp,
-    cpu: Cpu,
-    book: BookOpen,
-    scale: Scale,
-    stethoscope: Stethoscope,
-};
+
 
 const FacultiesPage = () => {
+    const { t } = useTranslation("contracts");
     const { year = "" } = useParams();
     const [list, setList] = useState(false);
-    const loading = useSimulatedLoad();
+
+    const { data, isLoading, error } = useQuery({
+        queryFn: () => getFaculties({ year }),
+        queryKey: ["faculties", year],
+        ...withInitialData<GetFacultiesResponse>(),
+    });
 
     return (
         <PageShell>
-            <Crumbs items={[{ label: "Documents", to: "/documents" }, { label: year.replace("-", " – ") }]} />
-            <PageHeader
-                title={`Faculties — ${year.replace("-", " – ")}`}
-                subtitle="Select a faculty to browse its study levels"
-                right={
-                    <div className="flex items-center gap-2">
-                        <Label htmlFor="view" className="text-xs text-muted-foreground">
-                            {list ? "List" : "Grid"} View
-                        </Label>
-                        <Switch id="view" checked={list} onCheckedChange={setList} />
-                    </div>
+            <ContentLoader
+                isLoading={isLoading}
+                error={withError(error, data)}
+                forMeta
+                customLoader={list ? <TableSkeleton /> : <GridSkeleton />}
+                header={
+                    <>
+                        <Crumbs items={[{ label: "Documents", to: "/documents" }, { label: year.replace("-", " – ") }]} />
+                        <PageHeader
+                            title={`${t("Faculties")} — [${year.replace("-", " – ")}]`}
+                            subtitle={t("Select a faculty to browse its study levels")}
+                            right={
+                                <div className="flex items-center gap-2">
+                                    <Label htmlFor="view" className="text-xs text-muted-foreground">
+                                        {list ? t("List") : t("Grid")} {t("View")}
+                                    </Label>
+                                    <Switch id="view" checked={list} onCheckedChange={setList} />
+                                </div>
+                            }
+                        />
+                    </>
                 }
-            />
-
-            <MaybeSkeleton loading={loading} skeleton={list ? <TableSkeleton /> : <GridSkeleton />}>
-                {list ? <ListView year={year} /> : <GridView year={year} />}
-            </MaybeSkeleton>
+            >
+                {list ? <ListView year={year} faculties={data?.faculties || []} /> : <GridView year={year} faculties={data?.faculties || []} />}
+            </ContentLoader>
         </PageShell>
     );
 }
 
 
 export default FacultiesPage
-function GridView({ year }: { year: string }) {
+function GridView({ year, faculties }: { year: string, faculties: Faculty[] }) {
     console.log(year);
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {faculties.map((f) => {
-                const Icon = iconMap[f.iconKey];
                 return (
                     <Link
                         key={f.slug}
@@ -70,7 +83,7 @@ function GridView({ year }: { year: string }) {
                             className="w-12 h-12 grid place-items-center rounded-xl mb-4"
                             style={{ backgroundColor: `${f.accent}22`, color: f.accent }}
                         >
-                            <Icon className="w-6 h-6" />
+                            <Icon name={f.icon} className="w-6 h-6" />
                         </div>
                         <h3 className="font-display text-lg font-semibold leading-snug mb-1">{f.name}</h3>
                         <p className="text-xs text-muted-foreground mb-4">{f.short}</p>
@@ -85,7 +98,7 @@ function GridView({ year }: { year: string }) {
     );
 }
 
-function ListView({ year }: { year: string }) {
+function ListView({ year, faculties }: { year: string, faculties: Faculty[] }) {
     return (
         <div className="glass-card rounded-2xl overflow-hidden">
             <Table>
@@ -100,8 +113,7 @@ function ListView({ year }: { year: string }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {faculties.map((f, i) => {
-                        const Icon = iconMap[f.iconKey];
+                    {faculties?.map((f, i) => {
                         return (
                             <TableRow key={f.slug} className={i % 2 ? "bg-secondary/20" : ""}>
                                 <TableCell>
@@ -109,7 +121,7 @@ function ListView({ year }: { year: string }) {
                                         className="w-9 h-9 grid place-items-center rounded-lg"
                                         style={{ backgroundColor: `${f.accent}22`, color: f.accent }}
                                     >
-                                        <Icon className="w-4 h-4" />
+                                        <Icon name={f.icon} className="w-4 h-4" />
                                     </div>
                                 </TableCell>
                                 <TableCell className="font-medium">{f.name}</TableCell>

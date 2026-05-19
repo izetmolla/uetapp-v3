@@ -37,7 +37,7 @@ const StudyLevelsPage = () => {
     const listQueryKey = [STUDY_LEVELS_FETCH_KEY, "list"] as const;
 
     const { columns, isLoading, error, columnVisibility } = useBackendColumns<StudyLevel>({
-        fetchColumns: async () => getStudyLevelsColumns().then((res) => res.data),
+        fetchColumns: async () => getStudyLevelsColumns(),
         queryKey: [STUDY_LEVELS_FETCH_KEY, "columns"],
         appendColumns: getActionsColumn(setRowAction),
         overrideColumns: prependColumns(),
@@ -105,7 +105,7 @@ const StudyLevelsPage = () => {
                 source={{
                     type: "server",
                     options: {
-                        fetch: (state) => getStudyLevelsList(state).then((res) => res.data),
+                        fetch: (state) => getStudyLevelsList(state),
                         queryKey: (state) => [STUDY_LEVELS_FETCH_KEY, "list", state],
                         initialPerPage: 10,
                     },

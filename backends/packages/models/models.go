@@ -15,9 +15,9 @@ var ErrJSONBArrayMarshal = errors.New("jsonb array marshal")
 func Models() []any {
 	models := []any{
 
-		&Student{},
-		&Employe{},
-
+		// &Student{},
+		// &Employe{},
+		// &AcademicYear{},
 		// &AcademicYear{},
 		// &Faculty{},
 		// &Department{},
@@ -25,35 +25,15 @@ func Models() []any {
 		// &Resource{},
 		// &Role{},
 
+		// &StudentScanFolder{},
+		// &StudentScanFolderDoc{},
+		// &StudentScanFolderDocFile{},
+
 		// &OrgUnit{},
 		// &Theme{},
-		// &Ws{},
-		// &WsUser{},
 		// &Session{},
 		// &User{},
-		// &AppService{},
-		// &AppNavigation{},
-		// &Endpoint{},
 
-		// // Ws Units
-		// &Entity{}, &EntityAttribute{}, &EntityRecord{}, &EntityRelation{}, &Template{},
-
-		// // Backend Units
-		// &Frontend{}, &Backend{}, &CallStackItem{},
-		// &AiProvider{}, &AiModel{}, &AiConversion{}, &AiMessage{},
-
-		// &WsMcpToken{},
-		// &WsMcpTokenStat{},
-
-		// // Ws Domains
-		// &WsDomain{},
-		// &WsDomainRegistrar{},
-		// &WsDomainSSL{},
-		// &WsDomainRedirect{},
-		// &WsDomainOrigin{},
-		// &WsDns{},
-
-		// &Workflow{},
 		// &Role{},
 		// &User{},
 		// &Session{},
