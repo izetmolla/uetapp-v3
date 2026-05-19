@@ -15,6 +15,33 @@ export function getUserDetail(id: string) {
     });
 }
 
+export function getUserCreateTemplate() {
+    return ApiService.fetchDataBody<UserDetailResponse>({
+        url: withAPI(`${USERS_LIST_BASE}/new`),
+        method: "get",
+    });
+}
+
+export function createUser(data: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    username?: string;
+    ldap_username?: string;
+    image?: string;
+    status: string;
+    password?: string;
+    password_confirm?: string;
+    is_confirmed?: boolean;
+    roles?: string[];
+}) {
+    return ApiService.fetchDataBody<UserMutationResponse>({
+        url: withAPI(USERS_LIST_BASE),
+        method: "post",
+        data,
+    });
+}
+
 export function updateUserGeneral(
     id: string,
     data: {

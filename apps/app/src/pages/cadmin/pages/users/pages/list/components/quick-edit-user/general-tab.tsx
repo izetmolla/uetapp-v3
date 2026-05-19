@@ -24,7 +24,7 @@ import {
 } from "@workspace/ui/components/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
-import { updateUserGeneral, type User } from "./api";
+import { createUser, updateUserGeneral, type User } from "./api";
 import FormSection from "./form-section";
 import { QUICK_EDIT_FORM_IDS } from "./form-ids";
 import { generalSchema, STATUS_VALUES, type GeneralFormValues } from "./schemas";
@@ -32,7 +32,9 @@ import { generalSchema, STATUS_VALUES, type GeneralFormValues } from "./schemas"
 interface GeneralTabProps {
     userId: string;
     user: User;
+    isCreateMode?: boolean;
     onSaved: (user: User) => void;
+    onCreated?: (user: User) => void;
     onPendingChange: (pending: boolean) => void;
 }
 
@@ -53,7 +55,14 @@ function formatStatusLabel(value: string) {
     return value.replace(/_/g, " ");
 }
 
-const GeneralTab: FC<GeneralTabProps> = ({ userId, user, onSaved, onPendingChange }) => {
+const GeneralTab: FC<GeneralTabProps> = ({
+    userId,
+    user,
+    isCreateMode = false,
+    onSaved,
+    onCreated,
+    onPendingChange,
+}) => {
     const { t } = useTranslation("admin");
 
     const form = useForm<GeneralFormValues>({
@@ -71,23 +80,40 @@ const GeneralTab: FC<GeneralTabProps> = ({ userId, user, onSaved, onPendingChang
     }, [form, user]);
 
     const mutation = useMutation({
-        mutationFn: (data: GeneralFormValues) => updateUserGeneral(userId, data),
+        mutationFn: (data: GeneralFormValues) =>
+            isCreateMode ? createUser(data) : updateUserGeneral(userId, data),
         onMutate: () => onPendingChange(true),
         onSettled: () => onPendingChange(false),
         onSuccess: (res) => {
             if (isApiErrorBody(res)) {
-                toast.error(getApiErrorMessageFromBody(res, t("Failed to update user")), {
-                    richColors: true,
-                });
+                toast.error(
+                    getApiErrorMessageFromBody(
+                        res,
+                        isCreateMode ? t("Failed to create user") : t("Failed to update user"),
+                    ),
+                    { richColors: true },
+                );
                 return;
             }
-            toast.success(t("General information saved"), { richColors: true });
-            if (res.user) onSaved(res.user);
+            toast.success(
+                isCreateMode ? t("User created successfully") : t("General information saved"),
+                { richColors: true },
+            );
+            if (res.user) {
+                if (isCreateMode) {
+                    onCreated?.(res.user);
+                } else {
+                    onSaved(res.user);
+                }
+            }
         },
         onError: (err: { response?: { data?: { message?: string } }; message?: string }) => {
-            toast.error(err?.response?.data?.message ?? err?.message ?? t("Failed to update user"), {
-                richColors: true,
-            });
+            toast.error(
+                err?.response?.data?.message ??
+                    err?.message ??
+                    (isCreateMode ? t("Failed to create user") : t("Failed to update user")),
+                { richColors: true },
+            );
         },
     });
 

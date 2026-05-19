@@ -17,8 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/av
 import { Badge } from "@workspace/ui/components/badge";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
 import { USER_FETCH_PERSISTANT } from "../../api";
-import useUsersListStore from "../../store";
-import { getUserDetail, type User } from "./api";
+import useUsersListStore, { EMPTY_USER } from "../../store";
+import { getUserCreateTemplate, getUserDetail, type User } from "./api";
 import { QUICK_EDIT_FORM_IDS } from "./form-ids";
 import GeneralTab from "./general-tab";
 import PasswordTab from "./password-tab";
@@ -26,20 +26,22 @@ import RolesTab from "./roles-tab";
 
 const QuickEditUser: FC = () => {
     const { t } = useTranslation("admin");
-    const { selectedUser, isQuickEditDialogOpen, closeDialogs } = useUsersListStore();
+    const { selectedUser, isCreateMode, isQuickEditDialogOpen, closeDialogs, promoteCreatedUser } =
+        useUsersListStore();
     const [activeTab, setActiveTab] = useState("general");
     const [isSaving, setIsSaving] = useState(false);
-    const resolvedUserId = selectedUser?.id ?? null;
+    const resolvedUserId = selectedUser?.id?.trim() || null;
+    const isCreate = isCreateMode || !resolvedUserId;
 
     const listQueryKey = [USER_FETCH_PERSISTANT, "users"] as const;
 
     const { data, isLoading, isError, refetch } = useQuery({
-        queryKey: [USER_FETCH_PERSISTANT, "user-detail", resolvedUserId],
-        queryFn: () => getUserDetail(resolvedUserId!),
-        enabled: isQuickEditDialogOpen && !!resolvedUserId,
+        queryKey: [USER_FETCH_PERSISTANT, "user-detail", isCreate ? "new" : resolvedUserId],
+        queryFn: () => (isCreate ? getUserCreateTemplate() : getUserDetail(resolvedUserId!)),
+        enabled: isQuickEditDialogOpen && (isCreate || !!resolvedUserId),
     });
 
-    const user = data?.user;
+    const user = data?.user ?? (isCreate ? EMPTY_USER : undefined);
     const availableRoles = data?.available_roles ?? [];
 
     const handleClose = useCallback(() => {
@@ -52,13 +54,27 @@ const QuickEditUser: FC = () => {
         (updated: User) => {
             void queryClient.invalidateQueries({ queryKey: listQueryKey });
             void queryClient.invalidateQueries({ queryKey: [USER_FETCH_PERSISTANT, "stats"] });
-            void queryClient.setQueryData(
-                [USER_FETCH_PERSISTANT, "user-detail", resolvedUserId],
-                (prev: typeof data | undefined) =>
-                    prev ? { ...prev, user: { ...prev.user, ...updated } } : prev,
-            );
+            if (resolvedUserId) {
+                void queryClient.setQueryData(
+                    [USER_FETCH_PERSISTANT, "user-detail", resolvedUserId],
+                    (prev: typeof data | undefined) =>
+                        prev ? { ...prev, user: { ...prev.user, ...updated } } : prev,
+                );
+            }
         },
         [listQueryKey, resolvedUserId, data],
+    );
+
+    const handleCreated = useCallback(
+        (created: User) => {
+            promoteCreatedUser(created);
+            void queryClient.setQueryData(
+                [USER_FETCH_PERSISTANT, "user-detail", created.id],
+                { user: created, available_roles: availableRoles },
+            );
+            handleSaved(created);
+        },
+        [promoteCreatedUser, availableRoles, handleSaved],
     );
 
     const displayName = user
@@ -79,19 +95,28 @@ const QuickEditUser: FC = () => {
               ? QUICK_EDIT_FORM_IDS.roles
               : QUICK_EDIT_FORM_IDS.general;
 
+    const isPendingCreate = isCreateMode && !resolvedUserId;
+
     const saveLabel =
-        activeTab === "password"
-            ? t("Save security")
-            : activeTab === "roles"
-              ? t("Save roles")
-              : t("Save changes");
+        isPendingCreate && activeTab === "general"
+            ? t("Create user")
+            : activeTab === "password"
+          ? t("Save security")
+          : activeTab === "roles"
+            ? t("Save roles")
+            : t("Save changes");
+
+    const dialogTitle = isCreate ? t("Add user") : t("Edit user");
+
+    const canShowTabs = !isLoading && !isError && user && (isCreate || resolvedUserId);
+    const passwordRolesDisabled = isPendingCreate;
 
     return (
         <Dialog open={isQuickEditDialogOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="flex h-[min(88vh,720px)] w-full max-w-3xl flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
                 <div className="shrink-0 border-b px-6 py-4">
                     <DialogHeader className="sr-only">
-                        <DialogTitle>{t("Edit user")}</DialogTitle>
+                        <DialogTitle>{dialogTitle}</DialogTitle>
                     </DialogHeader>
                     <div className="flex items-center gap-4">
                         {isLoading ? (
@@ -105,9 +130,13 @@ const QuickEditUser: FC = () => {
                             </Avatar>
                         )}
                         <div className="min-w-0 flex-1">
-                            <p className="text-muted-foreground mb-0.5 text-xs">{t("Edit user")}</p>
+                            <p className="text-muted-foreground mb-0.5 text-xs">{dialogTitle}</p>
                             <p className="truncate text-base font-semibold leading-tight text-foreground">
-                                {isLoading ? t("Loading user...") : displayName || t("User details")}
+                                {isLoading
+                                    ? t("Loading user...")
+                                    : isCreate
+                                      ? t("New user")
+                                      : displayName || t("User details")}
                             </p>
                             {user?.email ? (
                                 <p className="text-muted-foreground mt-1 flex items-center gap-1.5 truncate text-sm">
@@ -121,7 +150,7 @@ const QuickEditUser: FC = () => {
                                 </p>
                             ) : null}
                         </div>
-                        {user?.status && !isLoading ? (
+                        {user?.status && !isLoading && !isCreate ? (
                             <Badge
                                 variant={statusVariant(user.status)}
                                 className="shrink-0 capitalize"
@@ -137,14 +166,14 @@ const QuickEditUser: FC = () => {
                         <Skeleton className="h-9 w-64" />
                         <Skeleton className="h-[280px] w-full" />
                     </div>
-                ) : isError || !user || !resolvedUserId ? (
+                ) : isError || !user ? (
                     <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
                         <p className="text-muted-foreground text-sm">{t("Could not load user details.")}</p>
                         <Button variant="outline" size="sm" onClick={() => void refetch()}>
                             {t("Retry")}
                         </Button>
                     </div>
-                ) : (
+                ) : canShowTabs ? (
                     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                         <Tabs
                             value={activeTab}
@@ -155,10 +184,18 @@ const QuickEditUser: FC = () => {
                                 <TabsTrigger value="general" className="px-4 text-xs sm:text-sm">
                                     {t("General")}
                                 </TabsTrigger>
-                                <TabsTrigger value="password" className="px-4 text-xs sm:text-sm">
+                                <TabsTrigger
+                                    value="password"
+                                    className="px-4 text-xs sm:text-sm"
+                                    disabled={passwordRolesDisabled}
+                                >
                                     {t("Password & Security")}
                                 </TabsTrigger>
-                                <TabsTrigger value="roles" className="px-4 text-xs sm:text-sm">
+                                <TabsTrigger
+                                    value="roles"
+                                    className="px-4 text-xs sm:text-sm"
+                                    disabled={passwordRolesDisabled}
+                                >
                                     {t("Roles")}
                                 </TabsTrigger>
                             </TabsList>
@@ -168,9 +205,11 @@ const QuickEditUser: FC = () => {
                                     className="col-start-1 row-start-1 mt-0 flex h-full min-h-0 flex-col overflow-y-auto py-5 data-[state=inactive]:hidden"
                                 >
                                     <GeneralTab
-                                        userId={resolvedUserId}
+                                        userId={resolvedUserId ?? ""}
                                         user={user}
+                                        isCreateMode={isCreate}
                                         onSaved={handleSaved}
+                                        onCreated={handleCreated}
                                         onPendingChange={setIsSaving}
                                     />
                                 </TabsContent>
@@ -178,24 +217,36 @@ const QuickEditUser: FC = () => {
                                     value="password"
                                     className="col-start-1 row-start-1 mt-0 flex h-full min-h-0 flex-col overflow-y-auto py-5 data-[state=inactive]:hidden"
                                 >
-                                    <PasswordTab
-                                        userId={resolvedUserId}
-                                        user={user}
-                                        onSaved={handleSaved}
-                                        onPendingChange={setIsSaving}
-                                    />
+                                    {passwordRolesDisabled ? (
+                                        <p className="text-muted-foreground text-sm">
+                                            {t("Save general information to create the user first.")}
+                                        </p>
+                                    ) : (
+                                        <PasswordTab
+                                            userId={resolvedUserId!}
+                                            user={user}
+                                            onSaved={handleSaved}
+                                            onPendingChange={setIsSaving}
+                                        />
+                                    )}
                                 </TabsContent>
                                 <TabsContent
                                     value="roles"
                                     className="col-start-1 row-start-1 mt-0 flex h-full min-h-0 flex-col overflow-hidden data-[state=inactive]:hidden"
                                 >
-                                    <RolesTab
-                                        userId={resolvedUserId}
-                                        user={user}
-                                        availableRoles={availableRoles}
-                                        onSaved={handleSaved}
-                                        onPendingChange={setIsSaving}
-                                    />
+                                    {passwordRolesDisabled ? (
+                                        <p className="text-muted-foreground text-sm">
+                                            {t("Save general information to create the user first.")}
+                                        </p>
+                                    ) : (
+                                        <RolesTab
+                                            userId={resolvedUserId!}
+                                            user={user}
+                                            availableRoles={availableRoles}
+                                            onSaved={handleSaved}
+                                            onPendingChange={setIsSaving}
+                                        />
+                                    )}
                                 </TabsContent>
                             </div>
                         </Tabs>
@@ -208,13 +259,18 @@ const QuickEditUser: FC = () => {
                             >
                                 {t("Cancel")}
                             </Button>
-                            <Button type="submit" form={activeFormId} disabled={isSaving} className="gap-2">
+                            <Button
+                                type="submit"
+                                form={activeFormId}
+                                disabled={isSaving || (isPendingCreate && activeTab !== "general")}
+                                className="gap-2"
+                            >
                                 {isSaving ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
                                 {saveLabel}
                             </Button>
                         </DialogFooter>
                     </div>
-                )}
+                ) : null}
             </DialogContent>
         </Dialog>
     );

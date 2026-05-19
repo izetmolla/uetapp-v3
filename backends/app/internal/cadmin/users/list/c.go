@@ -21,6 +21,8 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	api.Get("/", controller.GetUsersListAPI)
 	api.Get("/columns", controller.GetUsersColumns)
 	api.Get("/stats", controller.GetUsersStatsAPI)
+	api.Get("/new", controller.GetUserCreateTemplate)
+	api.Post("/", controller.CreateUser)
 	api.Post("/disable", controller.DisableUsers)
 	api.Post("/enable", controller.EnableUsers)
 	api.Get("/:id", controller.GetUserDetail)

@@ -6,6 +6,9 @@ import { getActionsColumn, getColumnOverrides } from "./components/table-columns
 import StatsCard from "./components/stats-card";
 import TableConfigCustomizator from "./components/table-config-customizator";
 import QuickEditUser from "./components/quick-edit-user";
+import useUsersListStore from "./store";
+import { Button } from "@workspace/ui/components/button";
+import { UserPlus } from "lucide-react";
 import DeleteUserDialog from "./components/delete-user-dialog";
 import DisableUserDialog from "./components/disable-user-dialog";
 import EnableUserDialog from "./components/enable-user-dialog";
@@ -18,6 +21,7 @@ const breadcrumb: BreadcrumbItem[] = [
 
 const UsersListPage = () => {
     const { t } = useTranslation("admin");
+    const openCreateUser = useUsersListStore((s) => s.openCreateUser);
 
     const {
         columns,
@@ -40,6 +44,10 @@ const UsersListPage = () => {
             showHeaderSeparator
             rightComponent={
                 <div className="flex w-full items-end justify-end mb-2 gap-1">
+                    <Button type="button" variant="default" onClick={openCreateUser}>
+                        <UserPlus className="size-4" aria-hidden />
+                        {t("Add User")}
+                    </Button>
                     <TableConfigCustomizator />
                 </div>
             }
