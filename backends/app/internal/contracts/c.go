@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
 	"github.com/uetedu/app/internal/contracts/scandocuments"
+	"github.com/uetedu/app/internal/contracts/students"
 )
 
 type Controller struct {
@@ -22,6 +23,7 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api := apiGroup.Group("/contracts", controller.ContractsMiddlewareApi)
 	scandocuments.SetupApiRoutes(api, appClients)
+	students.SetupApiRoutes(api, appClients)
 	// suplements.SetupApiRoutes(api, appClients)
 
 	// app.Get("/", controller.GetEnterDataView) // Web endpoint for getting enter data
@@ -34,6 +36,7 @@ func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	app := appGroup.Group("/contracts", controller.ContractsMiddlewareView)
 	scandocuments.SetupWebRoutes(app, appClients)
+	students.SetupWebRoutes(app, appClients)
 	// suplements.SetupWebRoutes(app, appClients)
 	app.Get("/", appClients.WebView("Contracts"))
 

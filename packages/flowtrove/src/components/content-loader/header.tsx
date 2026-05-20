@@ -88,7 +88,9 @@ export const ContentLoaderHeader: FC<ContentLoaderHeaderProps> = ({
                 )}
             </div>
             {rightComponent && (
-                <div className="flex gap-1">{rightComponent}</div>
+                <div className="flex min-w-0 w-full flex-1 basis-full justify-end sm:w-auto sm:max-w-2xl">
+                    {rightComponent}
+                </div>
             )}
         </div>
     );

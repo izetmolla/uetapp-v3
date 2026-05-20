@@ -14,16 +14,20 @@ export function PageHeader({
     right?: ReactNode;
 }) {
     return (
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-            <div>
-                <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
+        <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+            <div className="min-w-0 flex-1">
+                <h1 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
                     {title}
                 </h1>
-                {subtitle && (
-                    <p className="text-sm text-muted-foreground mt-1.5">{subtitle}</p>
-                )}
+                {subtitle ? (
+                    <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
+                ) : null}
             </div>
-            {right}
+            {right ? (
+                <div className="flex w-full shrink-0 justify-stretch lg:w-auto lg:justify-end">
+                    {right}
+                </div>
+            ) : null}
         </div>
     );
 }

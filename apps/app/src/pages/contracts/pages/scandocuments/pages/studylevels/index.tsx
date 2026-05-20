@@ -16,8 +16,6 @@ import Icon from "@workspace/ui/components/icon";
 
 const StudyLevelsPage = () => {
   const { year = "", faculty_slug = "" } = useParams();
-  console.log("year", year);
-  console.log("faculty_slug", faculty_slug);
 
   // if (!faculty) return <div>Faculty not found</div>;
   const queryKey = ["studyLevels", year, faculty_slug];
@@ -47,14 +45,17 @@ const StudyLevelsPage = () => {
     });
     return g as { group: string; items: StudyLevel[] }[];
   }, [data?.study_levels]) as { group: string; items: StudyLevel[] }[];
-  console.log("grouped", grouped);
+ 
+  
+
+  const basePath = "/contracts/scandocuments";
   return (
     <PageShell>
       <Crumbs
         items={[
-          { label: "Documents", to: "/documents" },
-          { label: year.replace("-", " – "), to: `${year}` },
-          { label: data?.faculty?.short ?? "" },
+          { label: "Documents", to: basePath },
+          { label: year.replace("-", " – "), to: `${basePath}/${year}` },
+          { label: data?.faculty?.name ?? "", to: `${basePath}/${year}/${faculty_slug}` },
         ]}
       />
       <PageHeader title="Study Levels" subtitle={data?.faculty?.name ?? ""} />

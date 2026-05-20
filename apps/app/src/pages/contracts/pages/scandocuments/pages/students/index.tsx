@@ -1,6 +1,6 @@
 
-import {  useState } from "react";
-import { Eye, Download, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Eye, Download, Search, Plus, Cog } from "lucide-react";
 import { Input } from "@workspace/ui/components/input";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -19,12 +19,16 @@ import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { getStudents, type GetStudentsResponse } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
+import AddStudentDialog from "./components/add-student-dialog";
+import { useStudentListStore } from "./store";
+
 const PER_PAGE = 10;
 
 const StudentsPage = () => {
     const { year = "", faculty_slug = "", level = "", folder_id } = useParams();
+    const setIsAddStudentDialogOpen = useStudentListStore((s) => s.setIsAddStudentDialogOpen);
 
-  
+
 
     const [q, setQ] = useState("");
     const [page, setPage] = useState(1);
@@ -34,35 +38,74 @@ const StudentsPage = () => {
         queryKey: ["students", year, faculty_slug, level, folder_id],
         ...withInitialData<GetStudentsResponse>(),
     });
-    const totalPages = Math.max(1, Math.ceil(data?.students.length ?? 0 / PER_PAGE));
+
+
+
+    const filteredStudents = useMemo(() => {
+        const students = data?.students ?? [];
+        const term = q.trim().toLowerCase();
+        if (!term) return students;
+        return students.filter(
+            (s) =>
+                s.name.toLowerCase().includes(term) ||
+                String(s.id).toLowerCase().includes(term),
+        );
+    }, [data?.students, q]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredStudents.length / PER_PAGE));
     const safePage = Math.min(page, totalPages);
     const start = (safePage - 1) * PER_PAGE;
+    const pageStudents = filteredStudents.slice(start, start + PER_PAGE);
 
 
-
+    const basePath = "/contracts/scandocuments";
     return (
         <PageShell>
             <Crumbs
                 items={[
-                    { label: "Documents", to: "/documents" },
-                    { label: year.replace("-", " – "), to: "/documents/$year" },
-                    { label: data?.faculty.short ?? "", to: "/documents/$year/$faculty_slug" },
-                    { label: data?.studyLevel.name ?? "", to: "/documents/$year/$faculty_slug/$level" },
-                    { label: data?.folder.name ?? "", to: "/documents/$year/$faculty_slug/$level/$folder_id" },
+                    { label: "Scan Documents", to: basePath },
+                    { label: year.replace("-", " – "), to: `${basePath}/${year}` },
+                    { label: data?.faculty?.name ?? "", to: `${basePath}/${year}/${faculty_slug}` },
+                    { label: data?.study_level?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${level}` },
+                    { label: data?.folder?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${level}/${folder_id}` },
                 ]}
             />
             <PageHeader
                 title={`${data?.folder.name ?? ""} — Student Documents`}
-                subtitle={`${data?.studyLevel.name} · ${data?.faculty.short}`}
+                subtitle={`${data?.study_level.name} · ${data?.faculty.short}`}
                 right={
-                    <div className="relative">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            placeholder="Search by name or ID…"
-                            value={q}
-                            onChange={(e) => { setQ(e.target.value); setPage(1); }}
-                            className="pl-9 w-64"
-                        />
+                    <div className="flex w-full flex-col gap-1 sm:flex-row sm:items-center sm:justify-end sm:gap-1.5">
+                        <div className="relative w-full sm:w-44 md:w-48">
+                            <Search
+                                className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+                                aria-hidden
+                            />
+                            <Input
+                                type="search"
+                                placeholder="Search…"
+                                value={q}
+                                onChange={(e) => {
+                                    setQ(e.target.value);
+                                    setPage(1);
+                                }}
+                                className="h-8 w-full pl-8 text-sm"
+                                aria-label="Search students"
+                            />
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1">
+                            <Button
+                                type="button"
+                                size="sm"
+                                className="gap-1"
+                                onClick={() => setIsAddStudentDialogOpen(true)}
+                            >
+                                <Plus className="size-4" aria-hidden />
+                                Add
+                            </Button>
+                            <Button type="button" size="icon" variant="default" className="size-8">
+                                <Cog className="size-4" aria-hidden />
+                            </Button>
+                        </div>
                     </div>
                 }
             />
@@ -88,13 +131,13 @@ const StudentsPage = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {data?.students.length === 0 ? (
+                            {pageStudents.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                                         No students match your search.
                                     </TableCell>
                                 </TableRow>
-                            ) : data?.students.map((s) => (
+                            ) : pageStudents.map((s) => (
                                 <TableRow key={s.id} className="hover:bg-secondary/30 transition-colors">
                                     <TableCell>
                                         <div
@@ -106,7 +149,7 @@ const StudentsPage = () => {
                                     </TableCell>
                                     <TableCell className="font-mono text-xs">{s.id}</TableCell>
                                     <TableCell className="font-medium">{s.name}</TableCell>
-                                    <TableCell><Badge variant="secondary">{data?.studyLevel.name ?? ""}</Badge></TableCell>
+                                    <TableCell><Badge variant="secondary">{data?.study_level.name ?? ""}</Badge></TableCell>
                                     <TableCell>{s.docs}</TableCell>
                                     <TableCell><StudentStatus status={s.status} /></TableCell>
                                     <TableCell className="text-muted-foreground">{s.scannedDate}</TableCell>
@@ -124,7 +167,7 @@ const StudentsPage = () => {
 
                 <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
                     <span>
-                        Showing {data?.students.length === 0 ? 0 : start + 1}–{Math.min(start + PER_PAGE, data?.students.length ?? 0)} of {data?.students.length ?? 0} students
+                        Showing {filteredStudents.length === 0 ? 0 : start + 1}–{Math.min(start + PER_PAGE, filteredStudents.length)} of {filteredStudents.length} students
                     </span>
                     <Pagination className="mx-0 w-auto">
                         <PaginationContent>
@@ -145,6 +188,7 @@ const StudentsPage = () => {
                     </Pagination>
                 </div>
             </ContentLoader>
+            <AddStudentDialog />
         </PageShell>
     );
 }

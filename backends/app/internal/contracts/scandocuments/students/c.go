@@ -17,6 +17,7 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api := apiGroup.Group("/students")
 	api.Get("/list", controller.GetListDataApi)
+	api.Get("/search", controller.SearchStudents)
 	api.Post("/", controller.CreateFolder)
 }
 

@@ -17,14 +17,14 @@ type Student = {
 export interface GetStudentsResponse {
     students: Student[];
     faculty: Faculty;
-    studyLevel: StudyLevel;
-    academicYear: AcademicYear;
+    study_level: StudyLevel;
+    academic_year: AcademicYear;
     folder: Folder;
 }
 
 export async function getStudents(params: unknown) {
     return ApiService.fetchData<GetStudentsResponse>({
-        url: withAPI("/scandocuments/students/list"),
+        url: withAPI("/contracts/scandocuments/students/list"),
         method: "get",
         params,
     });

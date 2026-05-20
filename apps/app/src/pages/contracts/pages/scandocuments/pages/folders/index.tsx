@@ -9,7 +9,7 @@ import {
   Pagination, PaginationContent, PaginationItem, PaginationLink,
   PaginationNext, PaginationPrevious,
 } from "@workspace/ui/components/pagination";
-import { generateFolders } from "../../data/mockData";
+import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
 import { Crumbs } from "../../components/crumbs";
 import { PageHeader, PageShell } from "../../components/page-shell";
 import { TableSkeleton } from "../../components/skeleton-page";
@@ -21,29 +21,12 @@ import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import CreateNewFolderDialog from "./components/create-new-folder-dialog";
 import useFoldersStore from "./store";
 
-
-
 const PER_PAGE = 10;
 
 const FoldersPage = () => {
   const { year = "", faculty_slug = "", level = "" } = useParams();
   const setIsCreateFolderDialogOpen = useFoldersStore((s) => s.setIsCreateFolderDialogOpen);
-
-
-  const folders = useMemo(() => generateFolders(30, 42), []);
   const [page, setPage] = useState(1);
-
-  const totalStudents = folders.reduce((s, f) => s + f.students, 0);
-  const totalScanned = folders.reduce((s, f) => s + f.scanned, 0);
-  const scannedPct = Math.round((totalScanned / Math.max(totalStudents, 1)) * 100);
-  const lastUpdated = folders
-    .map((f) => f.lastModified)
-    .sort()
-    .at(-1)!;
-
-  const totalPages = Math.ceil(folders.length / PER_PAGE);
-  const start = (page - 1) * PER_PAGE;
-
 
   const { data, isLoading, error } = useQuery({
     queryFn: () => getFolders({ year, faculty_slug, level_slug: level }),
@@ -51,15 +34,34 @@ const FoldersPage = () => {
     ...withInitialData<GetFoldersResponse>(),
   });
 
+  const folders = data?.folders ?? [];
+  const stats = data?.stats;
+
+  const totalPages = Math.max(1, Math.ceil(folders.length / PER_PAGE));
+  const start = (page - 1) * PER_PAGE;
+  const pageFolders = useMemo(
+    () => folders.slice(start, start + PER_PAGE),
+    [folders, start],
+  );
+
+  const basePath = "/contracts/scandocuments";
+
+  const lastUpdatedLabel = useMemo(() => {
+    const raw = stats?.last_updated;
+    if (!raw) return "—";
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return raw;
+    return formatDate(date, "MMM dd, yyyy");
+  }, [stats?.last_updated]);
 
   return (
     <PageShell>
       <Crumbs
         items={[
-          { label: "Documents", to: "/documents" },
-          { label: year.replace("-", " – "), to: `${year}` },
-          { label: data?.faculty?.short ?? "", to: `${faculty_slug}` },
-          { label: data?.study_level?.name ?? "", to: `${level}` },
+          { label: "Documents", to: basePath },
+          { label: year.replace("-", " – "), to: `${basePath}/${year}` },
+          { label: data?.faculty?.name ?? "", to: `${basePath}/${year}/${faculty_slug}` },
+          { label: data?.study_level?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${level}` },
         ]}
       />
       <PageHeader
@@ -74,18 +76,34 @@ const FoldersPage = () => {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <StatBox icon={<FolderOpen className="w-4 h-4" />} label="Total Folders" value={data?.folders?.length} />
-        <StatBox icon={<Users className="w-4 h-4" />} label="Total Students" value={totalStudents} />
-        <StatBox icon={<ScanLine className="w-4 h-4" />} label="Scanned %" value={`${scannedPct}%`} />
-        <StatBox icon={<Clock className="w-4 h-4" />} label="Last Updated" value={lastUpdated} />
+        <StatBox
+          icon={<FolderOpen className="w-4 h-4" />}
+          label="Total Folders"
+          value={isLoading ? "—" : (stats?.total_folders ?? 0)}
+        />
+        <StatBox
+          icon={<Users className="w-4 h-4" />}
+          label="Total Students"
+          value={isLoading ? "—" : (stats?.total_students ?? 0).toLocaleString()}
+        />
+        <StatBox
+          icon={<ScanLine className="w-4 h-4" />}
+          label="Scanned %"
+          value={isLoading ? "—" : `${stats?.scanned_percent ?? 0}%`}
+        />
+        <StatBox
+          icon={<Clock className="w-4 h-4" />}
+          label="Last Updated"
+          value={isLoading ? "—" : lastUpdatedLabel}
+        />
       </div>
+
       <ContentLoader
         isLoading={isLoading}
         error={withError(error, data)}
         forMeta
         customLoader={<TableSkeleton />}
       >
-
         <div className="glass-card rounded-2xl overflow-hidden">
           <Table>
             <TableHeader>
@@ -101,7 +119,7 @@ const FoldersPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data?.folders?.map((f, i) => (
+              {pageFolders.map((f, i) => (
                 <TableRow key={f.id} className="hover:bg-secondary/30 transition-colors">
                   <TableCell className="text-muted-foreground">{start + i + 1}</TableCell>
                   <TableCell>
@@ -111,16 +129,18 @@ const FoldersPage = () => {
                     <Link to={`${f.id}`}>{f.name}</Link>
                   </TableCell>
                   <TableCell>{f.students}</TableCell>
-                  <TableCell>{f.scanned} / {f.students}</TableCell>
+                  <TableCell>
+                    {f.scanned} / {f.students}
+                  </TableCell>
                   <TableCell>
                     <StatusBadge status={f.status} />
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{f.lastModified}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatFolderDate(f.last_modified)}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button asChild size="icon" variant="ghost">
-                      <Link
-                        to={`${f.id}`}
-                      >
+                      <Link to={`${f.id}`}>
                         <Eye className="w-4 h-4" />
                       </Link>
                     </Button>
@@ -133,43 +153,62 @@ const FoldersPage = () => {
 
         <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
           <span>
-            Showing {start + 1}–{Math.min(start + PER_PAGE, folders.length)} of {folders.length} folders
+            Showing {folders.length === 0 ? 0 : start + 1}–
+            {Math.min(start + PER_PAGE, folders.length)} of {folders.length} folders
           </span>
-          <Pagination className="mx-0 w-auto">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
+          {totalPages > 1 ? (
+            <Pagination className="mx-0 w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
                     href="#"
-                    isActive={page === i + 1}
-                    onClick={(e) => { e.preventDefault(); setPage(i + 1); }}
-                  >
-                    {i + 1}
-                  </PaginationLink>
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage((p) => Math.max(1, p - 1));
+                    }}
+                  />
                 </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      href="#"
+                      isActive={page === i + 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(i + 1);
+                      }}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage((p) => Math.min(totalPages, p + 1));
+                    }}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          ) : null}
         </div>
       </ContentLoader>
       <CreateNewFolderDialog />
     </PageShell>
   );
-}
+};
 
 export default FoldersPage;
+
+function formatFolderDate(raw: string | undefined): string {
+  if (!raw) return "—";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return formatDate(date, "MMM dd, yyyy");
+}
 
 function StatBox({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
@@ -188,5 +227,9 @@ function StatusBadge({ status }: { status: "Complete" | "In Progress" | "Pending
     "In Progress": "border-amber-500/40 text-amber-400 bg-amber-500/10",
     Pending: "border-border text-muted-foreground bg-secondary/40",
   } as const;
-  return <Badge variant="outline" className={map[status]}>{status}</Badge>;
+  return (
+    <Badge variant="outline" className={map[status]}>
+      {status}
+    </Badge>
+  );
 }

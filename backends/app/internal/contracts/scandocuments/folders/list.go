@@ -27,13 +27,14 @@ func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}
-	folders, err := c.getFolders(ctxPtr, academicYear.ID, faculty.ID, studyLevel.ID)
+	folders, stats, err := c.listFoldersWithStats(ctxPtr, academicYear.ID, faculty.ID, studyLevel.ID)
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}
 
 	return c.app.Api(ctx, r.WithData(fiber.Map{
 		"folders":       folders,
+		"stats":         stats,
 		"faculty":       &faculty,
 		"academic_year": &academicYear,
 		"study_level":   &studyLevel,
@@ -58,30 +59,16 @@ func (c *Controller) GetListDataView(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.View(ctx, r.WithError(err))
 	}
-	folders, err := c.getFolders(ctxPtr, academicYear.ID, faculty.ID, studyLevel.ID)
+	folders, stats, err := c.listFoldersWithStats(ctxPtr, academicYear.ID, faculty.ID, studyLevel.ID)
 	if err != nil {
 		return c.app.View(ctx, r.WithError(err))
 	}
 	return c.app.View(ctx, r.WithData(fiber.Map{
 		"folders":     folders,
+		"stats":       stats,
 		"study_level": &studyLevel,
 		"faculty":     &faculty,
 	}))
-}
-
-func (c *Controller) getFolders(ctx context.Context, academicYearID, facultyID, studyLevelID int64) ([]models.StudentScanFolder, error) {
-	db := c.app.Postgres()
-	folders, err := gorm.G[models.StudentScanFolder](db).
-		Where(&models.StudentScanFolder{
-			StudyLevelID:   studyLevelID,
-			AcademicYearID: academicYearID,
-			FacultyID:      facultyID,
-		}).
-		Find(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return folders, nil
 }
 
 func (c *Controller) getAcademicYear(ctx context.Context, year string) (*models.AcademicYear, error) {
