@@ -27,7 +27,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
 import { cn } from "@workspace/ui/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@workspace/ui/hooks/use-debounce";
 import { navItems } from "../../sidebar/nav-main";
 import { useNavigate } from "react-router";
@@ -269,10 +269,11 @@ export function SearchProvider({ children }: { children: ReactNode }) {
 
     const hasSearchKeyword = debouncedKeyword.length > 0;
 
-    const { data: searchResult, isLoading: isSearchLoading, isFetching: isSearchFetching } = useQuery({
+    const { data: searchResult, isLoading: isSearchLoading } = useQuery({
         queryKey: ["globalsearch", "search", debouncedKeyword],
         queryFn: () => searchServices({ keyword: debouncedKeyword }),
         enabled: open && hasSearchKeyword,
+        placeholderData: keepPreviousData,
     });
 
     const searchGroups = searchResult?.data ?? [];
@@ -331,7 +332,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         filteredPeople,
         filteredSuggestions,
         searchGroups,
-        isSearchLoading: isSearchLoading || isSearchFetching,
+        isSearchLoading,
         hasSearchKeyword,
         handleNavigate
     };

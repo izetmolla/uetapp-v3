@@ -14,7 +14,6 @@ import (
 	"github.com/uetedu/app/internal/languages"
 	"github.com/uetedu/app/internal/render"
 	"github.com/uetedu/app/internal/secretary"
-	"github.com/uetedu/app/internal/testendpoint"
 )
 
 func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
@@ -22,7 +21,7 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	api := app.Group("/api")
 	viewController := render.NewController(appClients)
 
-	testendpoint.SetupRoutes(api, appClients)
+	// testendpoint.SetupRoutes(api, appClients)
 	admin.SetupRoutes(api, appClients)
 	languages.SetupRoutes(api, appClients)
 	authorization.SetupRoutes(app, api, appClients)
