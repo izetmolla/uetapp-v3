@@ -7,10 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func (c *Controller) getServicesToSearch(ctx context.Context, roles []string) ([]models.Service, error) {
+func (c *Controller) getServicesToSearch(ctx context.Context, userRoles []string) ([]map[string]any, error) {
 	services, err := gorm.G[models.Service](c.app.Postgres()).
-		Select("id, name, title, icon, roles").
-		Where("roles @> ?", roles).
+		Select("id, name, title, icon, description, roles").
 		Where("status = ?", models.StatusActive).
 		Order("name ASC").
 		Find(ctx)
@@ -18,8 +17,19 @@ func (c *Controller) getServicesToSearch(ctx context.Context, roles []string) ([
 		return nil, err
 	}
 
-	for _, service := range services {
-
+	result := make([]map[string]any, 0, len(services))
+	for _, svc := range services {
+		if !c.app.UserCanAccessService(svc.Roles, svc.Name, userRoles) {
+			continue
+		}
+		result = append(result, map[string]any{
+			"id":          svc.ID,
+			"name":        svc.Name,
+			"title":       svc.Title,
+			"icon":        svc.Icon,
+			"description": svc.Description,
+			"roles":       svc.Roles,
+		})
 	}
-	return services, nil
+	return result, nil
 }

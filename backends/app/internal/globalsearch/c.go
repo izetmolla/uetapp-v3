@@ -27,7 +27,7 @@ func (cc *Controller) Search(ctx fiber.Ctx) error {
 		return cc.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusUnauthorized), r.WithCode("UNAUTHORIZED"))
 
 	}
-	services, err := cc.getServicesToSearch(reqCtx, user.Roles)
+	services, err := cc.getServicesToSearch(reqCtx, cc.app.FreshUserRoles(reqCtx, user.UserID, user.Roles))
 	if err != nil {
 		return cc.app.Api(ctx, r.WithError(err))
 	}

@@ -75,6 +75,11 @@ func (app *AppClients) userHasAdminRead(userRoles []string) bool {
 	return hasRole && canRead
 }
 
+// UserCanAccessService reports whether the user may access a service (exported for globalsearch and other packages).
+func (app *AppClients) UserCanAccessService(serviceRoles models.JSONBArray, serviceName string, userRoles []string) bool {
+	return app.userCanAccessService(serviceRoles, serviceName, userRoles)
+}
+
 // userCanAccessService checks DB service roles plus the service name (e.g. contracts:rw → contracts service).
 func (app *AppClients) userCanAccessService(serviceRoles models.JSONBArray, serviceName string, userRoles []string) bool {
 	if app.userHasAdminRead(userRoles) {
@@ -99,6 +104,11 @@ func roleStringsFromJSONB(roles models.JSONBArray) []string {
 		}
 	}
 	return out
+}
+
+// FreshUserRoles returns the latest roles from the users table, falling back to token/session roles.
+func (app *AppClients) FreshUserRoles(ctx context.Context, userID string, fallback []string) []string {
+	return app.freshUserRoles(ctx, userID, fallback)
 }
 
 // freshUserRoles returns the latest roles from the users table, falling back to token/session roles.
