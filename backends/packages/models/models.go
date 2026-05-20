@@ -22,7 +22,7 @@ func Models() []any {
 		// &Faculty{},
 		// &Department{},
 		// &StudyLevel{},
-		// &Resource{},
+		&Resource{},
 		// &Role{},
 
 		// &StudentScanFolder{},
@@ -40,6 +40,13 @@ func Models() []any {
 		// &Service{},
 		// &ServiceNavigation{},
 		// &Role{},
+
+		// &Faculty{},
+		// &StudyProgram{},
+		// &StudyProfile{},
+		// &StudyProgramProfile{},
+		// &StudyProgramLevels{},
+		// &StudyProgramLanguage{},
 	}
 
 	if len(models) > 0 {

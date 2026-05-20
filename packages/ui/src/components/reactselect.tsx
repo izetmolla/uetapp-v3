@@ -35,6 +35,11 @@ export interface ReactSelectShadcnProps {
     size?: Size
     /** Render the destructive border/ring when the field is invalid. */
     invalid?: boolean
+    /**
+     * When true, menu options wrap to multiple lines so long labels are fully
+     * readable instead of truncated with an ellipsis.
+     */
+    wrapOptionText?: boolean
 }
 
 /**
@@ -86,6 +91,7 @@ export function reactSelectClassNames<
 >({
     size = "default",
     invalid = false,
+    wrapOptionText = false,
 }: ReactSelectShadcnProps = {}): ClassNamesConfig<Option, IsMulti, Group> {
     return {
         container: () => "w-full min-w-0",
@@ -95,10 +101,12 @@ export function reactSelectClassNames<
         // focus ring, disabled bg, invalid + dark states.
         control: ({ isFocused, isDisabled }) =>
             cn(
-                "flex w-full items-center gap-1.5 rounded-lg border border-input bg-transparent text-sm whitespace-nowrap transition-colors outline-none",
+                "flex w-full gap-1.5 rounded-lg border border-input bg-transparent text-sm transition-colors outline-none",
+                wrapOptionText ? "items-start" : "items-center whitespace-nowrap",
                 size === "sm"
                     ? "min-h-7 rounded-[min(var(--radius-md),10px)] ps-2.5 pe-2 py-0.5"
                     : "min-h-8 ps-2.5 pe-2 py-1",
+                wrapOptionText && (size === "sm" ? "py-1" : "py-1.5"),
                 isDisabled &&
                     "pointer-events-none cursor-not-allowed bg-input/50 opacity-50 dark:bg-input/80",
                 isFocused &&
@@ -112,7 +120,11 @@ export function reactSelectClassNames<
         valueContainer: () =>
             "flex min-w-0 flex-1 flex-wrap items-center gap-1 px-0 py-0",
         placeholder: () => "text-muted-foreground",
-        singleValue: () => "text-foreground",
+        singleValue: () =>
+            cn(
+                "text-foreground",
+                wrapOptionText && "whitespace-normal break-words leading-snug",
+            ),
         // Inherit text size from `control`; just reset the inner <input> styles
         // that react-select would otherwise leave unstyled in user agents.
         input: () =>
@@ -142,8 +154,17 @@ export function reactSelectClassNames<
             "py-2 text-center text-sm text-muted-foreground",
         // Mirrors `SelectContent`.
         menu: () =>
-            "mt-1 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10",
-        menuList: () => "group/rs-menulist max-h-64 overflow-y-auto p-1",
+            cn(
+                "mt-1 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10",
+                wrapOptionText
+                    ? "max-w-[min(100vw-2rem,28rem)]"
+                    : "min-w-36",
+            ),
+        menuList: () =>
+            cn(
+                "group/rs-menulist max-h-64 overflow-y-auto p-1",
+                wrapOptionText && "max-h-72",
+            ),
         menuPortal: () => "z-50 pointer-events-auto",
         group: () => "py-1",
         // Mirrors `SelectLabel`.
@@ -157,7 +178,8 @@ export function reactSelectClassNames<
         // accent background so only one row reads as active.
         option: ({ isSelected, isDisabled }) =>
             cn(
-                "relative flex cursor-pointer items-center gap-1.5 rounded-md ps-1.5 pe-1.5 py-1 text-sm select-none outline-hidden transition-colors",
+                "relative flex cursor-pointer gap-1.5 rounded-md ps-1.5 pe-1.5 py-1 text-sm select-none outline-hidden transition-colors",
+                wrapOptionText ? "items-start py-2" : "items-center",
                 !isDisabled &&
                     "hover:bg-accent hover:text-accent-foreground",
                 isSelected &&
@@ -217,23 +239,39 @@ function LoadingIndicator<
     )
 }
 
-function Option<
+function createOptionComponent<
     Option,
     IsMulti extends boolean,
     Group extends GroupBase<Option>,
->(props: OptionProps<Option, IsMulti, Group>) {
-    return (
-        <defaultComponents.Option {...props}>
-            <span className="min-w-0 flex-1 truncate">{props.children}</span>
-            {props.isSelected ? (
-                <CheckIcon
-                    aria-hidden
-                    className="size-3.5 shrink-0 text-current"
-                />
-            ) : null}
-        </defaultComponents.Option>
-    )
+>(wrapOptionText: boolean) {
+    return function Option(props: OptionProps<Option, IsMulti, Group>) {
+        return (
+            <defaultComponents.Option {...props}>
+                <span
+                    className={cn(
+                        "min-w-0 flex-1 text-left",
+                        wrapOptionText
+                            ? "whitespace-normal break-words leading-snug"
+                            : "truncate",
+                    )}
+                >
+                    {props.children}
+                </span>
+                {props.isSelected ? (
+                    <CheckIcon
+                        aria-hidden
+                        className={cn(
+                            "size-3.5 shrink-0 text-current",
+                            wrapOptionText && "mt-0.5",
+                        )}
+                    />
+                ) : null}
+            </defaultComponents.Option>
+        )
+    }
 }
+
+const Option = createOptionComponent(false)
 
 /**
  * Default `components` overrides used by the shadcn-styled wrappers.
@@ -283,13 +321,22 @@ export function composeComponents<
     Group extends GroupBase<Option> = GroupBase<Option>,
 >(
     override?: SelectComponentsConfig<Option, IsMulti, Group>,
+    options?: Pick<ReactSelectShadcnProps, "wrapOptionText">,
 ): SelectComponentsConfig<Option, IsMulti, Group> {
+    const base =
+        options?.wrapOptionText === true
+            ? {
+                  ...reactSelectComponents,
+                  Option: createOptionComponent<
+                      Option,
+                      IsMulti,
+                      Group
+                  >(true),
+              }
+            : reactSelectComponents
+
     return {
-        ...(reactSelectComponents as unknown as SelectComponentsConfig<
-            Option,
-            IsMulti,
-            Group
-        >),
+        ...(base as unknown as SelectComponentsConfig<Option, IsMulti, Group>),
         ...(override ?? {}),
     }
 }
@@ -316,28 +363,56 @@ export function reactSelectStyles<
     Option,
     IsMulti extends boolean = false,
     Group extends GroupBase<Option> = GroupBase<Option>,
->({ size = "default" }: ReactSelectShadcnProps = {}): StylesConfig<
-    Option,
-    IsMulti,
-    Group
-> {
+>({
+    size = "default",
+    wrapOptionText = false,
+}: ReactSelectShadcnProps = {}): StylesConfig<Option, IsMulti, Group> {
     return {
         menuPortal: (base) => ({
             ...base,
             zIndex: 60,
             pointerEvents: "auto",
         }),
+        menu: (base) =>
+            wrapOptionText
+                ? {
+                      ...base,
+                      width: "max-content",
+                      minWidth: "100%",
+                      maxWidth: "min(100vw - 2rem, 28rem)",
+                  }
+                : base,
         option: (base) => ({
             ...base,
             display: "flex",
-            alignItems: "center",
+            alignItems: wrapOptionText ? "flex-start" : "center",
             gap: "0.375rem",
             cursor: "pointer",
             width: "100%",
+            ...(wrapOptionText
+                ? {
+                      whiteSpace: "normal",
+                      overflow: "visible",
+                      textOverflow: "unset",
+                  }
+                : {}),
         }),
+        singleValue: (base) =>
+            wrapOptionText
+                ? {
+                      ...base,
+                      whiteSpace: "normal",
+                      overflow: "visible",
+                      textOverflow: "unset",
+                      position: "relative",
+                      transform: "none",
+                      maxWidth: "100%",
+                  }
+                : base,
         control: (base) => ({
             ...base,
             minHeight: size === "sm" ? "1.75rem" : "2rem",
+            ...(wrapOptionText ? { height: "auto" } : {}),
         }),
     }
 }
@@ -456,6 +531,7 @@ export function ReactSelect<
     const {
         size = "default",
         invalid,
+        wrapOptionText = false,
         classNames,
         components,
         styles,
@@ -499,14 +575,18 @@ export function ReactSelect<
                 reactSelectClassNames<Option, IsMulti, Group>({
                     size,
                     invalid,
+                    wrapOptionText,
                 }),
                 classNames,
             )}
-            components={composeComponents<Option, IsMulti, Group>(components)}
+            components={composeComponents<Option, IsMulti, Group>(components, {
+                wrapOptionText,
+            })}
             styles={mergeStyles(
                 reactSelectStyles<Option, IsMulti, Group>({
                     size,
                     invalid,
+                    wrapOptionText,
                 }),
                 styles,
             )}

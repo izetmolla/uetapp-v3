@@ -27,8 +27,11 @@ import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
 import { cn } from "@workspace/ui/lib/utils";
-import { navItems } from "../sidebar/nav-main";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@workspace/ui/hooks/use-debounce";
+import { navItems } from "../../sidebar/nav-main";
 import { useNavigate } from "react-router";
+import { searchServices } from "./api";
 
 type FlatNavItem = {
     title: string;
@@ -252,6 +255,19 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     }, [open, openSearch, closeSearch]);
 
     const normalizedQuery = query.trim().toLowerCase();
+    const debouncedKeyword = useDebounce(query.trim(), 300);
+
+    const { data: searchResult } = useQuery({
+        queryKey: ["globalsearch", "search", debouncedKeyword],
+        queryFn: () => searchServices({ keyword: debouncedKeyword }),
+        enabled: open,
+    });
+
+    useEffect(() => {
+        if (searchResult !== undefined) {
+            console.log("[globalsearch]", searchResult);
+        }
+    }, [searchResult]);
 
     const filteredPeople = useMemo(() => {
         if (!normalizedQuery) return people;

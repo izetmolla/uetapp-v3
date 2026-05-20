@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/flowtrove/packages/render"
 	"github.com/gofiber/fiber/v3"
@@ -29,7 +28,6 @@ func (app *AppClients) GeneralData(c fiber.Ctx, reqCtx context.Context, serviceN
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("service.Roles", service.Roles)
 	if len(service.Roles) > 0 && !app.userCanAccessService(service.Roles, service.Name, userRoles) {
 		return nil, ErrServiceAccessDenied
 	}

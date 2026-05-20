@@ -117,6 +117,7 @@ const AdvancedSearchFiltersPanel: FC<AdvancedSearchFiltersProps> = ({
 
     const selectProps = {
         size: "sm" as const,
+        wrapOptionText: true as const,
         isClearable: true as const,
         menuPortalTarget,
         menuPosition: "fixed" as const,

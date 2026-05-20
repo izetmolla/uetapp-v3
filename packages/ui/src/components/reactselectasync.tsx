@@ -48,6 +48,7 @@ export function ReactSelectAsync<
     const {
         size = "default",
         invalid,
+        wrapOptionText = false,
         classNames,
         components,
         styles,
@@ -95,14 +96,18 @@ export function ReactSelectAsync<
                 reactSelectClassNames<Option, IsMulti, Group>({
                     size,
                     invalid,
+                    wrapOptionText,
                 }),
                 classNames,
             )}
-            components={composeComponents<Option, IsMulti, Group>(components)}
+            components={composeComponents<Option, IsMulti, Group>(components, {
+                wrapOptionText,
+            })}
             styles={mergeStyles(
                 reactSelectStyles<Option, IsMulti, Group>({
                     size,
                     invalid,
+                    wrapOptionText,
                 }),
                 styles,
             )}

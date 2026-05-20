@@ -9,6 +9,7 @@ COPY packages/models/ /packages/models/
 COPY packages/authorization/ /packages/authorization/
 COPY packages/render/ /packages/render/
 COPY packages/datatable/ /packages/datatable/
+COPY packages/drivers/ /packages/drivers/
 RUN go mod download
 COPY app/ ./
 

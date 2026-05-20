@@ -22,14 +22,16 @@ type Faculty struct {
 	Image       string        `json:"image" gorm:"size:255;"`
 	Status      FacultyStatus `json:"status" gorm:"default:active;"`
 
-	Departments []Department `json:"departments" gorm:"foreignKey:FacultyID;references:ID"`
-
 	Short      string `json:"short" gorm:"size:255;"`
 	Students   int64  `json:"students" gorm:"-"`
 	Folders    int64  `json:"folders" gorm:"-"`
 	Completion int64  `json:"completion" gorm:"-"`
 	Accent     string `json:"accent" gorm:"size:255;"`
 	Icon       string `json:"icon" gorm:"size:255;"`
+
+	StudyPrograms []StudyProgram           `json:"study_programs" gorm:"foreignKey:FacultyID;references:ID"`
+	Languages     []StudyProgramLanguage   `json:"languages" gorm:"foreignKey:FacultyID;references:ID"`
+	Departments   []Department             `json:"departments" gorm:"foreignKey:FacultyID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

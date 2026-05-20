@@ -10,9 +10,11 @@ import (
 	"github.com/uetedu/app/internal/contracts"
 	"github.com/uetedu/app/internal/enter"
 	"github.com/uetedu/app/internal/general"
+	"github.com/uetedu/app/internal/globalsearch"
 	"github.com/uetedu/app/internal/languages"
 	"github.com/uetedu/app/internal/render"
 	"github.com/uetedu/app/internal/secretary"
+	"github.com/uetedu/app/internal/testendpoint"
 )
 
 func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
@@ -20,6 +22,7 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	api := app.Group("/api")
 	viewController := render.NewController(appClients)
 
+	testendpoint.SetupRoutes(api, appClients)
 	admin.SetupRoutes(api, appClients)
 	languages.SetupRoutes(api, appClients)
 	authorization.SetupRoutes(app, api, appClients)
@@ -27,6 +30,9 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	api.Use(auth.HandleRefreshToken)
 	api.Use(auth.UseAPIAuthorization())
 	app.Use(auth.UseWEBAuthorization())
+
+	// Global Search Routes
+	globalsearch.SetupApiRoutes(api, appClients)
 
 	// Handle Routes based on the API group
 	general.SetupRoutes(api, appClients)

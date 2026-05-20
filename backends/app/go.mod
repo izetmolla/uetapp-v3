@@ -10,9 +10,12 @@ replace github.com/flowtrove/packages/authorization => ../packages/authorization
 
 replace github.com/flowtrove/packages/datatable => ../packages/datatable
 
+replace github.com/flowtrove/packages/drivers => ../packages/drivers
+
 require (
 	github.com/flowtrove/packages/authorization v0.0.0-00010101000000-000000000000
 	github.com/flowtrove/packages/datatable v0.0.0
+	github.com/flowtrove/packages/drivers v0.0.0
 	github.com/flowtrove/packages/models v0.0.0
 	github.com/flowtrove/packages/render v0.0.0
 	github.com/glebarez/sqlite v1.11.0
@@ -31,6 +34,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.9.1 // indirect
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.13 // indirect
@@ -62,6 +66,7 @@ require (
 	github.com/tinylib/msgp v1.6.4 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.70.0 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.50.0 // indirect
