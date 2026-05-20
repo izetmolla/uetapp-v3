@@ -12,7 +12,7 @@ export type SearchService = {
 export type Student = {
     id: string;
     full_name: string;
-    email: string
+    email: string;
     faculty: string;
 };
 export type Students = Student[];
@@ -34,7 +34,16 @@ export type DataResponse = {
 export type SearchResponse = {
     data: DataResponse[];
     services: SearchService[];
+    keyword?: string;
 };
+
+export function isStudentsGroup(group: DataResponse): group is DataResponse & { data: Students } {
+    return group.id === "students";
+}
+
+export function isEmployeesGroup(group: DataResponse): group is DataResponse & { data: Employees } {
+    return group.id === "employees";
+}
 
 export function searchServices(params: Record<string, unknown>) {
     return ApiService.fetchData<SearchResponse>({

@@ -31,7 +31,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@workspace/ui/hooks/use-debounce";
 import { navItems } from "../../sidebar/nav-main";
 import { useNavigate } from "react-router";
-import { searchServices } from "./api";
+import {
+    isEmployeesGroup,
+    isStudentsGroup,
+    searchServices,
+    type DataResponse,
+    type Employee,
+    type Student
+} from "./api";
 
 type FlatNavItem = {
     title: string;
@@ -134,6 +141,9 @@ type SearchContextValue = {
     setActiveFilter: React.Dispatch<React.SetStateAction<(typeof searchFilters)[number]["id"] | null>>;
     filteredPeople: Person[];
     filteredSuggestions: FlatNavItem[];
+    searchGroups: DataResponse[];
+    isSearchLoading: boolean;
+    hasSearchKeyword: boolean;
     handleNavigate: (href: string) => void;
 };
 
@@ -257,17 +267,15 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const normalizedQuery = query.toLowerCase();
     const debouncedKeyword = useDebounce(query, 300).trim();
 
-    const { data: searchResult } = useQuery({
+    const hasSearchKeyword = debouncedKeyword.length > 0;
+
+    const { data: searchResult, isLoading: isSearchLoading, isFetching: isSearchFetching } = useQuery({
         queryKey: ["globalsearch", "search", debouncedKeyword],
         queryFn: () => searchServices({ keyword: debouncedKeyword }),
-        enabled: open && debouncedKeyword.length > 0,
+        enabled: open && hasSearchKeyword,
     });
 
-    useEffect(() => {
-        if (searchResult !== undefined) {
-            console.log("[globalsearch]", searchResult);
-        }
-    }, [searchResult]);
+    const searchGroups = searchResult?.data ?? [];
 
     const filteredPeople = useMemo(() => {
         const term = normalizedQuery.trim();
@@ -322,6 +330,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         setActiveFilter,
         filteredPeople,
         filteredSuggestions,
+        searchGroups,
+        isSearchLoading: isSearchLoading || isSearchFetching,
+        hasSearchKeyword,
         handleNavigate
     };
 
@@ -371,6 +382,97 @@ function SearchInputField({
     );
 }
 
+function initialsFromName(name: string) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "?";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+function SearchResultRow({
+    name,
+    subtitle,
+    onSelect
+}: {
+    name: string;
+    subtitle: string;
+    onSelect?: () => void;
+}) {
+    return (
+        <li>
+            <button
+                type="button"
+                className="hover:bg-muted flex w-full items-start gap-3 rounded-md px-2 py-2 text-left transition-colors"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onSelect}>
+                <Avatar className="mt-0.5 size-8 shrink-0">
+                    <AvatarFallback className="text-xs">{initialsFromName(name)}</AvatarFallback>
+                </Avatar>
+                <span className="min-w-0 flex-1">
+                    <span className="line-clamp-1 text-sm font-medium">{name}</span>
+                    <span className="text-muted-foreground line-clamp-1 text-xs">{subtitle}</span>
+                </span>
+            </button>
+        </li>
+    );
+}
+
+function SearchDataGroups() {
+    const { searchGroups, isSearchLoading, hasSearchKeyword, setQuery } = useSearch();
+
+    if (!hasSearchKeyword) return null;
+
+    if (isSearchLoading) {
+        return (
+            <section className="mb-3">
+                <p className="text-muted-foreground px-2 py-4 text-center text-sm">Searching…</p>
+            </section>
+        );
+    }
+
+    const nonEmptyGroups = searchGroups.filter(
+        (group) => Array.isArray(group.data) && group.data.length > 0
+    );
+
+    if (nonEmptyGroups.length === 0) {
+        return (
+            <section className="mb-3">
+                <p className="text-muted-foreground px-2 py-4 text-center text-sm">No results found.</p>
+            </section>
+        );
+    }
+
+    return (
+        <>
+            {nonEmptyGroups.map((group) => (
+                <section key={group.id} className="mb-3">
+                    <p className="text-muted-foreground mb-1 px-1 text-xs font-medium">{group.title}</p>
+                    <ul className="space-y-0.5">
+                        {isStudentsGroup(group) &&
+                            group.data.map((student: Student) => (
+                                <SearchResultRow
+                                    key={student.id}
+                                    name={student.full_name}
+                                    subtitle={[student.email, student.faculty].filter(Boolean).join(" · ")}
+                                    onSelect={() => setQuery(student.full_name)}
+                                />
+                            ))}
+                        {isEmployeesGroup(group) &&
+                            group.data.map((employee: Employee) => (
+                                <SearchResultRow
+                                    key={employee.id}
+                                    name={employee.full_name}
+                                    subtitle={[employee.email, employee.department].filter(Boolean).join(" · ")}
+                                    onSelect={() => setQuery(employee.full_name)}
+                                />
+                            ))}
+                    </ul>
+                </section>
+            ))}
+        </>
+    );
+}
+
 function SearchDropdownContent() {
     const {
         isMobile,
@@ -379,6 +481,7 @@ function SearchDropdownContent() {
         setActiveFilter,
         filteredPeople,
         filteredSuggestions,
+        hasSearchKeyword,
         setQuery,
         handleNavigate
     } = useSearch();
@@ -420,7 +523,9 @@ function SearchDropdownContent() {
 
             <div className="max-h-[50vh] overflow-y-auto overscroll-contain">
                 <div className="p-2">
-                    {filteredPeople.length > 0 && (
+                    <SearchDataGroups />
+
+                    {!hasSearchKeyword && filteredPeople.length > 0 && (
                         <section className="mb-3">
                             <p className="text-muted-foreground mb-2 px-1 text-xs font-medium">People</p>
                             <div className="flex gap-3 overflow-x-auto px-1 pb-1">
@@ -441,6 +546,7 @@ function SearchDropdownContent() {
                         </section>
                     )}
 
+                    {!hasSearchKeyword && (
                     <section>
                         <p className="text-muted-foreground mb-1 px-1 text-xs font-medium">Suggestions</p>
                         {filteredSuggestions.length === 0 ? (
@@ -473,9 +579,7 @@ function SearchDropdownContent() {
                             </ul>
                         )}
                     </section>
-
-
-                    {}
+                    )}
                 </div>
             </div>
         </div>

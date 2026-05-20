@@ -3,7 +3,61 @@ package globalsearch
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
+
+// SearchStudentItem is the JSON shape returned to the frontend global search API.
+type SearchStudentItem struct {
+	ID       string `json:"id"`
+	FullName string `json:"full_name"`
+	Email    string `json:"email"`
+	Faculty  string `json:"faculty"`
+}
+
+// SearchEmployeeItem is the JSON shape returned to the frontend global search API.
+type SearchEmployeeItem struct {
+	ID         string `json:"id"`
+	FullName   string `json:"full_name"`
+	Email      string `json:"email"`
+	Department string `json:"department"`
+}
+
+func formatStudentsForSearch(students []Student) []SearchStudentItem {
+	out := make([]SearchStudentItem, 0, len(students))
+	for _, s := range students {
+		out = append(out, SearchStudentItem{
+			ID:       studentSearchID(s),
+			FullName: studentFullName(s),
+			Email:    studentEmail(s),
+			Faculty:  s.Faculty,
+		})
+	}
+	return out
+}
+
+func studentSearchID(s Student) string {
+	if s.PersonID != "" {
+		return s.PersonID
+	}
+	return s.StudentFID
+}
+
+func studentFullName(s Student) string {
+	parts := make([]string, 0, 3)
+	for _, p := range []string{s.Firstname, s.Fathersname, s.Surname} {
+		if strings.TrimSpace(p) != "" {
+			parts = append(parts, strings.TrimSpace(p))
+		}
+	}
+	return strings.Join(parts, " ")
+}
+
+func studentEmail(s Student) string {
+	if s.EmailUET != "" {
+		return s.EmailUET
+	}
+	return s.Email
+}
 
 // Student is a trimmed view of an external student record for global search (not every API field).
 type Student struct {

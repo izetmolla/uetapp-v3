@@ -57,7 +57,7 @@ func (c *Controller) getStudentsToSearch(ctx context.Context, keyword string, _ 
 	}
 
 	students, meta := parseStudentsSearchBody(res.Body)
-	data["data"] = students
+	data["data"] = formatStudentsForSearch(students)
 	data["meta"] = meta
 	return data, nil
 }
