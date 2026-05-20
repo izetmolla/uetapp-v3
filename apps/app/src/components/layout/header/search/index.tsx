@@ -254,13 +254,13 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         return () => document.removeEventListener("keydown", down);
     }, [open, openSearch, closeSearch]);
 
-    const normalizedQuery = query.trim().toLowerCase();
-    const debouncedKeyword = useDebounce(query.trim(), 300);
+    const normalizedQuery = query.toLowerCase();
+    const debouncedKeyword = useDebounce(query, 300).trim();
 
     const { data: searchResult } = useQuery({
         queryKey: ["globalsearch", "search", debouncedKeyword],
         queryFn: () => searchServices({ keyword: debouncedKeyword }),
-        enabled: open,
+        enabled: open && debouncedKeyword.length > 0,
     });
 
     useEffect(() => {
@@ -270,18 +270,20 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     }, [searchResult]);
 
     const filteredPeople = useMemo(() => {
-        if (!normalizedQuery) return people;
-        return people.filter((person) => person.name.toLowerCase().includes(normalizedQuery));
+        const term = normalizedQuery.trim();
+        if (!term) return people;
+        return people.filter((person) => person.name.toLowerCase().includes(term));
     }, [normalizedQuery]);
 
     const filteredSuggestions = useMemo(() => {
         let items = allNavItems;
+        const term = normalizedQuery.trim();
 
-        if (normalizedQuery) {
+        if (term) {
             items = items.filter(
                 (item) =>
-                    item.title.toLowerCase().includes(normalizedQuery) ||
-                    item.group.toLowerCase().includes(normalizedQuery)
+                    item.title.toLowerCase().includes(term) ||
+                    item.group.toLowerCase().includes(term)
             );
         }
 
@@ -471,6 +473,9 @@ function SearchDropdownContent() {
                             </ul>
                         )}
                     </section>
+
+
+                    {}
                 </div>
             </div>
         </div>
@@ -520,8 +525,11 @@ export function SearchDesktop() {
         <div ref={desktopAnchorRef} className={cn("relative hidden w-full lg:block", searchWidthClass)}>
             <div
                 className={cn("relative w-full", open && "rounded-lg bg-background")}
-                onClick={openSearch}
+                onClick={(e) => {
+                    if (e.target === e.currentTarget) openSearch();
+                }}
                 onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget) return;
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
                         openSearch();

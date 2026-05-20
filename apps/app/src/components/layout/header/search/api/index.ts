@@ -6,14 +6,34 @@ export type SearchService = {
     name: string;
     title: string;
     icon?: string;
-    description?: string;
-    roles?: string[];
 };
 
 
+export type Student = {
+    id: string;
+    full_name: string;
+    email: string
+    faculty: string;
+};
+export type Students = Student[];
+export type Employee = {
+    id: string;
+    full_name: string;
+    email: string;
+    department: string;
+};
+export type Employees = Employee[];
+export type DataResponse = {
+    id: string;
+    title: string;
+    data: Students | Employees;
+};
+
+
+
 export type SearchResponse = {
+    data: DataResponse[];
     services: SearchService[];
-    keyword: string;
 };
 
 export function searchServices(params: Record<string, unknown>) {

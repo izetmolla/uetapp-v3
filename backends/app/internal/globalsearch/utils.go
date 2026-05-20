@@ -23,12 +23,10 @@ func (c *Controller) getServicesToSearch(ctx context.Context, userRoles []string
 			continue
 		}
 		result = append(result, map[string]any{
-			"id":          svc.ID,
-			"name":        svc.Name,
-			"title":       svc.Title,
-			"icon":        svc.Icon,
-			"description": svc.Description,
-			"roles":       svc.Roles,
+			"id":    svc.ID,
+			"name":  svc.Name,
+			"title": svc.Title,
+			"icon":  svc.Icon,
 		})
 	}
 	return result, nil

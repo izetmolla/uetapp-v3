@@ -32,8 +32,28 @@ func (cc *Controller) Search(ctx fiber.Ctx) error {
 		return cc.app.Api(ctx, r.WithError(err))
 	}
 
+	data := []map[string]any{}
+
+	for _, service := range services {
+		switch service["name"] {
+		case "contracts":
+			students, err := cc.getStudentsToSearch(reqCtx, keyword, user.Roles)
+			if err != nil {
+				return cc.app.Api(ctx, r.WithError(err))
+			}
+			data = append(data, students)
+		case "hr":
+			employees, err := cc.getEmployeesToSearch(reqCtx, user.Roles)
+			if err != nil {
+				return cc.app.Api(ctx, r.WithError(err))
+			}
+			data = append(data, employees)
+		}
+	}
+
 	return cc.app.Api(ctx, r.WithData(fiber.Map{
 		"services": services,
 		"keyword":  keyword,
+		"data":     data,
 	}))
 }
