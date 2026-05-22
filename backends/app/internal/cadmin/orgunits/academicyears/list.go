@@ -66,7 +66,7 @@ func (cc *Controller) GetAcademicYearsListView(c fiber.Ctx) error {
 	}
 
 	datatable.FormatContent(&rows, columns)
-	return cc.app.View(c, r.WithContext(ctxPtr), r.WithTitle("Academic Years"), r.WithData(fiber.Map{
+	return cc.app.View(c, r.WithContext(ctxPtr), r.WithTitle("Academic Years 1"), r.WithData(fiber.Map{
 		"data":       rows,
 		"pagination": datatable.RenderPagination(pagination),
 		"query":      q,

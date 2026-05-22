@@ -8,6 +8,7 @@ import (
 	"github.com/uetedu/app/internal/authorization"
 	"github.com/uetedu/app/internal/cadmin"
 	"github.com/uetedu/app/internal/contracts"
+	"github.com/uetedu/app/internal/dashboard"
 	"github.com/uetedu/app/internal/enter"
 	"github.com/uetedu/app/internal/general"
 	"github.com/uetedu/app/internal/globalsearch"
@@ -25,6 +26,10 @@ func SetupRoutes(app fiber.Router, appClients *config.AppClients) {
 	admin.SetupRoutes(api, appClients)
 	languages.SetupRoutes(api, appClients)
 	authorization.SetupRoutes(app, api, appClients)
+
+	// Dashboard Routes
+	dashboard.SetupApiRoutes(api, appClients)
+	dashboard.SetupWebRoutes(app, appClients)
 
 	api.Use(auth.HandleRefreshToken)
 	api.Use(auth.UseAPIAuthorization())
