@@ -15,12 +15,12 @@ const (
 
 // Server specific settings.
 type StudyProgramProfile struct {
-	ID int64 `json:"id" gorm:"primaryKey;autoIncrement"`
-
-	StudyProgramID int64        `json:"study_program_id" gorm:"type:bigint;not null;index"`
+	StudyProgramID int64        `json:"study_program_id" gorm:"type:bigint;not null;uniqueIndex:idx_study_program_profile"`
 	StudyProgram   StudyProgram `json:"study_program" gorm:"foreignKey:StudyProgramID;references:ID"`
-	StudyProfileID int64        `json:"study_profile_id" gorm:"type:bigint;not null;index"`
+	StudyProfileID int64        `json:"study_profile_id" gorm:"type:bigint;not null;uniqueIndex:idx_study_program_profile"`
 	StudyProfile   StudyProfile `json:"study_profile" gorm:"foreignKey:StudyProfileID;references:ID"`
+
+	OldID string `json:"old_id" gorm:"size:255;default:null;"`
 
 	Status StudyProgramProfileStatus `json:"status" gorm:"default:active;"`
 

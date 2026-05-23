@@ -13,6 +13,8 @@ type StudyProgramLevels struct {
 	StudyLevelID   int64        `json:"study_level_id" gorm:"type:bigint;not null;uniqueIndex:idx_study_program_levels"`
 	StudyLevel     StudyLevel   `json:"study_level" gorm:"foreignKey:StudyLevelID;references:ID"`
 
+	OldID string `json:"old_id" gorm:"size:255;default:null;"`
+
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`

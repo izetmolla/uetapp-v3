@@ -30,5 +30,5 @@ func (b *StudyProfile) BeforeCreate(_ *gorm.DB) (err error) {
 }
 
 func (b StudyProfile) TableName() string {
-	return "study_programs"
+	return "study_profiles"
 }

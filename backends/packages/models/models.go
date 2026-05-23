@@ -46,9 +46,9 @@ func Models() []any {
 		&FacultyStudyLevel{},
 		&StudyProgram{},
 		&FacultyStudyProgram{},
-		// &StudyProfile{},
-		// &StudyProgramProfile{},
-		// &StudyProgramLevels{},
+		&StudyProfile{},
+		&StudyProgramProfile{},
+		&StudyProgramLevels{},
 		// &StudyProgramLanguage{},
 	}
 
