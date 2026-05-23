@@ -1,0 +1,44 @@
+services:
+  nfs:
+    #networks:
+      #VLAN5:
+        #ipv4_address: 192.168.5.30
+    image: izetmolla/docker-nfs-server
+    network_mode: host
+    container_name: nfs
+    restart: always
+    privileged: true
+    environment:
+      NFS_SERVER_THREAD_COUNT: 1 # https://github.com/izetmolla/docker-nfs-server/blob/develop/doc/advanced/performance-tuning.md
+      NFS_PORT: 2049
+      NFS_VERSION: 4
+      NFS_EXPORT_0: /mnt/storages/minio-01 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
+      NFS_EXPORT_1: /mnt/storages/minio-01 192.168.5.150/32(rw,sync,no_root_squash,no_subtree_check)
+      #NFS_EXPORT_1: /mnt/registries 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
+      #NFS_EXPORT_2: /mnt/uet-app/minio-new  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
+      #NFS_EXPORT_3: /mnt/uet-app/minio-new  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
+      #NFS_EXPORT_4: /mnt/uet-app/minio-new  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
+      
+      #NFS_EXPORT_5: /mnt/uet-app/databases/postgres-new  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
+      #NFS_EXPORT_6: /mnt/uet-app/databases/postgres-new  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
+      #NFS_EXPORT_7: /mnt/uet-app/databases/postgres-new  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
+
+
+      #NFS_EXPORT_0: /mnt 192.168.5.0/22(fsid=0,rw,no_root_squash,no_subtree_check) # https://github.com/izetmolla/docker-nfs-server/issues/24
+      #NFS_EXPORT_1: /mnt/uetapp 192.168.5.30/32(rw,sync,no_root_squash,no_subtree_check)
+      #NFS_EXPORT_2: /mnt/uetapp 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
+      #NFS_EXPORT_3: /mnt/uetapp-registry 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
+      # NFS_EXPORT_1: /STORAGE 0.0.0.0/0(rw,sync,no_root_squash,no_subtree_check)
+      
+      SHARED_DIRECTORY: /mnt
+    volumes:
+      - /STORAGE1/uet-nfs:/mnt
+      - /lib/modules:/lib/modules:ro # https://github.com/izetmolla/docker-nfs-server/blob/develop/doc/feature/auto-load-kernel-modules.md
+    cap_add:
+      - SYS_ADMIN
+      - SYS_MODULE
+
+
+#networks:
+ # VLAN5:
+   # external: true

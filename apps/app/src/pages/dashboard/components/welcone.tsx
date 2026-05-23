@@ -24,14 +24,14 @@ export function WelcomeCard() {
                         <img
                             width={100}
                             height={50}
-                            src={`/static/images/academy-dashboard-light.svg`}
+                            src={`/static/app/0.0.36/images/academy-dashboard-light.svg`}
                             className="block w-full dark:hidden"
                             alt="shadcn/ui"
                         />
                         <img
                             width={100}
                             height={50}
-                            src={`/static/images/academy-dashboard-dark.svg`}
+                            src={`/static/app/0.0.36/images/academy-dashboard-dark.svg`}
                             className="hidden w-full dark:block"
                             alt="shadcn/ui"
                         />
@@ -39,7 +39,7 @@ export function WelcomeCard() {
                     <img
                         width={800}
                         height={300}
-                        src={`/static/images/star-shape.png`}
+                        src={`/static/app/0.0.36/images/star-shape.png`}
                         className="pointer-events-none absolute inset-0 aspect-auto"
                         alt="shadcn/ui"
                     />
