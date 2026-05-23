@@ -71,7 +71,7 @@ metadata:
   namespace: uetedu-v3
 spec:
   type: ExternalName
-  externalName: minio-svc.uet-app.svc.cluster.local
+  externalName: minio-storage.storages.svc.cluster.local
   ports:
     - name: http
       port: 9000
