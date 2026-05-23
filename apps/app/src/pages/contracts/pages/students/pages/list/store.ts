@@ -18,11 +18,13 @@ type DialogState = {
     isQuickEditDialogOpen: boolean;
     isDisableDialogOpen: boolean;
     isEnableDialogOpen: boolean;
+    isImportUsersDialogOpen: boolean;
 };
 
 type StudentsListStore = DialogState & {
     openQuickEdit: (student: Student) => void;
     openCreateStudent: () => void;
+    openImportUsers: () => void;
     openDisable: (student: Student) => void;
     openEnable: (student: Student) => void;
     closeDialogs: () => void;
@@ -34,6 +36,7 @@ const closedState: DialogState = {
     isQuickEditDialogOpen: false,
     isDisableDialogOpen: false,
     isEnableDialogOpen: false,
+    isImportUsersDialogOpen: false,
 };
 
 const useStudentsListStore = create<StudentsListStore>((set) => ({
@@ -51,6 +54,11 @@ const useStudentsListStore = create<StudentsListStore>((set) => ({
             selectedStudent: EMPTY_STUDENT,
             isCreateMode: true,
             isQuickEditDialogOpen: true,
+        }),
+    openImportUsers: () =>
+        set({
+            ...closedState,
+            isImportUsersDialogOpen: true,
         }),
     openDisable: (student) =>
         set({

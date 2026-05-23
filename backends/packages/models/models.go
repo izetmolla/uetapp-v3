@@ -49,7 +49,7 @@ func Models() []any {
 		&StudyProfile{},
 		&StudyProgramProfile{},
 		&StudyProgramLevels{},
-		// &StudyProgramLanguage{},
+		&StudyProgramLanguage{},
 	}
 
 	if len(models) > 0 {

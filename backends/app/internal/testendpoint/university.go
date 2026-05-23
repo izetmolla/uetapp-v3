@@ -15,6 +15,13 @@ import (
 	"gorm.io/gorm"
 )
 
+type UniversitySyncResult struct {
+	StudyLevels   []models.StudyLevel
+	Faculties     []models.Faculty
+	StudyPrograms []models.StudyProgram
+	StudyProfiles []models.StudyProfile
+}
+
 type UniversityOrgUnitType struct {
 	ProgramOldId string `json:"program_old_id"`
 	Program      string `json:"program"`
@@ -25,14 +32,33 @@ type UniversityOrgUnitType struct {
 
 func (cc *Controller) GetUniversityUnit(c fiber.Ctx) error {
 	reqCtx := c.Context()
-	db := cc.app.Postgres()
 	r := cc.app.Render()
-	resource, err := gorm.G[models.Resource](db).
-		Select("id", "config").
-		Where("id = ?", 3).
-		First(reqCtx)
+
+	orgUnits, err := fetchUniversityOrgUnits(reqCtx, cc.app.Postgres(), 3)
 	if err != nil {
 		return cc.app.Api(c, r.WithError(err))
+	}
+
+	result, err := cc.syncUniversityOrgUnits(reqCtx, orgUnits)
+	if err != nil {
+		return cc.app.Api(c, r.WithError(err))
+	}
+
+	return cc.app.Api(c, cc.app.Render().WithData(fiber.Map{
+		"study_levels":   result.StudyLevels,
+		"study_programs": result.StudyPrograms,
+		"study_profiles": result.StudyProfiles,
+		"faculties":      result.Faculties,
+	}))
+}
+
+func fetchUniversityOrgUnits(ctx context.Context, db *gorm.DB, resourceID int64) ([]UniversityOrgUnitType, error) {
+	resource, err := gorm.G[models.Resource](db).
+		Select("id", "config").
+		Where("id = ?", resourceID).
+		First(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	res, err := httprequest.Execute[map[string]any](httprequest.New(&httprequest.HttpRequestDriver{
@@ -42,43 +68,40 @@ func (cc *Controller) GetUniversityUnit(c fiber.Ctx) error {
 			"Content-Type":  "application/json",
 			"Authorization": "Bearer " + resource.Config["authorization"].(string),
 		},
-		// Body: map[string]any{
-		// 	"action": "getStudent",
-		// },
 		Params: map[string]string{
 			"action": "getOrgUnits",
 		},
 	}))
 	if err != nil {
-		return cc.app.Api(c, r.WithError(err))
+		return nil, err
 	}
 
-	orgUnits, err := parseUniversityOrgUnit(res.Body)
-	if err != nil {
-		fmt.Println("orgUnits", orgUnits)
+	return parseUniversityOrgUnit(res.Body)
+}
 
-		return cc.app.Api(c, r.WithError(err))
-	}
-
-	studyLevels, err := cc.getStudyLevels(reqCtx, orgUnits)
+func (cc *Controller) syncUniversityOrgUnits(ctx context.Context, orgUnits []UniversityOrgUnitType) (UniversitySyncResult, error) {
+	studyLevels, err := cc.getStudyLevels(ctx, orgUnits)
 	if err != nil {
-		return cc.app.Api(c, r.WithError(err))
+		return UniversitySyncResult{}, err
 	}
-	faculties, err := cc.getFaculties(reqCtx, orgUnits, studyLevels)
+	faculties, err := cc.getFaculties(ctx, orgUnits, studyLevels)
 	if err != nil {
-		return cc.app.Api(c, r.WithError(err))
+		return UniversitySyncResult{}, err
 	}
-	studyPrograms, err := cc.getStudyPrograms(reqCtx, orgUnits, studyLevels)
+	studyPrograms, err := cc.getStudyPrograms(ctx, orgUnits, studyLevels)
 	if err != nil {
-		return cc.app.Api(c, r.WithError(err))
+		return UniversitySyncResult{}, err
 	}
-
-	return cc.app.Api(c, cc.app.Render().WithData(fiber.Map{
-		// "org_units": orgUnits,
-		"study_levels":   studyLevels,
-		"study_programs": studyPrograms,
-		"faculties":      faculties,
-	}))
+	studyProfiles, err := cc.getStudyProfiles(ctx, orgUnits)
+	if err != nil {
+		return UniversitySyncResult{}, err
+	}
+	return UniversitySyncResult{
+		StudyLevels:   studyLevels,
+		Faculties:     faculties,
+		StudyPrograms: studyPrograms,
+		StudyProfiles: studyProfiles,
+	}, nil
 }
 
 func (cc *Controller) getStudyLevels(reqCtx context.Context, orgUnits []UniversityOrgUnitType) ([]models.StudyLevel, error) {
@@ -100,6 +123,27 @@ func (cc *Controller) getStudyLevels(reqCtx context.Context, orgUnits []Universi
 		studyLevels = append(studyLevels, studyLevel)
 	}
 	return studyLevels, nil
+}
+
+func (cc *Controller) getStudyProfiles(ctx context.Context, orgUnits []UniversityOrgUnitType) ([]models.StudyProfile, error) {
+	seen := make(map[int64]struct{})
+	studyProfiles := make([]models.StudyProfile, 0)
+	for _, orgUnit := range orgUnits {
+		name := strings.TrimSpace(orgUnit.Profile)
+		if name == "" {
+			continue
+		}
+		studyProfile, err := cc.getOrCreateStudyProfile(ctx, name)
+		if err != nil {
+			return []models.StudyProfile{}, err
+		}
+		if _, exists := seen[studyProfile.ID]; exists {
+			continue
+		}
+		seen[studyProfile.ID] = struct{}{}
+		studyProfiles = append(studyProfiles, studyProfile)
+	}
+	return studyProfiles, nil
 }
 
 func (cc *Controller) getFaculties(ctx context.Context, orgUnits []UniversityOrgUnitType, studyLevels []models.StudyLevel) ([]models.Faculty, error) {
@@ -196,10 +240,47 @@ func (cc *Controller) getStudyPrograms(ctx context.Context, orgUnits []Universit
 	programOrder := make([]int64, 0)
 	seenFacultyProgramPairs := make(map[string]struct{})
 	seenProgramLevelPairs := make(map[string]struct{})
+	seenProgramProfilePairs := make(map[string]struct{})
 
 	for _, orgUnit := range orgUnits {
 		programName := strings.TrimSpace(orgUnit.Program)
 		studyLevelName := strings.TrimSpace(orgUnit.StudyLevel)
+		profileName := strings.TrimSpace(orgUnit.Profile)
+
+		if programName != "" && profileName != "" {
+			studyProgram, err := cc.getOrCreateStudyProgram(ctx, programName)
+			if err != nil {
+				return []models.StudyProgram{}, err
+			}
+
+			studyProfile, err := cc.getOrCreateStudyProfile(ctx, profileName)
+			if err != nil {
+				return []models.StudyProgram{}, err
+			}
+
+			profilePairKey := fmt.Sprintf("program-profile:%d:%d", studyProgram.ID, studyProfile.ID)
+			if _, exists := seenProgramProfilePairs[profilePairKey]; !exists {
+				seenProgramProfilePairs[profilePairKey] = struct{}{}
+
+				studyProgramProfile, err := cc.getOrCreateStudyProgramProfile(ctx, studyProgram.ID, studyProfile.ID)
+				if err != nil {
+					return []models.StudyProgram{}, err
+				}
+				studyProgramProfile.StudyProfile = studyProfile
+
+				if _, exists := programByID[studyProgram.ID]; !exists {
+					studyProgram.Faculties = []models.FacultyStudyProgram{}
+					studyProgram.StudyLevels = []models.StudyProgramLevels{}
+					studyProgram.Profiles = []models.StudyProgramProfile{}
+					programByID[studyProgram.ID] = studyProgram
+					programOrder = append(programOrder, studyProgram.ID)
+				}
+
+				entry := programByID[studyProgram.ID]
+				entry.Profiles = append(entry.Profiles, studyProgramProfile)
+				programByID[studyProgram.ID] = entry
+			}
+		}
 
 		if programName != "" && studyLevelName != "" {
 			studyProgram, err := cc.getOrCreateStudyProgram(ctx, programName)
@@ -220,7 +301,12 @@ func (cc *Controller) getStudyPrograms(ctx context.Context, orgUnits []Universit
 			if _, exists := seenProgramLevelPairs[levelPairKey]; !exists {
 				seenProgramLevelPairs[levelPairKey] = struct{}{}
 
-				studyProgramLevel, err := cc.getOrCreateStudyProgramLevel(ctx, studyProgram.ID, studyLevel.ID)
+				studyProgramLevel, err := cc.getOrCreateStudyProgramLevel(
+					ctx,
+					studyProgram.ID,
+					studyLevel.ID,
+					orgUnit.ProgramOldId,
+				)
 				if err != nil {
 					return []models.StudyProgram{}, err
 				}
@@ -229,6 +315,7 @@ func (cc *Controller) getStudyPrograms(ctx context.Context, orgUnits []Universit
 				if _, exists := programByID[studyProgram.ID]; !exists {
 					studyProgram.Faculties = []models.FacultyStudyProgram{}
 					studyProgram.StudyLevels = []models.StudyProgramLevels{}
+					studyProgram.Profiles = []models.StudyProgramProfile{}
 					programByID[studyProgram.ID] = studyProgram
 					programOrder = append(programOrder, studyProgram.ID)
 				}
@@ -269,6 +356,7 @@ func (cc *Controller) getStudyPrograms(ctx context.Context, orgUnits []Universit
 		if _, exists := programByID[studyProgram.ID]; !exists {
 			studyProgram.Faculties = []models.FacultyStudyProgram{}
 			studyProgram.StudyLevels = []models.StudyProgramLevels{}
+			studyProgram.Profiles = []models.StudyProgramProfile{}
 			programByID[studyProgram.ID] = studyProgram
 			programOrder = append(programOrder, studyProgram.ID)
 		}
@@ -366,22 +454,78 @@ func (cc *Controller) getOrCreateFacultyStudyProgram(ctx context.Context, facult
 	return facultyStudyProgram, nil
 }
 
-func (cc *Controller) getOrCreateStudyProgramLevel(ctx context.Context, studyProgramID int64, studyLevelID int64) (models.StudyProgramLevels, error) {
+func (cc *Controller) getOrCreateStudyProgramLevel(ctx context.Context, studyProgramID int64, studyLevelID int64, oldID string) (models.StudyProgramLevels, error) {
+	oldID = strings.TrimSpace(oldID)
 	db := cc.app.Postgres()
 	studyProgramLevel, err := gorm.G[models.StudyProgramLevels](db).
 		Where(&models.StudyProgramLevels{StudyProgramID: studyProgramID, StudyLevelID: studyLevelID}).
 		First(ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			studyProgramLevel = models.StudyProgramLevels{StudyProgramID: studyProgramID, StudyLevelID: studyLevelID}
+			studyProgramLevel = models.StudyProgramLevels{
+				StudyProgramID: studyProgramID,
+				StudyLevelID:   studyLevelID,
+				OldID:          oldID,
+			}
 			if err := db.Create(&studyProgramLevel).Error; err != nil {
 				return models.StudyProgramLevels{}, err
 			}
 		} else {
 			return models.StudyProgramLevels{}, err
 		}
+	} else if oldID != "" && strings.TrimSpace(studyProgramLevel.OldID) == "" {
+		studyProgramLevel.OldID = oldID
+		if err := db.WithContext(ctx).
+			Model(&models.StudyProgramLevels{}).
+			Where("study_program_id = ? AND study_level_id = ?", studyProgramID, studyLevelID).
+			Update("old_id", oldID).Error; err != nil {
+			return models.StudyProgramLevels{}, err
+		}
 	}
 	return studyProgramLevel, nil
+}
+
+func (cc *Controller) getOrCreateStudyProfile(ctx context.Context, name string) (models.StudyProfile, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return models.StudyProfile{}, fmt.Errorf("study profile name is empty")
+	}
+	db := cc.app.Postgres()
+	studyProfile, err := gorm.G[models.StudyProfile](db).
+		Where(&models.StudyProfile{Name: name}).
+		First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			studyProfile = models.StudyProfile{Name: name}
+			if err := db.Create(&studyProfile).Error; err != nil {
+				return models.StudyProfile{}, err
+			}
+		} else {
+			return models.StudyProfile{}, err
+		}
+	}
+	return studyProfile, nil
+}
+
+func (cc *Controller) getOrCreateStudyProgramProfile(ctx context.Context, studyProgramID int64, studyProfileID int64) (models.StudyProgramProfile, error) {
+	db := cc.app.Postgres()
+	studyProgramProfile, err := gorm.G[models.StudyProgramProfile](db).
+		Where(&models.StudyProgramProfile{StudyProgramID: studyProgramID, StudyProfileID: studyProfileID}).
+		First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			studyProgramProfile = models.StudyProgramProfile{
+				StudyProgramID: studyProgramID,
+				StudyProfileID: studyProfileID,
+			}
+			if err := db.Create(&studyProgramProfile).Error; err != nil {
+				return models.StudyProgramProfile{}, err
+			}
+		} else {
+			return models.StudyProgramProfile{}, err
+		}
+	}
+	return studyProgramProfile, nil
 }
 
 func (cc *Controller) getOrCreateStudyProgram(ctx context.Context, name string) (models.StudyProgram, error) {

@@ -21,8 +21,7 @@ type StudyProgramLanguage struct {
 
 	Status StudyProgramLanguageStatus `json:"status" gorm:"default:active;"`
 
-	FacultyID int64   `json:"faculty_id" gorm:"type:bigint;not null;index"`
-	Faculty   Faculty `json:"faculty" gorm:"foreignKey:FacultyID;references:ID"`
+	StudyPrograms []StudyProgram `json:"study_programs" gorm:"foreignKey:LanguageID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

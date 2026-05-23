@@ -1,4 +1,4 @@
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, UsersIcon } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import type { FC } from "react";
 import { QUERY_KEYS } from "@workspace/flowtrove/components/data-table/lib/constants";
@@ -9,6 +9,7 @@ import TableConfigCustomizator from "./table-config-customizator";
 
 const StudentsListHeaderActions: FC = () => {
     const openCreateStudent = useStudentsListStore((s) => s.openCreateStudent);
+    const openImportUsers = useStudentsListStore((s) => s.openImportUsers);
     const [search, setSearch] = useQueryState(
         "full_name",
         parseAsString.withDefault("").withOptions({ throttleMs: 300 }),
@@ -38,7 +39,11 @@ const StudentsListHeaderActions: FC = () => {
             <div className="flex shrink-0 items-center justify-end gap-1">
                 <Button type="button" variant="default" onClick={openCreateStudent}>
                     <UserPlus className="size-4" aria-hidden />
-                    Add Student
+                    Create
+                </Button>
+                <Button type="button" variant="default" onClick={openImportUsers}>
+                    <UsersIcon className="size-4" aria-hidden />
+                    Import
                 </Button>
                 <TableConfigCustomizator />
             </div>

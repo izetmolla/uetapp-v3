@@ -12,6 +12,7 @@ import StudentsListHeaderActions from "./components/list-header-actions";
 import QuickEditStudent from "./components/quick-edit-student";
 import DisableStudentDialog from "./components/disable-student-dialog";
 import EnableStudentDialog from "./components/enable-student-dialog";
+import ImportUsersDialog from "./components/import-users-dialog";
 
 const breadcrumb: BreadcrumbItem[] = [
     { label: "Contracts", to: "/contracts" },
@@ -61,6 +62,7 @@ const StudentsListPage = () => {
             <QuickEditStudent />
             <DisableStudentDialog />
             <EnableStudentDialog />
+            <ImportUsersDialog />
         </ContentLoader>
     );
 };

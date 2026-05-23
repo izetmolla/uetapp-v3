@@ -25,6 +25,9 @@ type StudyProgram struct {
 	Profiles    []StudyProgramProfile `json:"profiles" gorm:"foreignKey:StudyProgramID;references:ID"`
 	StudyLevels []StudyProgramLevels  `json:"study_levels" gorm:"foreignKey:StudyProgramID;references:ID"`
 
+	Language   StudyProgramLanguage `json:"language" gorm:"foreignKey:LanguageID;references:ID"`
+	LanguageID *int64               `json:"language_id" gorm:"type:bigint;index"`
+
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
