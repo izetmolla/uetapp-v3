@@ -17,14 +17,13 @@ const (
 type StudyProgram struct {
 	ID   int64  `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name string `json:"name" gorm:"size:255;"`
+	Slug string `json:"slug" gorm:"size:255;"`
 
 	Status StudyProgramStatus `json:"status" gorm:"default:active;"`
 
-	FacultyID int64   `json:"faculty_id" gorm:"type:bigint;not null;index"`
-	Faculty   Faculty `json:"faculty" gorm:"foreignKey:FacultyID;references:ID"`
-
-	Profiles []StudyProgramProfile `json:"profiles" gorm:"foreignKey:StudyProgramID;references:ID"`
-	Levels   []StudyProgramLevels  `json:"levels" gorm:"foreignKey:StudyProgramID;references:ID"`
+	Faculties   []FacultyStudyProgram `json:"faculties" gorm:"foreignKey:StudyProgramID;references:ID"`
+	Profiles    []StudyProgramProfile `json:"profiles" gorm:"foreignKey:StudyProgramID;references:ID"`
+	StudyLevels []StudyProgramLevels  `json:"study_levels" gorm:"foreignKey:StudyProgramID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

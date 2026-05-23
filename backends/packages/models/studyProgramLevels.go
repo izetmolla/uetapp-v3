@@ -8,11 +8,9 @@ import (
 
 // Server specific settings.
 type StudyProgramLevels struct {
-	ID int64 `json:"id" gorm:"primaryKey;autoIncrement"`
-
-	StudyProgramID int64        `json:"study_program_id" gorm:"type:bigint;not null;index"`
+	StudyProgramID int64        `json:"study_program_id" gorm:"type:bigint;not null;uniqueIndex:idx_study_program_levels"`
 	StudyProgram   StudyProgram `json:"study_program" gorm:"foreignKey:StudyProgramID;references:ID"`
-	StudyLevelID   int64        `json:"study_level_id" gorm:"type:bigint;not null;index"`
+	StudyLevelID   int64        `json:"study_level_id" gorm:"type:bigint;not null;uniqueIndex:idx_study_program_levels"`
 	StudyLevel     StudyLevel   `json:"study_level" gorm:"foreignKey:StudyLevelID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
