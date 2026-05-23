@@ -33,7 +33,7 @@ spec:
             - name: MINIO_ROOT_USER
               value: imolla
             - name: MINIO_ROOT_PASSWORD
-              value: grtdrgftretgbtgvrsdgfrtrhfgfg
+              value: DFnC7C8Gd8l5tDKFYsfxxonu2Zi9q5UmDpj6ZR4Z
           ports:
             - containerPort: 9000
               name: api
@@ -75,7 +75,7 @@ metadata:
   name: minio-storage
   namespace: storages
 spec:
-  type: ClusterIP
+  type: NodePort
   clusterIP: 10.100.2.201
   selector:
     app: minio-storage
@@ -86,3 +86,4 @@ spec:
     - name: api
       port: 9000
       targetPort: 9000
+      nodePort: 30014
