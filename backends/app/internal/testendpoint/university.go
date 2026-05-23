@@ -1,13 +1,16 @@
 package testendpoint
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/flowtrove/packages/drivers/httprequest"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 )
 
@@ -23,7 +26,6 @@ func (cc *Controller) GetUniversityUnit(c fiber.Ctx) error {
 	reqCtx := c.Context()
 	db := cc.app.Postgres()
 	r := cc.app.Render()
-
 	resource, err := gorm.G[models.Resource](db).
 		Select("id", "config").
 		Where("id = ?", 3).
@@ -54,12 +56,100 @@ func (cc *Controller) GetUniversityUnit(c fiber.Ctx) error {
 	if err != nil {
 		return cc.app.Api(c, r.WithError(err))
 	}
+
+	studyLevels, err := cc.getStudyLevels(reqCtx, orgUnits)
+	if err != nil {
+		return cc.app.Api(c, r.WithError(err))
+	}
+	faculties, err := cc.getFaculties(reqCtx, orgUnits)
+	if err != nil {
+		return cc.app.Api(c, r.WithError(err))
+	}
+
 	return cc.app.Api(c, cc.app.Render().WithData(fiber.Map{
-		"org_units": orgUnits,
-		// "formatted": formatForInsert(orgUnits),
+		// "org_units": orgUnits,
+		"study_levels": studyLevels,
+		"faculties":    faculties,
 	}))
 }
 
+func (cc *Controller) getStudyLevels(reqCtx context.Context, orgUnits []UniversityOrgUnitType) ([]models.StudyLevel, error) {
+	seen := make(map[string]struct{})
+	studyLevels := make([]models.StudyLevel, 0)
+	for _, orgUnit := range orgUnits {
+		name := orgUnit.StudyLevel
+		if _, exists := seen[name]; exists {
+			continue
+		}
+		seen[name] = struct{}{}
+		studyLevel, err := cc.getOrCreateStudyLevel(reqCtx, name)
+		if err != nil {
+			return []models.StudyLevel{}, err
+		}
+		studyLevels = append(studyLevels, studyLevel)
+
+	}
+	return studyLevels, nil
+}
+
+func (cc *Controller) getFaculties(ctx context.Context, orgUnits []UniversityOrgUnitType) ([]models.Faculty, error) {
+	seen := make(map[string]struct{})
+	faculties := make([]models.Faculty, 0)
+	for _, orgUnit := range orgUnits {
+		name := orgUnit.Faculty
+		if _, exists := seen[name]; exists {
+			continue
+		}
+		seen[name] = struct{}{}
+		faculty, err := cc.getOrCreateFaculty(ctx, name)
+		if err != nil {
+			return []models.Faculty{}, err
+		}
+		faculties = append(faculties, faculty)
+
+	}
+	return faculties, nil
+}
+
+// Database Functions
+func (cc *Controller) getOrCreateStudyLevel(ctx context.Context, name string) (models.StudyLevel, error) {
+	db := cc.app.Postgres()
+	studyLevel, err := gorm.G[models.StudyLevel](db).
+		Where(&models.StudyLevel{Name: name}).
+		First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			studyLevel = models.StudyLevel{Name: name, Slug: slug.Make(name)}
+			if err := db.Create(&studyLevel).Error; err != nil {
+				return models.StudyLevel{}, err
+			}
+		} else {
+			return models.StudyLevel{}, err
+		}
+	}
+
+	return studyLevel, nil
+}
+
+func (cc *Controller) getOrCreateFaculty(ctx context.Context, name string) (models.Faculty, error) {
+	db := cc.app.Postgres()
+	faculty, err := gorm.G[models.Faculty](db).
+		Where(&models.Faculty{Name: name}).
+		First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			faculty = models.Faculty{Name: name, Slug: slug.Make(name)}
+			if err := db.Create(&faculty).Error; err != nil {
+				return models.Faculty{}, err
+			}
+		} else {
+			return models.Faculty{}, err
+		}
+	}
+	return faculty, nil
+}
+
+// Helpers Functions
 func parseUniversityOrgUnit(body map[string]any) ([]UniversityOrgUnitType, error) {
 	rows, err := extractOrgUnitRows(body)
 	if err != nil {

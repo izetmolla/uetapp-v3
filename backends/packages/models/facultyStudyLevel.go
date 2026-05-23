@@ -15,9 +15,9 @@ const (
 
 // Server specific settings.
 type FacultyStudyLevel struct {
-	FacultyID    int64      `json:"faculty_id" gorm:"type:bigint;not null;index"`
+	FacultyID    int64      `json:"faculty_id" gorm:"type:bigint;not null;uniqueIndex:idx_faculty_study_level"`
 	Faculty      Faculty    `json:"faculty" gorm:"foreignKey:FacultyID;references:ID"`
-	StudyLevelID int64      `json:"study_level_id" gorm:"type:bigint;not null;index"`
+	StudyLevelID int64      `json:"study_level_id" gorm:"type:bigint;not null;uniqueIndex:idx_faculty_study_level"`
 	StudyLevel   StudyLevel `json:"study_level" gorm:"foreignKey:StudyLevelID;references:ID"`
 
 	Status FacultyStudyLevelStatus `json:"status" gorm:"default:active;"`
