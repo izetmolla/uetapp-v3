@@ -53,7 +53,7 @@ metadata:
   name: postgres-db
   namespace: uetedu-v3
 spec:
-  type: ClusterIP
+  type: NodePort
   clusterIP: 10.100.2.200
   selector:
     app: postgres-db
@@ -62,3 +62,4 @@ spec:
       protocol: TCP
       port: 5432
       targetPort: 5432
+      nodePort: 30015

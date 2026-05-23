@@ -149,7 +149,7 @@ const AddStudentDialog: FC = () => {
 
     return (
         <Dialog open={isAddStudentDialogOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="flex h-[min(88vh,760px)] w-[min(96vw,960px)] max-w-[960px] flex-col gap-0 overflow-hidden p-0 sm:max-w-[960px]">
+            <DialogContent fullscreen>
                 <div className="shrink-0 border-b px-5 py-3.5">
                     <DialogHeader className="gap-1 text-left sm:text-left">
                         <DialogTitle className="text-base font-semibold leading-tight">

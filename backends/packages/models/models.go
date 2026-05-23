@@ -21,8 +21,7 @@ func Models() []any {
 		// &AcademicYear{},
 		// &Faculty{},
 		// &Department{},
-		// &StudyLevel{},
-		&Resource{},
+		// &Resource{},
 		// &Role{},
 
 		// &StudentScanFolder{},
@@ -42,6 +41,8 @@ func Models() []any {
 		// &Role{},
 
 		// &Faculty{},
+		// &FacultyStudyLevel{},
+		// &StudyLevel{},
 		// &StudyProgram{},
 		// &StudyProfile{},
 		// &StudyProgramProfile{},

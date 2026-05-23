@@ -20,7 +20,8 @@ func NewController(app *config.AppClients) *Controller {
 
 func SetupRoutes(api fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	api.Get("/test/httprequest", controller.TestEndpoint)
+	// api.Get("/test/httprequest", controller.TestEndpoint)
+	api.Get("/test/university-unit", controller.GetUniversityUnit)
 }
 
 func (cc *Controller) TestEndpoint(c fiber.Ctx) error {
