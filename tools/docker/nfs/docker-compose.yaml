@@ -35,6 +35,12 @@ services:
       NFS_EXPORT_13: /mnt/general-registry  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
 
 
+
+      NFS_EXPORT_14: /mnt/storages/minio-storage  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_15: /mnt/storages/minio-storage  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_16: /mnt/storages/minio-storage  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
+
+
       #NFS_EXPORT_0: /mnt 192.168.5.0/22(fsid=0,rw,no_root_squash,no_subtree_check) # https://github.com/izetmolla/docker-nfs-server/issues/24
       #NFS_EXPORT_1: /mnt/uetapp 192.168.5.30/32(rw,sync,no_root_squash,no_subtree_check)
       #NFS_EXPORT_2: /mnt/uetapp 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
