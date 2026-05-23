@@ -31,6 +31,9 @@ npm-debug.log*
 
 
 
+# Kubernetes secrets (never commit real tokens)
+tools/k8s/registry/registry.secrets.yaml
+
 #Backends
 backends/k8s.secrets.yaml
 backends/app/tmp/*

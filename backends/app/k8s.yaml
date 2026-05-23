@@ -22,7 +22,7 @@ spec:
         - name: registry-01-secret
       containers:
       - name: app
-        image: rg1.uetonline.com/uetedu-v3/app:latest
+        image: rg1.izetmolla.com/uetedu-v3/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

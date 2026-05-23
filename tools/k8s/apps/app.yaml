@@ -22,7 +22,7 @@ spec:
         - name: registry-01-secret
       containers:
       - name: app
-        image: rg1.uetonline.com/uetedu-v3/app:latest
+        image: rg1.izetmolla.com/uetedu-v3/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -38,7 +38,7 @@ spec:
           - name: JWT_SECRET
             value: "fdgvtrfiduhgvjrtfdgvuyrthfdjhvjrfhdgfvujchrbfdhjgvchjrfbdvhrjfdvbcfjdbnv"
           - name: DATABASE_URL
-            value: "postgres://imolla:TopeTope1995@10.100.2.200:5432/uetapp?sslmode=disable"
+            value: "postgres://imolla:fgvgyfdtgxfchgfxtrfdcgvgffgcvjfgchgfc@10.100.2.200:5432/uetapp?sslmode=disable"
           - name: LDAP_URL
             value: "ldap://192.168.11.61:389"
           - name: LDAP_DIRECT_BIND
