@@ -38,7 +38,7 @@ spec:
           - name: JWT_SECRET
             value: "fdgvtrfiduhgvjrtfdgvuyrthfdjhvjrfhdgfvujchrbfdhjgvchjrfbdvhrjfdvbcfjdbnv"
           - name: DATABASE_URL
-            value: "postgres://imolla:TopeTope1995@10.100.2.200:5432/uetapp"  
+            value: "postgres://imolla:TopeTope1995@10.100.2.200:5432/uetapp?sslmode=disable"
           - name: LDAP_URL
             value: "ldap://192.168.11.61:389"
           - name: LDAP_DIRECT_BIND
