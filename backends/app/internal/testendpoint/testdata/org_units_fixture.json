@@ -1,0 +1,2949 @@
+[
+  {
+    "program_old_id": "60",
+    "program": "Arsim Parashkollor",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "98",
+    "program": "Arte Muzikore",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "98",
+    "program": "Arte Muzikore",
+    "profile": "Kanto",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "98",
+    "program": "Arte Muzikore",
+    "profile": "Kitarë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "98",
+    "program": "Arte Muzikore",
+    "profile": "Piano",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "98",
+    "program": "Arte Muzikore",
+    "profile": "Violinë dhe Harqe",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "86",
+    "program": "Arte Pamore",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "86",
+    "program": "Arte Pamore",
+    "profile": "Grafikë - Dizajn",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "86",
+    "program": "Arte Pamore",
+    "profile": "Multimedia",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "86",
+    "program": "Arte Pamore",
+    "profile": "Trashëgimi Kulturore",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "99",
+    "program": "Arte Skenike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "99",
+    "program": "Arte Skenike",
+    "profile": "Aktrim",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "99",
+    "program": "Arte Skenike",
+    "profile": "Balet",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "99",
+    "program": "Arte Skenike",
+    "profile": "Marrëdhënie Publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "99",
+    "program": "Arte Skenike",
+    "profile": "Multimedia",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "99",
+    "program": "Arte Skenike",
+    "profile": "Regji",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "",
+    "program": "Bachelor in Communication",
+    "profile": "",
+    "faculty": "",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "145",
+    "program": "Business Informatics",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "100",
+    "program": "Edukim Fizik dhe Sporte",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "100",
+    "program": "Edukim Fizik dhe Sporte",
+    "profile": "Atletikë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "100",
+    "program": "Edukim Fizik dhe Sporte",
+    "profile": "Futboll",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "100",
+    "program": "Edukim Fizik dhe Sporte",
+    "profile": "Gazetari",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "100",
+    "program": "Edukim Fizik dhe Sporte",
+    "profile": "Gjimnastikë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "100",
+    "program": "Edukim Fizik dhe Sporte",
+    "profile": "Lojëra me Dorë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "",
+    "program": "Erasmus Bachelor",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "",
+    "program": "Erasmus Bachelor",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "",
+    "program": "Erasmus Bachelor",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "66",
+    "program": "Filozofi",
+    "profile": "Filozofi Gjuhe",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "66",
+    "program": "Filozofi",
+    "profile": "Filozofi Politike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "66",
+    "program": "Filozofi",
+    "profile": "Gazetari",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "146",
+    "program": "Financë",
+    "profile": "Accounting",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "91",
+    "program": "Financë",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "91",
+    "program": "Financë",
+    "profile": "Bankë",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "91",
+    "program": "Financë",
+    "profile": "Informatikë Ekonomike",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "91",
+    "program": "Financë",
+    "profile": "Kontabilitet",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "91",
+    "program": "Financë",
+    "profile": "Menaxhim i Organizatave",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "1",
+    "program": "Financë, Bankë",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "103",
+    "program": "Fizioterapi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "104",
+    "program": "Imazheri",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "102",
+    "program": "Infermieri",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "144",
+    "program": "Informatikë Ekonomike",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "4",
+    "program": "Informatikë ekonomike (Financë dhe Bankë)",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "3",
+    "program": "Informatikë Ekonomike (Menaxhim biznesi)",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "96",
+    "program": "Inxhinieri Industriale",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "96",
+    "program": "Inxhinieri Industriale",
+    "profile": "Inxhinieri Elektrike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "96",
+    "program": "Inxhinieri Industriale",
+    "profile": "Inxhinieri Kimike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "96",
+    "program": "Inxhinieri Industriale",
+    "profile": "Inxhinieri Mekanike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "147",
+    "program": "Inxhinieri Informatike",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "147",
+    "program": "Inxhinieri Informatike",
+    "profile": "Software Design",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "88",
+    "program": "Inxhinieri Informatike",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "88",
+    "program": "Inxhinieri Informatike",
+    "profile": "Grafikë - Dizajn",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "88",
+    "program": "Inxhinieri Informatike",
+    "profile": "Hartim Softwere-sh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "88",
+    "program": "Inxhinieri Informatike",
+    "profile": "Informatikë Ekonomike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "88",
+    "program": "Inxhinieri Informatike",
+    "profile": "Inxhinieri Telekomunikacioni",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "152",
+    "program": "Inxhinieri Mekanike",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "89",
+    "program": "Inxhinieri Ndërtimi",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "16",
+    "program": "Juridik i Përgjithshëm",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "90",
+    "program": "Komunikim",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "90",
+    "program": "Komunikim",
+    "profile": "Gazetari",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "90",
+    "program": "Komunikim",
+    "profile": "Grafikë - Dizajn",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "90",
+    "program": "Komunikim",
+    "profile": "Marketing",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "90",
+    "program": "Komunikim",
+    "profile": "Marrëdhënie Publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "90",
+    "program": "Komunikim",
+    "profile": "Multimedia",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "24",
+    "program": "Komunikim- Dizajn",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "20",
+    "program": "Komunikim-marrëdhënie publike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "64",
+    "program": "Letërsi",
+    "profile": "Gazetari",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "97",
+    "program": "Linguistikë",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "97",
+    "program": "Linguistikë",
+    "profile": "Gjuhë Angleze",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "22",
+    "program": "Marrëdhënie ndërkombëtare",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "84",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "84",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Administratë Publike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "84",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Marrëdhënie Publike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "84",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Siguri",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "84",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Studime Europiane",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "44",
+    "program": "Menaxhim Biznesi",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "44",
+    "program": "Menaxhim Biznesi",
+    "profile": "Informatikë Ekonomike",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "44",
+    "program": "Menaxhim Biznesi",
+    "profile": "Kontabilitet",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "44",
+    "program": "Menaxhim Biznesi",
+    "profile": "Marketing",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "44",
+    "program": "Menaxhim Biznesi",
+    "profile": "Menaxhim i Organizatave",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "44",
+    "program": "Menaxhim Biznesi",
+    "profile": "Turizëm",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "",
+    "program": "Nursing",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "25",
+    "program": "Psikologji",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "25",
+    "program": "Psikologji",
+    "profile": "Marketing",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "25",
+    "program": "Psikologji",
+    "profile": "Marrëdhënie Publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "25",
+    "program": "Psikologji",
+    "profile": "Menaxhim i Organizatave",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "25",
+    "program": "Psikologji",
+    "profile": "Psikologji Edukimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "25",
+    "program": "Psikologji",
+    "profile": "Shëndet Mendor",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "21",
+    "program": "Shkenca politike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "83",
+    "program": "Shkenca Politike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "83",
+    "program": "Shkenca Politike",
+    "profile": "Administratë Publike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "83",
+    "program": "Shkenca Politike",
+    "profile": "Gazetari",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "83",
+    "program": "Shkenca Politike",
+    "profile": "Partitë Politike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "83",
+    "program": "Shkenca Politike",
+    "profile": "Sociologji Politike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "83",
+    "program": "Shkenca Politike",
+    "profile": "Studime Europiane",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "85",
+    "program": "Sociologji",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "85",
+    "program": "Sociologji",
+    "profile": "Administratë Publike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "85",
+    "program": "Sociologji",
+    "profile": "Antropologji Sociale",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "85",
+    "program": "Sociologji",
+    "profile": "Marrëdhënie Publike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "85",
+    "program": "Sociologji",
+    "profile": "Sociologji Politike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "26",
+    "program": "Sociologji-Antropologji sociale",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "87",
+    "program": "Teknologji Informacioni",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "87",
+    "program": "Teknologji Informacioni",
+    "profile": "Grafikë - Dizajn",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "87",
+    "program": "Teknologji Informacioni",
+    "profile": "Hartim Softwere",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "87",
+    "program": "Teknologji Informacioni",
+    "profile": "Informatikë Ekonomike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "87",
+    "program": "Teknologji Informacioni",
+    "profile": "Inxhinieri Telekomunikacioni",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "95",
+    "program": "Turizëm",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Bachelor"
+  },
+  {
+    "program_old_id": "92",
+    "program": "Aplikime Informatike",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Diplomë Profesionale"
+  },
+  {
+    "program_old_id": "93",
+    "program": "Kontabilitet",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Diplomë Profesionale"
+  },
+  {
+    "program_old_id": "94",
+    "program": "Menaxhim",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Diplomë Profesionale"
+  },
+  {
+    "program_old_id": "15",
+    "program": "Shkenca Ekonomike",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "15",
+    "program": "Shkenca Ekonomike",
+    "profile": "Ekonomi dhe Zhvillimi i Qëndrueshëm",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "15",
+    "program": "Shkenca Ekonomike",
+    "profile": "Financë",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "15",
+    "program": "Shkenca Ekonomike",
+    "profile": "Menaxhim",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "15",
+    "program": "Shkenca Ekonomike",
+    "profile": "Menaxhimi i Sistemeve të Informacionit",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "19",
+    "program": "Shkenca Juridike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "151",
+    "program": "Shkenca Sociale",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "42",
+    "program": "Shkenca Sociale",
+    "profile": "Psikologji-Pedagogji",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "42",
+    "program": "Shkenca Sociale",
+    "profile": "Shkenca Komunikimi",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "151",
+    "program": "Shkenca Sociale",
+    "profile": "Shkenca Politike dhe Marrëdhënie Ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "42",
+    "program": "Shkenca Sociale",
+    "profile": "Shkenca Politike dhe Marrëdhënie Ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "42",
+    "program": "Shkenca Sociale",
+    "profile": "Sociologji-Antropologji Sociale",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "150",
+    "program": "Shkenca Sociale dhe të Sjelljes",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Doktoraturë"
+  },
+  {
+    "program_old_id": "136",
+    "program": "E Drejtë Private",
+    "profile": "E drejtë civile",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "136",
+    "program": "E Drejtë Private",
+    "profile": "E drejtë ekonomike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "136",
+    "program": "E Drejtë Private",
+    "profile": "E drejtë financiare, fiskale dhe bankare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "136",
+    "program": "E Drejtë Private",
+    "profile": "Qeverisja e korporatës",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "135",
+    "program": "E Drejtë Publike",
+    "profile": "E drejtë evropiane dhe ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "135",
+    "program": "E Drejtë Publike",
+    "profile": "E drejtë kushtetuese dhe administrative",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "135",
+    "program": "E Drejtë Publike",
+    "profile": "E drejtë penale",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "137",
+    "program": "Ekonomi dhe Zhvillim i Qendrueshëm",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "137",
+    "program": "Ekonomi dhe Zhvillim i Qendrueshëm",
+    "profile": "Administrata dhe politikat publike",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "137",
+    "program": "Ekonomi dhe Zhvillim i Qendrueshëm",
+    "profile": "Politika, shoqëria dhe demokratizimi",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "137",
+    "program": "Ekonomi dhe Zhvillim i Qendrueshëm",
+    "profile": "Urbanizimi, zhvillimi territorial dhe politikat mjedisore",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "138",
+    "program": "Financë",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "138",
+    "program": "Financë",
+    "profile": "E drejtë financiare, fiskale dhe bankare",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "138",
+    "program": "Financë",
+    "profile": "Financat publike",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "138",
+    "program": "Financë",
+    "profile": "Qeverisja e korporatave",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "138",
+    "program": "Financë",
+    "profile": "Tregjet financiare dhe menaxhimi bankar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "143",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "E drejtë evropiane dhe ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "143",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Globalizimi dhe zhvillimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "143",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Politika, shoqëria dhe demokratizimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "143",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Studime të sigurisë dhe gjeopolitikës",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "139",
+    "program": "Menaxhim",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "139",
+    "program": "Menaxhim",
+    "profile": "Biznes dhe marketing ndërkombëtar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "139",
+    "program": "Menaxhim",
+    "profile": "E drejtë ekonomike",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "139",
+    "program": "Menaxhim",
+    "profile": "Komunikimi në biznes",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "139",
+    "program": "Menaxhim",
+    "profile": "Lidershipi dhe menaxhimi i karrierës",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "140",
+    "program": "Shkenca Komunikimi",
+    "profile": "Komunikimi dhe sjelljet politike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "140",
+    "program": "Shkenca Komunikimi",
+    "profile": "Komunikimi në biznes",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "140",
+    "program": "Shkenca Komunikimi",
+    "profile": "Lidershipi dhe menaxhimi i karrierës",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "140",
+    "program": "Shkenca Komunikimi",
+    "profile": "Teori dhe modele komunikimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "141",
+    "program": "Shkenca Politike",
+    "profile": "Administrata dhe politikat publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "141",
+    "program": "Shkenca Politike",
+    "profile": "Komunikimi dhe sjelljet politike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "141",
+    "program": "Shkenca Politike",
+    "profile": "Politika, shoqëria dhe demokratizimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "142",
+    "program": "Sociologji",
+    "profile": "Kriminalogji",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "142",
+    "program": "Sociologji",
+    "profile": "Politika, shoqëria dhe demokratizimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Nivelit të Dytë"
+  },
+  {
+    "program_old_id": "8-FB",
+    "program": "",
+    "profile": "Financë - Bankë",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "13",
+    "program": "Administrim Biznesi",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "13",
+    "program": "Administrim Biznesi",
+    "profile": "Administrim Publik",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "13",
+    "program": "Administrim Biznesi",
+    "profile": "Biznes-Marketing",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "13",
+    "program": "Administrim Biznesi",
+    "profile": "Ekonomi Europiane",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "13",
+    "program": "Administrim Biznesi",
+    "profile": "Kontabilitet dhe Raportim Financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "13",
+    "program": "Administrim Biznesi",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "13",
+    "program": "Administrim Biznesi",
+    "profile": "Menaxhim Marketingu",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "133",
+    "program": "Arte Muzikore",
+    "profile": "Kompozicion",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "133",
+    "program": "Arte Muzikore",
+    "profile": "Mjeshtri Instrumentesh me Harqe",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "133",
+    "program": "Arte Muzikore",
+    "profile": "Mjeshtri Piano",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "113",
+    "program": "Arte Pamore",
+    "profile": "Dizajn - Modë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "113",
+    "program": "Arte Pamore",
+    "profile": "TV - Multimedia",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "114",
+    "program": "Arte Skenike",
+    "profile": "Mjeshtri Regjie",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "114",
+    "program": "Arte Skenike",
+    "profile": "TV dhe Produksion",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "153",
+    "program": "Arte të Aplikuara",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "153",
+    "program": "Arte të Aplikuara",
+    "profile": "Grafikë - Dizajn",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "153",
+    "program": "Arte të Aplikuara",
+    "profile": "Instrument",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "153",
+    "program": "Arte të Aplikuara",
+    "profile": "Instrument",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "153",
+    "program": "Arte të Aplikuara",
+    "profile": "Kanto",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "153",
+    "program": "Arte të Aplikuara",
+    "profile": "Koreografi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "153",
+    "program": "Arte të Aplikuara",
+    "profile": "Regji",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "156",
+    "program": "Business Informatics",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "80",
+    "program": "E Drejtë Penale",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "17",
+    "program": "E Drejtë Private dhe Biznesi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "17",
+    "program": "E Drejtë Private dhe Biznesi",
+    "profile": "E Drejtë e Biznesit",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "17",
+    "program": "E Drejtë Private dhe Biznesi",
+    "profile": "E Drejtë Private",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "59",
+    "program": "E Drejtë Publike dhe Ndërkombëtare",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "59",
+    "program": "E Drejtë Publike dhe Ndërkombëtare",
+    "profile": "E Drejtë Ndërkombëtare dhe Europiane",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "59",
+    "program": "E Drejtë Publike dhe Ndërkombëtare",
+    "profile": "E Drejtë Penale",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "59",
+    "program": "E Drejtë Publike dhe Ndërkombëtare",
+    "profile": "E Drejtë Publike dhe Kushtetuese",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "",
+    "program": "Erasmus Master",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "109",
+    "program": "Financë",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "109",
+    "program": "Financë",
+    "profile": "Auditim dhe Menaxhim Risku",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "109",
+    "program": "Financë",
+    "profile": "Bankë dhe Tregje Financiare",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "109",
+    "program": "Financë",
+    "profile": "Ekonomi-Financë",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "109",
+    "program": "Financë",
+    "profile": "Kontabilitet dhe Raportim Financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "109",
+    "program": "Financë",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "6",
+    "program": "Financë, Bankë",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "6",
+    "program": "Financë, Bankë",
+    "profile": "Banka dhe tregje financiare",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "6",
+    "program": "Financë, Bankë",
+    "profile": "Ekonomi-Financë",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "6",
+    "program": "Financë, Bankë",
+    "profile": "Ekonomiks",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "6",
+    "program": "Financë, Bankë",
+    "profile": "Politika Fiskale",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "122",
+    "program": "Fizioterapi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "122",
+    "program": "Fizioterapi",
+    "profile": "Teknika Rehabilitimi",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "115",
+    "program": "Gjuhësi e Aplikuar",
+    "profile": "Gjuhë Angleze",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "115",
+    "program": "Gjuhësi e Aplikuar",
+    "profile": "Gjuhë Gjermane",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "132",
+    "program": "Imazheri dhe Radioterapi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "121",
+    "program": "Infermieri",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "8",
+    "program": "Informatikë ekonomike",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "8",
+    "program": "Informatikë ekonomike",
+    "profile": "Administrim biznesi",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "8",
+    "program": "Informatikë ekonomike",
+    "profile": "Bazë të Dhënash",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "8",
+    "program": "Informatikë ekonomike",
+    "profile": "Biznes",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "8",
+    "program": "Informatikë ekonomike",
+    "profile": "Dizenjim dhe Zhvillim Aplikimesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "8",
+    "program": "Informatikë ekonomike",
+    "profile": "Financë - Bankë",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "8",
+    "program": "Informatikë ekonomike",
+    "profile": "Teknologji Informacioni",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "120",
+    "program": "Inxhinieri Industriale",
+    "profile": "Inxhinieri Energjitike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "120",
+    "program": "Inxhinieri Industriale",
+    "profile": "Inxhinieri Mekanike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "120",
+    "program": "Inxhinieri Industriale",
+    "profile": "Inxhinieri Transporti",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "120",
+    "program": "Inxhinieri Industriale",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "111",
+    "program": "Inxhinieri Informatike",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "111",
+    "program": "Inxhinieri Informatike",
+    "profile": "Dizenjim dhe Zhvillim Aplikimesh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "111",
+    "program": "Inxhinieri Informatike",
+    "profile": "Inxhinieri Softwere-sh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "111",
+    "program": "Inxhinieri Informatike",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "111",
+    "program": "Inxhinieri Informatike",
+    "profile": "Menaxhim të Dhënash",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "111",
+    "program": "Inxhinieri Informatike",
+    "profile": "Siguria e Sistemeve të Informacionit",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "",
+    "program": "Inxhinieri Mekanike",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "",
+    "program": "Inxhinieri Mekanike",
+    "profile": "Energjitike",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "",
+    "program": "Inxhinieri Mekanike",
+    "profile": "Infrastrukturë Transporti",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "112",
+    "program": "Inxhinieri Ndërtimi",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "112",
+    "program": "Inxhinieri Ndërtimi",
+    "profile": "Infrastrukturë Transporti",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "112",
+    "program": "Inxhinieri Ndërtimi",
+    "profile": "Inxhinieri Strukturash",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "34",
+    "program": "Këshillim psikologjik dhe psikoterapi pozitive",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "28",
+    "program": "Komunikim-Marrëdhënie Publike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "28",
+    "program": "Komunikim-Marrëdhënie Publike",
+    "profile": "Marrëdhënie publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "28",
+    "program": "Komunikim-Marrëdhënie Publike",
+    "profile": "Mass media dhe komunikimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "28",
+    "program": "Komunikim-Marrëdhënie Publike",
+    "profile": "Studime dhe teoritë e komunikimit",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "47",
+    "program": "Marrëdhënie Ndërkombëtare - Diplomaci",
+    "profile": "Çështjet e Ballkanit",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "47",
+    "program": "Marrëdhënie Ndërkombëtare - Diplomaci",
+    "profile": "Studime Amerikane",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "30",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "79",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "30",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Çështje të Reja të Sigurisë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "79",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Çështje të Sigurisë",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "30",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Çështjet e Ballkanit",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "30",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Diplomaci publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "30",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "E Drejtë Ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "79",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Gjeopolitikë",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "79",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "79",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Organizata Ndëkombëtare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "30",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Organizatat Ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "79",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Strategji Politike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "30",
+    "program": "Marrëdhënie Ndërkombëtare",
+    "profile": "Studime Strategjike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "Arte",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "Edukim Fizik, Sporte dhe Shëndeti",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "Gjuhët dhe Komunikimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "Matematikë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "Shkencat e Natyrës",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "Shoqëria dhe Mjedisi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "116",
+    "program": "Mësuesi për Arsimin e Mesëm",
+    "profile": "Teknologjia dhe TIK",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "32",
+    "program": "Psikologji",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "32",
+    "program": "Psikologji",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "32",
+    "program": "Psikologji",
+    "profile": "Psikologji Këshillimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "32",
+    "program": "Psikologji",
+    "profile": "Psikologji Klinike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "32",
+    "program": "Psikologji",
+    "profile": "Psikologji Organizacionale",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "32",
+    "program": "Psikologji",
+    "profile": "Psikologji Shkollore",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "106",
+    "program": "Shkenca Komunikimi",
+    "profile": "Gazetari dhe Mediat e Reja",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "106",
+    "program": "Shkenca Komunikimi",
+    "profile": "Marrëdhënie Publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "106",
+    "program": "Shkenca Komunikimi",
+    "profile": "Marrëdhënie Publike Politike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "106",
+    "program": "Shkenca Komunikimi",
+    "profile": "Media Digjitale",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "106",
+    "program": "Shkenca Komunikimi",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "106",
+    "program": "Shkenca Komunikimi",
+    "profile": "Menaxhim Marketingu",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "131",
+    "program": "Shkenca Politike - Integrimi dhe Qeverisja",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "29",
+    "program": "Shkenca Politike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "78",
+    "program": "Shkenca Politike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "78",
+    "program": "Shkenca Politike",
+    "profile": "Administrim Publik",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "78",
+    "program": "Shkenca Politike",
+    "profile": "Marrëdhënie Publike Politike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "78",
+    "program": "Shkenca Politike",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "29",
+    "program": "Shkenca Politike",
+    "profile": "Politikë e krahasuar",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "78",
+    "program": "Shkenca Politike",
+    "profile": "Strategji Politike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "29",
+    "program": "Shkenca Politike",
+    "profile": "Teoritë politike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "31",
+    "program": "Shkencat e Edukimit",
+    "profile": "Administrim Shkollor",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "31",
+    "program": "Shkencat e Edukimit",
+    "profile": "Politikat e Edukimit",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "149",
+    "program": "Sistemet e Qendrueshme të Prodhimit të Ushqimeve",
+    "profile": "Inxhinieri, Cilësi dhe Siguri Ushqimore",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "149",
+    "program": "Sistemet e Qendrueshme të Prodhimit të Ushqimeve",
+    "profile": "Menaxhim i Sistemeve të Prodhimit të Ushqimeve",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "33",
+    "program": "Sociologji-Antropologji sociale",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "33",
+    "program": "Sociologji-Antropologji sociale",
+    "profile": "Sociologji Organizimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "124",
+    "program": "Studime Religjioze",
+    "profile": "Çështje të Sigurisë",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "124",
+    "program": "Studime Religjioze",
+    "profile": "Krahasimi i Religjioneve",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "119",
+    "program": "Teknologji Informacioni",
+    "profile": "Inovacion",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "119",
+    "program": "Teknologji Informacioni",
+    "profile": "IT e Biznesit",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "119",
+    "program": "Teknologji Informacioni",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "119",
+    "program": "Teknologji Informacioni",
+    "profile": "Zhvillim Software-sh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master i Shkencave"
+  },
+  {
+    "program_old_id": "118",
+    "program": "Audit",
+    "profile": "Administrim Publik",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "118",
+    "program": "Audit",
+    "profile": "Auditim dhe Menaxhim Risku",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "118",
+    "program": "Audit",
+    "profile": "Auditim i Institucioneve Financiare",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "118",
+    "program": "Audit",
+    "profile": "Kontabilitet dhe Raportim Financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "118",
+    "program": "Audit",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "9",
+    "program": "Banka dhe sigurime",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "9",
+    "program": "Banka dhe sigurime",
+    "profile": "Banka",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "9",
+    "program": "Banka dhe sigurime",
+    "profile": "Kontabilitet dhe Raportim Financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "9",
+    "program": "Banka dhe sigurime",
+    "profile": "Politika Fiskale",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "9",
+    "program": "Banka dhe sigurime",
+    "profile": "Sigurime",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "43",
+    "program": "Banka dhe Sigurime",
+    "profile": "Banka",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "43",
+    "program": "Banka dhe Sigurime",
+    "profile": "Kontabilitet dhe Raportim Financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "43",
+    "program": "Banka dhe Sigurime",
+    "profile": "Politika Fiskale",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "43",
+    "program": "Banka dhe Sigurime",
+    "profile": "Sigurime",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "67",
+    "program": "Diplomaci",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "38",
+    "program": "Dizajn grafik",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "101",
+    "program": "Dizajn i Aplikuar dhe Modë",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "18",
+    "program": "Drejtësi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "18",
+    "program": "Drejtësi",
+    "profile": "E Drejtë Administrative",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "18",
+    "program": "Drejtësi",
+    "profile": "E Drejtë Europiane",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "18",
+    "program": "Drejtësi",
+    "profile": "E Drejtë Ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "58",
+    "program": "Drejtësi",
+    "profile": "E Drejtë Administrative",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "58",
+    "program": "Drejtësi",
+    "profile": "E Drejtë Ndërkombëtare",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "76",
+    "program": "E Drejtë Biznesi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "77",
+    "program": "E Drejtë Biznesi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Administrim Publik",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Auditim dhe Menaxhim Risku",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Banka",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Bankë dhe Tregje Financiare",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Kontabilitet dhe Raportim Financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Politika Fiskale",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Qeverisje dhe Auditim",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "62",
+    "program": "Financë",
+    "profile": "Sigurime",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "63",
+    "program": "Financë",
+    "profile": "Banka",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "63",
+    "program": "Financë",
+    "profile": "Kontabilitet dhe Raportim Financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "63",
+    "program": "Financë",
+    "profile": "Politika Fiskale",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "63",
+    "program": "Financë",
+    "profile": "Qeverisje dhe Auditim",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "63",
+    "program": "Financë",
+    "profile": "Sigurime",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "123",
+    "program": "Infermieri",
+    "profile": "Infermieri Kirurgjikale",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "123",
+    "program": "Infermieri",
+    "profile": "Infermieri në Kujdesin Shëndetësor Parësor",
+    "faculty": "Fakulteti i Shkencave Mjekësore Teknike",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "12",
+    "program": "Informatikë e Aplikuar",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "12",
+    "program": "Informatikë e Aplikuar",
+    "profile": "Bazë të Dhënash",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "110",
+    "program": "Informatikë e Aplikuar",
+    "profile": "Bazë të Dhënash",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "12",
+    "program": "Informatikë e Aplikuar",
+    "profile": "Dizenjim dhe Zhvillim Aplikimesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "110",
+    "program": "Informatikë e Aplikuar",
+    "profile": "Dizenjim dhe Zhvillim Aplikimesh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "110",
+    "program": "Informatikë e Aplikuar",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "110",
+    "program": "Informatikë e Aplikuar",
+    "profile": "Menaxhim të Dhënash",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "110",
+    "program": "Informatikë e Aplikuar",
+    "profile": "Siguria e Sistemeve të Informacionit",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "110",
+    "program": "Informatikë e Aplikuar",
+    "profile": "TV - Multimedia",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "45",
+    "program": "Informatikë e aplikuar",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "45",
+    "program": "Informatikë e aplikuar",
+    "profile": "Bazë të Dhënash",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "45",
+    "program": "Informatikë e aplikuar",
+    "profile": "Dizenjim dhe Zhvillim Aplikimesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "107",
+    "program": "Komunikim",
+    "profile": "Gazetari dhe Mediat e Reja",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "107",
+    "program": "Komunikim",
+    "profile": "Marrëdhënie Publike Politike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "107",
+    "program": "Komunikim",
+    "profile": "Menaxhim Marketingu",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "107",
+    "program": "Komunikim",
+    "profile": "TV - Multimedia",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "155",
+    "program": "Komunikim dhe Media Digjitale",
+    "profile": "Gazetari Digjitale",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "155",
+    "program": "Komunikim dhe Media Digjitale",
+    "profile": "Marketing",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "155",
+    "program": "Komunikim dhe Media Digjitale",
+    "profile": "Marrëdhënie Publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "10",
+    "program": "Marketing",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "10",
+    "program": "Marketing",
+    "profile": "Inovacion",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "10",
+    "program": "Marketing",
+    "profile": "Marrëdhënie Publike Politike",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "10",
+    "program": "Marketing",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "10",
+    "program": "Marketing",
+    "profile": "Shërbime dhe turizëm",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "10",
+    "program": "Marketing",
+    "profile": "Turizëm",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "10",
+    "program": "Marketing",
+    "profile": "TV Multimedia",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "57",
+    "program": "Marketing",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "57",
+    "program": "Marketing",
+    "profile": "Inovacion dhe tregje strategjike",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "57",
+    "program": "Marketing",
+    "profile": "Marketing bankar dhe financiar",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "57",
+    "program": "Marketing",
+    "profile": "Shërbime dhe turizëm",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "37",
+    "program": "Marrëdhënie ndërkombëtare-Diplomaci",
+    "profile": "Çështjet e Ballkanit",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "130",
+    "program": "Marrëdhënie ndërkombëtare-Diplomaci",
+    "profile": "Çështjet e Ballkanit",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "37",
+    "program": "Marrëdhënie ndërkombëtare-Diplomaci",
+    "profile": "Studime Amerikane",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "130",
+    "program": "Marrëdhënie ndërkombëtare-Diplomaci",
+    "profile": "Studime Amerikane",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "35",
+    "program": "Marrëdhënie publike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "35",
+    "program": "Marrëdhënie publike",
+    "profile": "MP për sektorin komercial",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "35",
+    "program": "Marrëdhënie publike",
+    "profile": "MP politike dhe institucionale",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "46",
+    "program": "Marrëdhënie Publike",
+    "profile": "MP për sektorin komercial",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "46",
+    "program": "Marrëdhënie Publike",
+    "profile": "MP politike dhe institucionale",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "Administrim Publik",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "Administrim Territori",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "Institucione dhe administrim publik",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "Menaxhim i Burimeve Njerëzore",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "Menaxhimi i Burimeve Njerëzore dhe i karrierës",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "11",
+    "program": "Menaxhim Biznesi",
+    "profile": "Menaxhimi i SME-ve",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "56",
+    "program": "Menaxhim Biznesi",
+    "profile": "Biznes",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "56",
+    "program": "Menaxhim Biznesi",
+    "profile": "Institucione dhe administrim publik",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "56",
+    "program": "Menaxhim Biznesi",
+    "profile": "Menaxhimi i Burimeve Njerëzore dhe i karrierës",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "56",
+    "program": "Menaxhim Biznesi",
+    "profile": "Menaxhimi i SME-ve",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "39",
+    "program": "Mësuesi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "39",
+    "program": "Mësuesi",
+    "profile": "Administrim Shkollor",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "54",
+    "program": "Mësuesi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "117",
+    "program": "Mësuesi për Arsimin Fillor",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "125",
+    "program": "Mësuesi për Edukim Fizik dhe Sporte",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "108",
+    "program": "Psikologji e Aplikuar",
+    "profile": "Menaxhim dhe Vlerësim Projektesh",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "108",
+    "program": "Psikologji e Aplikuar",
+    "profile": "Psikologji Këshillimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "108",
+    "program": "Psikologji e Aplikuar",
+    "profile": "Psikologji Klinike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "108",
+    "program": "Psikologji e Aplikuar",
+    "profile": "Psikologji Organizacionale",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "108",
+    "program": "Psikologji e Aplikuar",
+    "profile": "Psikologji Shkollore",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "40",
+    "program": "Psikologji Shkollore",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "53",
+    "program": "Psikologji Shkollore",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "53",
+    "program": "Psikologji Shkollore",
+    "profile": "Psikologji Këshillimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "53",
+    "program": "Psikologji Shkollore",
+    "profile": "Psikologji Shkollore",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "81",
+    "program": "Qeverisje e Korporatave",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "14",
+    "program": "Qeverisje e Korporatave",
+    "profile": "",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "14",
+    "program": "Qeverisje e Korporatave",
+    "profile": "Auditim dhe Kontroll i Brendshëm",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "14",
+    "program": "Qeverisje e Korporatave",
+    "profile": "Biznes",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "14",
+    "program": "Qeverisje e Korporatave",
+    "profile": "E Drejtë Biznesi",
+    "faculty": "Fakulteti i Ekonomisë, Biznesit dhe Zhvillimit",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "36",
+    "program": "Shkenca politike",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "36",
+    "program": "Shkenca politike",
+    "profile": "Administrim Publik",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "36",
+    "program": "Shkenca politike",
+    "profile": "Politika publike",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "129",
+    "program": "Shkenca politike",
+    "profile": "Politika publike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "36",
+    "program": "Shkenca politike",
+    "profile": "Sjellja dhe strategjitë politike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "55",
+    "program": "Shkenca politike",
+    "profile": "Politika publike",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "41",
+    "program": "Sociologji e aplikuar",
+    "profile": "Sociologji Organizimi",
+    "faculty": "Fakulteti i Shkencave Humane, Edukimit dhe Arteve Liberale",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "75",
+    "program": "Studime të Sigurisë",
+    "profile": "Çështje të Sigurisë",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "75",
+    "program": "Studime të Sigurisë",
+    "profile": "Gjeopolitikë",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "75",
+    "program": "Studime të Sigurisë",
+    "profile": "Siguria e Sistemeve të Informacionit",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "75",
+    "program": "Studime të Sigurisë",
+    "profile": "Studime Rajonale",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "148",
+    "program": "Teknologji Informacioni e Aplikuar në Financë",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "Master Profesional"
+  },
+  {
+    "program_old_id": "105",
+    "program": "Arkitekturë",
+    "profile": "Arkitekturë",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "PIND Master i Shkencave"
+  },
+  {
+    "program_old_id": "105",
+    "program": "Arkitekturë",
+    "profile": "Arkitekturë Interieri",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "PIND Master i Shkencave"
+  },
+  {
+    "program_old_id": "105",
+    "program": "Arkitekturë",
+    "profile": "Restaurim Monumentesh",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "PIND Master i Shkencave"
+  },
+  {
+    "program_old_id": "105",
+    "program": "Arkitekturë",
+    "profile": "Urbanistikë",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "PIND Master i Shkencave"
+  },
+  {
+    "program_old_id": "157",
+    "program": "Ndërmjetës të Pasurive të Paluajtshme",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "Program trajnimi"
+  },
+  {
+    "program_old_id": "105",
+    "program": "Arkitekturë",
+    "profile": "",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "programin e integruar të studimeve të ciklit të dytë Master i Shkencave"
+  },
+  {
+    "program_old_id": "105",
+    "program": "Arkitekturë",
+    "profile": "Arkitekturë Interieri",
+    "faculty": "Fakulteti i Inxhinierisë, Informatikës dhe Arkitekturës",
+    "study_level": "programin e integruar të studimeve të ciklit të dytë Master i Shkencave"
+  },
+  {
+    "program_old_id": "134",
+    "program": "Drejtësi",
+    "profile": "",
+    "faculty": "Fakulteti i Shkencave Juridike, Politike dhe Marrëdhënieve Ndërkombëtare",
+    "study_level": "programin e integruar të studimeve të ciklit të dytë Master i Shkencave"
+  }
+]
