@@ -72,6 +72,7 @@ const ContentLoader: FC<ContentLoaderProps> = (props) => {
     customLoader,
     breadcrumb,
     header,
+    centered,
   } = props;
 
   const [title, setTitle] = useState(titleProp ?? "");
@@ -130,27 +131,41 @@ const ContentLoader: FC<ContentLoaderProps> = (props) => {
     errorMessage,
   });
 
-  const content = isLoading ? (
+  const centeredState = centered && (isLoading || Boolean(error));
+
+  const loadingBody = (
     <>
       {showHeaderOnLoader && <ContentLoaderHeader {...headerProps} />}
-      {customLoader ?? <DefaultSpinner />}
+      {customLoader ?? <DefaultSpinner centered={centered} />}
     </>
-  ) : error ? (
+  );
+
+  const errorBody = (
     <>
       <ContentLoaderHeader {...headerProps} />
-      <ContentLoaderErrorView error={error} minimal={minimalError} />
+      <ContentLoaderErrorView error={error!} minimal={minimalError} centered={centered} />
     </>
-  ) : (
+  );
+
+  const successBody = (
     <>
       <ContentLoaderHeader {...headerProps} />
       {children}
     </>
   );
 
+  const content = isLoading ? loadingBody : error ? errorBody : successBody;
+
   return (
     <ContentLoaderContext.Provider value={contextValue}>
       {header && header}
-      {content}
+      {centeredState ? (
+        <div className="flex flex-1 min-h-0 w-full items-center justify-center">
+          {content}
+        </div>
+      ) : (
+        content
+      )}
     </ContentLoaderContext.Provider>
   );
 };

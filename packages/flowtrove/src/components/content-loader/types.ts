@@ -78,6 +78,11 @@ export interface ContentLoaderProps {
     headerSeparatorMarginY?: string;
     /** Forwarded to the page header wrapper; see [ContentLoaderHeaderProps.headerClassName]. */
     headerClassName?: string;
+    /**
+     * When true, loading and error states fill the available space and are centered
+     * (e.g. dialogs or embedded panels). Default false uses a fixed viewport height.
+     */
+    centered?: boolean;
 }
 
 /** Shape of API error response (optional fields). */

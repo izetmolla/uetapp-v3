@@ -2,12 +2,15 @@
 
 import { type FC, useMemo } from "react";
 
+import { cn } from "@workspace/ui/lib/utils";
 import type { ApiErrorResponse } from "./types";
 
 interface ContentLoaderErrorViewProps {
     error: Error;
     /** Compact layout for constrained areas (e.g. sidebar). */
     minimal?: boolean;
+    /** Fill parent and center content instead of using a fixed viewport height. */
+    centered?: boolean;
 }
 
 /**
@@ -17,6 +20,7 @@ interface ContentLoaderErrorViewProps {
 export const ContentLoaderErrorView: FC<ContentLoaderErrorViewProps> = ({
     error,
     minimal = false,
+    centered = false,
 }) => {
     const apiResponse = useMemo((): ApiErrorResponse | null => {
         const response = (error as Error & { response?: { data?: ApiErrorResponse } })
@@ -40,7 +44,10 @@ export const ContentLoaderErrorView: FC<ContentLoaderErrorViewProps> = ({
 
     return (
         <div
-            className="flex flex-col items-center justify-center gap-2 h-[70vh] text-center text-destructive"
+            className={cn(
+                "flex flex-col items-center justify-center gap-2 text-center text-destructive",
+                centered ? "w-full px-4" : "h-[70vh]",
+            )}
             role="alert"
         >
             <p className="font-medium">{error.message}</p>
