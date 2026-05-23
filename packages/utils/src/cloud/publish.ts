@@ -79,7 +79,7 @@ export async function getServiceVersion(
 const ROOT_DIR = process.cwd();
 
 const minioClient = new Client({
-    endPoint: "192.168.11.50",
+    endPoint: "192.168.5.170",
     port: 30014,
     useSSL: false,
     accessKey: "imolla",

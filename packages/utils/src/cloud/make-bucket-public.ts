@@ -3,7 +3,7 @@ import * as Minio from "minio";
 ///////////////////////////////////////
 // CONFIG (EDIT THESE)
 ///////////////////////////////////////
-const ENDPOINT = "192.168.5.151";
+const ENDPOINT = "192.168.5.170";
 const PORT = 30014;
 const USE_SSL = false;
 
