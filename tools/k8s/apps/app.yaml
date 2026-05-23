@@ -1,0 +1,155 @@
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: uetedu-v3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: uetedu-v3
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      imagePullSecrets:
+        - name: registry-01-secret
+      containers:
+      - name: app
+        image: rg1.uetonline.com/uetedu-v3/app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+          - name: ENV
+            value: "production"
+          - name: AUTH_URL
+            value: "https://uet.izetmolla.com"
+          - name: PORT
+            value: "3000"
+          - name: ADDRESS
+            value: "0.0.0.0"
+          - name: JWT_SECRET
+            value: "fdgvtrfiduhgvjrtfdgvuyrthfdjhvjrfhdgfvujchrbfdhjgvchjrfbdvhrjfdvbcfjdbnv"
+          - name: DATABASE_URL
+            value: "postgres://imolla:TopeTope1995@10.100.2.200:5432/uetapp"  
+          - name: LDAP_URL
+            value: "ldap://192.168.11.61:389"
+          - name: LDAP_DIRECT_BIND
+            value: "true"
+          - name: LDAP_DOMAIN
+            value: "uet.com"
+          - name: LDAP_USER_FILTER
+            value: "(&(objectClass=user)(userPrincipalName=%s))"        
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  namespace: uetedu-v3
+spec:
+  selector:
+    app: app
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-static
+  namespace: uetedu-v3
+spec:
+  type: ExternalName
+  externalName: minio-svc.uet-app.svc.cluster.local
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+# Static assets → MinIO only. Do NOT combine this Ingress with portal / on the same Ingress:
+# rewrite-target applies to every path on this resource; keep only /static/<app>/v… here.
+#
+# Apply order: Ingress "portal" MUST come before "portal-static" in this file so kubectl apply
+# updates the main ingress (drops /static/…) before creating portal-static; otherwise the nginx
+# admission webhook rejects duplicate host+path with the old portal spec still in the cluster.
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  # Must match the existing ingress in the cluster (nginx allows one rule per host+path).
+  name: app
+  namespace: uetedu-v3
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01-issuer
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600s"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600s"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600s"
+    
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - uet.izetmolla.com
+    secretName: uetedu-v3-tls
+  rules:
+    - host: uet.izetmolla.com
+      http:
+        paths:
+          # - path: /administrator
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: uetapp-administrator
+          #       port:
+          #         number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 3000
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-static
+  namespace: uetedu-v3
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /uetedu-v3/$1
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - uet.izetmolla.com
+      secretName: uetedu-v3-tls
+  rules:
+    - host: uet.izetmolla.com
+      http:
+        paths:
+          - path: /static/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: minio-static
+                port:
+                  number: 9000

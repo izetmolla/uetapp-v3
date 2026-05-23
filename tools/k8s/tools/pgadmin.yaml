@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pgadmin
+---
+# Secret for admin credentials
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin-admin-secret
+  namespace: pgadmin
+type: Opaque
+stringData:
+  PGADMIN_DEFAULT_EMAIL: "izetmolla@icloud.com"
+  PGADMIN_DEFAULT_PASSWORD: "Endrisa@1996!!"
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      initContainers:
+        - name: init-pgadmin-data
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /var/lib/pgadmin/sessions /var/lib/pgadmin/storage
+              chown -R 5050:5050 /var/lib/pgadmin
+              chmod -R 700 /var/lib/pgadmin/sessions
+          volumeMounts:
+            - name: pgadmin-storage
+              mountPath: /var/lib/pgadmin
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:9.14.0
+          imagePullPolicy: Always
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-admin-secret
+                  key: PGADMIN_DEFAULT_EMAIL
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-admin-secret
+                  key: PGADMIN_DEFAULT_PASSWORD
+            - name: PGADMIN_CONFIG_SESSION_DB_PATH
+              value: "'/var/lib/pgadmin/sessions'"
+            - name: PGADMIN_CONFIG_SESSION_EXPIRATION_TIME
+              value: "36500"
+            - name: PGADMIN_CONFIG_USER_INACTIVITY_TIMEOUT
+              value: "0"
+            - name: PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION
+              value: "False"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: pgadmin-storage
+              mountPath: /var/lib/pgadmin
+      volumes:
+        - name: pgadmin-storage
+          nfs:
+            server: 192.168.5.151
+            path: /mnt/otherdata/pgadmin
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin-service
+  namespace: pgadmin
+spec:
+  selector:
+    app: pgadmin
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+  clusterIP: 10.100.2.59
+  clusterIPs:
+    - 10.100.2.59

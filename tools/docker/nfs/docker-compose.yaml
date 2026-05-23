@@ -14,14 +14,18 @@ services:
       NFS_VERSION: 4
       NFS_EXPORT_0: /mnt/storages/minio-01 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
       NFS_EXPORT_1: /mnt/storages/minio-01 192.168.5.150/32(rw,sync,no_root_squash,no_subtree_check)
-      #NFS_EXPORT_1: /mnt/registries 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
-      #NFS_EXPORT_2: /mnt/uet-app/minio-new  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
-      #NFS_EXPORT_3: /mnt/uet-app/minio-new  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
-      #NFS_EXPORT_4: /mnt/uet-app/minio-new  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
+
       
-      #NFS_EXPORT_5: /mnt/uet-app/databases/postgres-new  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
-      #NFS_EXPORT_6: /mnt/uet-app/databases/postgres-new  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
-      #NFS_EXPORT_7: /mnt/uet-app/databases/postgres-new  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_5: /mnt/databases/postgres-db  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_6: /mnt/databases/postgres-db  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_7: /mnt/databases/postgres-db  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
+
+
+
+
+      NFS_EXPORT_8: /mnt/otherdata  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_9: /mnt/otherdata  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_10: /mnt/otherdata  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
 
 
       #NFS_EXPORT_0: /mnt 192.168.5.0/22(fsid=0,rw,no_root_squash,no_subtree_check) # https://github.com/izetmolla/docker-nfs-server/issues/24
@@ -32,7 +36,7 @@ services:
       
       SHARED_DIRECTORY: /mnt
     volumes:
-      - /STORAGE1/uet-nfs:/mnt
+      - /STORAGE1/uet-app:/mnt
       - /lib/modules:/lib/modules:ro # https://github.com/izetmolla/docker-nfs-server/blob/develop/doc/feature/auto-load-kernel-modules.md
     cap_add:
       - SYS_ADMIN

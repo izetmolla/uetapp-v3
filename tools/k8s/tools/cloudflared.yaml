@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudflared
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflared-token
+  namespace: cloudflared
+type: Opaque
+stringData:
+  TUNNEL_TOKEN: "eyJhIjoiZWM3NDJhNGFmNDI3MTRjNTA3MzQ3NGYwMDQ0NTUxODciLCJ0IjoiNzM3NGRhZTUtNzM5OS00Y2ZkLThmMTYtYjkzODhjMzBkMjMyIiwicyI6Ik5XUXdaVGMwTVRndE1qUmhaQzAwWXpnNExXRTVaV1l0TW1GaU4yRmpabU14TkRJMSJ9"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+  namespace: cloudflared
+data:
+  config.yaml: |
+    tunnel: 7374dae5-7399-4cfd-8f16-b9388c30d232
+    credentials-file: /etc/cloudflared/credentials.json
+    
+    # Enable WARP routing for private network access
+    warp-routing:
+      enabled: true
+      
+    ingress:
+      # HTTP access to subnet 10.100.0.0/16
+      #- hostname: "*.flowtrove.com"
+      #  service: http://10.100.0.0/16:80
+            
+      # Catch-all rule for any other traffic
+      - service: http_status:404
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: cloudflared
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+        sysctls:
+        # Allows ICMP traffic (ping, traceroute) to resources behind cloudflared
+          - name: net.ipv4.ping_group_range
+            value: "65532 65532"
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          args: 
+            - tunnel
+            - --no-autoupdate
+            - --loglevel
+            - debug
+            - --metrics
+            - 0.0.0.0:2000
+            - --config
+            - /etc/cloudflared/config.yaml
+            - run
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflared-token
+                  key: TUNNEL_TOKEN
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cloudflared
+          livenessProbe:
+            httpGet:
+              # Cloudflared has a /ready endpoint which returns 200 if and only if
+              # it has an active connection to Cloudflare's network
+              path: /ready
+              port: 2000
+            failureThreshold: 1
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: config
+          configMap:
+            name: cloudflared-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudflared-metrics
+  namespace: cloudflared
+spec:
+  selector:
+    app: cloudflared
+  ports:
+    - name: metrics
+      port: 2000
+      targetPort: 2000
+  type: ClusterIP
