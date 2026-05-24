@@ -4,47 +4,49 @@ import {
     Upload,
 } from "lucide-react";
 import { Separator } from "@workspace/ui/components/separator";
-import { useCallback, useState, useTransition } from "react";
-import type { Student } from "../api";
+import { useCallback, useState } from "react";
+import { importStudents, type Student } from "../api";
 import { DataTableActionBar, DataTableActionBarAction, DataTableActionBarSelection } from "@workspace/flowtrove/components/data-table/components/data-table-action-bar";
 import { useImportDialogPortalContainer } from "../portal-container-context";
+import { ConfirmAlertDialog } from "./alert-dialog";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 // import { exportTableToCSV } from "@/lib/export";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 // import { deletePreApplication } from "../api";
 // import { toast } from "sonner";
 
-const actions = [
-    "update-status",
-    "update-priority",
-    "export",
-    "delete",
-] as const;
-
-type Action = (typeof actions)[number];
 
 interface ImportStudentsActionsProps {
     table: Table<Student>;
 }
 
-
-// const tasks = {
-//     status: {
-//         enumValues: ["Active", "Inactive"],
-//     },
-//     priority: {
-//         enumValues: ["high", "low"],
-//     },
-// };
+type ActionConfig = {
+    action: string;
+    open: boolean;
+    title: string;
+    description?: string;
+    confirmLabel?: string;
+    confirmVariant?: "default" | "destructive";
+}
 export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
     const rows = table.getFilteredSelectedRowModel().rows;
+    const mutateImportStudents = useMutation({
+        mutationFn: importStudents,
+        onSuccess: (data) => {
+            if (data.success) {
+                toast.success(data.message);
+            } else {
+                toast.error(data.message);
+            }
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
     const portalContainer = useImportDialogPortalContainer();
-    const [isPending, startTransition] = useTransition();
-    const [currentAction, setCurrentAction] = useState<Action | null>(null);
+    const [action, setAction] = useState<ActionConfig | null>(null);
 
-    const getIsActionPending = useCallback(
-        (action: Action) => isPending && currentAction === action,
-        [isPending, currentAction],
-    );
 
     // const onTaskUpdate = React.useCallback(
     //     ({
@@ -73,34 +75,26 @@ export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
     //     [rows],
     // );
 
-    const onTaskExport = useCallback(() => {
-        alert("export");
-        setCurrentAction("export");
-        startTransition(() => {
-            // exportTableToCSV(table, {
-            //     excludeColumns: ["select", "actions"],
-            //     onlySelected: true,
-            // });
-        });
+    const onStudentImportClicked = useCallback(() => {
+        setAction({
+            action: "import",
+            open: true,
+            title: "Import students",
+            description: "Are you sure you want to import the selected students?",
+            confirmLabel: "Import",
+        })
     }, [table]);
 
-    // const onTaskDelete = useCallback(() => {
-    //     setCurrentAction("delete");
-    //     startTransition(() => {
-    //         // deletePreApplication({
-    //         //     ids: rows.map((row) => row.original.id),
-    //         // }).then(res => res.data).then((res) => {
-    //         //     if (res.error) {
-    //         //         toast.error(res.error.message);
-    //         //     } else {
-    //         //         toast.success("Client deleted");
-    //         //         table.toggleAllRowsSelected(false);
-    //         //     }
-    //         // }).catch((err) => {
-    //         //     toast.success(err?.message || "Error deleting client");
-    //         // })
-    //     });
-    // }, [rows, table]);
+    const onConfirm = useCallback(() => {
+        if (action?.action === "import") {
+            mutateImportStudents.mutate({
+                students: rows.map((row) => row.original.sp_id),
+            });
+        }
+    }, [table, action?.action]);
+
+
+
 
     return (
         <DataTableActionBar
@@ -170,11 +164,11 @@ export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
                     </SelectContent>
                 </Select> */}
                 <DataTableActionBarAction
-                className="cursor-pointer"
+                    className="cursor-pointer"
                     size="icon"
                     tooltip="Import students"
-                    isPending={getIsActionPending("export")}
-                    onClick={onTaskExport}
+                    isPending={mutateImportStudents.isPending}
+                    onClick={onStudentImportClicked}
                 >
                     <Upload />
                 </DataTableActionBarAction>
@@ -187,6 +181,18 @@ export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
                     <Trash2 />
                 </DataTableActionBarAction> */}
             </div>
+            {action?.open ? (
+                <ConfirmAlertDialog
+                    isPending={mutateImportStudents.isPending}
+                    open={action?.open}
+                    onOpenChange={() => setAction(null)}
+                    title={action?.title}
+                    description={action?.description}
+                    confirmLabel={action.confirmLabel}
+                    confirmVariant={action.confirmVariant}
+                    onConfirm={onConfirm}
+                />
+            ) : null}
         </DataTableActionBar>
     );
 }

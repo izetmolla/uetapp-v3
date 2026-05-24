@@ -63,3 +63,13 @@ export async function getImportStudentsColumns(filters?: Record<string, unknown>
     });
 }
 
+
+
+
+export function importStudents(data: Record<string, unknown>) {
+    return ApiService.fetchData<ImportStudentsMutationResponse>({
+        url: withAPI(`${IMPORT_STUDENTS_LIST_BASE}/import-students`),
+        method: "post",
+        data,
+    });
+}

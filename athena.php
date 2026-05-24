@@ -50,11 +50,31 @@ switch ($action) {
     case 'getStudents':
         echo json_encode(getStudents());
         break;
+
+    case 'getStudentsBySPids':
+        echo json_encode(getStudentsBySPids());
+        break;
     default:
         echo json_encode(['error' => 'Invalid action', "message" => "Action is not valid"]);
         break;
 }
 
+
+
+
+function getStudentsBySPids()
+{
+    global $DB;
+    $spids = optional_param('ids', '[]', PARAM_RAW);
+    $spids = json_decode($spids, true);
+    if (empty($spids)) {
+        return ['error' => 'SP IDs are required', "message" => "SP IDs are not provided"];
+    }
+    return ['data' => $spids, "message" => "SP IDs are provided"];
+
+    $students = $DB->get_records_sql("SELECT * FROM athena_users WHERE SP_ID IN (" . implode(',', $spids) . ")");
+    return $students;
+}
 
 
 /**

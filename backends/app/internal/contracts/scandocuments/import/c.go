@@ -18,4 +18,5 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api.Get("/", controller.GetStudentsListAPI)
 	api.Get("/columns", controller.GetStudentsColumns)
+	api.Post("/import-students", controller.ImportStudents)
 }

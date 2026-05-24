@@ -19,7 +19,7 @@ type UniversityOrgUnitType struct {
 
 // Helpers Functions
 func parseUniversityOrgUnit(body map[string]any) ([]UniversityOrgUnitType, error) {
-	rows, err := extractOrgUnitRows(body)
+	rows, err := extractHttpBodyRows(body)
 	if err != nil {
 		return nil, err
 	}
@@ -39,23 +39,50 @@ func parseUniversityOrgUnit(body map[string]any) ([]UniversityOrgUnitType, error
 }
 
 // extractOrgUnitRows supports the upstream shapes we have seen:
+//   - { "error": "..."}
 //   - { "data": [ ... ] }                          (getOrgUnits HTTP body)
 //   - { "response": { "data": [ ... ] } }          (wrapped client payloads)
 //   - { "response": "[{\"faculty\":...}, ...]" }   (JSON string response)
-func extractOrgUnitRows(body map[string]any) ([]any, error) {
+func extractHttpBodyRows(body map[string]any) ([]any, error) {
+	// Support direct array
 	if data, ok := body["data"].([]any); ok {
 		return data, nil
 	}
-
+	// Support direct error
+	if errorMsg, ok := body["error"].(string); ok {
+		return nil, fmt.Errorf("error: %s", errorMsg)
+	}
+	// Sometimes, Moodle returns students as a map[int|string]map[string]any instead of []any.
+	if dataMap, ok := body["data"].(map[string]any); ok && len(dataMap) > 0 {
+		out := make([]any, 0, len(dataMap))
+		for _, v := range dataMap {
+			out = append(out, v)
+		}
+		return out, nil
+	}
+	if dataMapInt, ok := body["data"].(map[any]any); ok && len(dataMapInt) > 0 {
+		out := make([]any, 0, len(dataMapInt))
+		for _, v := range dataMapInt {
+			out = append(out, v)
+		}
+		return out, nil
+	}
+	// Look for nested response shapes
 	response := body["response"]
 	if response == nil {
 		return nil, nil
 	}
-
 	switch v := response.(type) {
 	case map[string]any:
 		if data, ok := v["data"].([]any); ok {
 			return data, nil
+		}
+		if dataMap, ok := v["data"].(map[string]any); ok && len(dataMap) > 0 {
+			out := make([]any, 0, len(dataMap))
+			for _, value := range dataMap {
+				out = append(out, value)
+			}
+			return out, nil
 		}
 		return nil, fmt.Errorf("response object has no data array")
 	case []any:
@@ -69,7 +96,7 @@ func extractOrgUnitRows(body map[string]any) ([]any, error) {
 		case []any:
 			return parsed, nil
 		case map[string]any:
-			return extractOrgUnitRows(parsed)
+			return extractHttpBodyRows(parsed)
 		default:
 			return nil, fmt.Errorf("decoded response string is not an array or object")
 		}
