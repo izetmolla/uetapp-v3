@@ -89,6 +89,13 @@ export interface DataTableProps<TData> {
    * instead of being synced to the page URL. Use for dialogs or embedded tables.
    */
   disableParamPersistence?: boolean;
+  /**
+   * Stretch the table body to fill remaining vertical space (e.g. fullscreen dialogs).
+   * Centers loading, error, and empty states in the table area.
+   */
+  fillHeight?: boolean;
+  /** Keep column headers fixed at the top while scrolling the table body */
+  stickyHeader?: boolean;
   className?: string;
 }
 
@@ -196,6 +203,8 @@ function DataTableCore<TData>({
   enableAdvancedFilter = false,
   enablePagination = true,
   showTotalRows = false,
+  fillHeight = false,
+  stickyHeader = false,
   actionBar,
   onSelectionChange,
   className,
@@ -318,6 +327,11 @@ function DataTableCore<TData>({
 
   const clearColumnFilters = isServer ? serverData.clearColumnFilters : undefined;
 
+  const isStickyHeader = stickyHeader || fillHeight;
+  const rowCount = table.getRowModel().rows.length;
+  const showEmptyOverlay =
+    fillHeight && !isLoading && !showErrorRow && rowCount === 0;
+
   const toolbar = enableToolbar && (
     effectiveAdvancedFilter ? (
       <DataTableAdvancedToolbar
@@ -346,110 +360,184 @@ function DataTableCore<TData>({
   return (
     <div
       className={cn(
-        "flex w-full flex-col gap-2.5 overflow-auto",
-        className
+        "flex w-full flex-col gap-2.5",
+        fillHeight ? "min-h-0 flex-1 overflow-hidden" : "overflow-auto",
+        className,
       )}
     >
-      {toolbar}
-      <div className="overflow-x-auto rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    style={
-                      header.column.getIsPinned()
-                        ? getCommonPinningStyles({ column: header.column })
-                        : {}
-                    }
-                    className={header.column.columnDef.meta?.className ?? ""}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {showErrorRow ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columnCount}
-                  className="h-24 text-center text-destructive"
+      {toolbar ? (
+        <div className={cn(fillHeight && "shrink-0")}>{toolbar}</div>
+      ) : null}
+      <div
+        className={cn(
+          "rounded-md border",
+          fillHeight
+            ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
+            : "overflow-x-auto",
+        )}
+      >
+        {fillHeight && isLoading ? (
+          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-background/80 text-muted-foreground text-sm">
+            <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+            Loading...
+          </div>
+        ) : null}
+        {fillHeight && showErrorRow ? (
+          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-background/80 px-4 text-center text-destructive text-sm">
+            <span className="font-medium">{displayedErrorMessage}</span>
+            {isServer && serverData.refetch ? (
+              <span className="ml-1 inline-flex items-center gap-1.5">
+                <span className="text-muted-foreground">·</span>
+                {isFetching ? (
+                  <Loader2
+                    className="size-4 shrink-0 animate-spin text-muted-foreground"
+                    aria-hidden
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  disabled={isFetching}
+                  onClick={() => serverData.refetch()}
+                  className="underline underline-offset-2 hover:no-underline disabled:opacity-50 disabled:no-underline"
                 >
-                  <span className="font-medium">{displayedErrorMessage}</span>
-                  {isServer && serverData.refetch && (
-                    <span className="ml-1 inline-flex items-center gap-1.5">
-                      <span className="text-muted-foreground">·</span>
-                      {isFetching && (
-                        <Loader2
-                          className="size-4 shrink-0 animate-spin text-muted-foreground"
-                          aria-hidden
-                        />
+                  Retry
+                </button>
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+        {showEmptyOverlay ? (
+          <div className="absolute inset-0 z-[1] flex items-center justify-center text-muted-foreground text-sm">
+            No results.
+          </div>
+        ) : null}
+        <div
+          className={cn(
+            (fillHeight || stickyHeader) && "min-h-0 flex-1 overflow-auto",
+            !fillHeight && stickyHeader && "max-h-[min(70vh,48rem)]",
+          )}
+        >
+          <Table containerClassName={isStickyHeader ? "overflow-visible" : undefined}>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className={isStickyHeader ? "hover:bg-transparent" : undefined}>
+                  {headerGroup.headers.map((header) => {
+                    const isPinned = header.column.getIsPinned();
+                    const pinningStyle = isPinned
+                      ? getCommonPinningStyles({ column: header.column, withBorder: true })
+                      : {};
+                    return (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      style={{
+                        ...pinningStyle,
+                        ...(isStickyHeader
+                          ? {
+                              top: 0,
+                              zIndex: isPinned ? 30 : 20,
+                            }
+                          : {}),
+                      }}
+                      className={cn(
+                        header.column.columnDef.meta?.className,
+                        isStickyHeader &&
+                          "sticky bg-background shadow-[inset_0_-1px_0_hsl(var(--border))]",
                       )}
-                      <button
-                        type="button"
-                        disabled={isFetching}
-                        onClick={() => serverData.refetch()}
-                        className="underline underline-offset-2 hover:no-underline disabled:opacity-50 disabled:no-underline"
-                      >
-                        Retry
-                      </button>
-                    </span>
-                  )}
-                </TableCell>
-              </TableRow>
-            ) : isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columnCount}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={getCommonPinningStyles({ column: cell.column })}
-                      className={cell.column.columnDef.meta?.className ?? ""}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columnCount}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {!fillHeight && showErrorRow ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columnCount}
+                    className="h-24 text-center text-destructive"
+                  >
+                    <span className="font-medium">{displayedErrorMessage}</span>
+                    {isServer && serverData.refetch && (
+                      <span className="ml-1 inline-flex items-center gap-1.5">
+                        <span className="text-muted-foreground">·</span>
+                        {isFetching && (
+                          <Loader2
+                            className="size-4 shrink-0 animate-spin text-muted-foreground"
+                            aria-hidden
+                          />
+                        )}
+                        <button
+                          type="button"
+                          disabled={isFetching}
+                          onClick={() => serverData.refetch()}
+                          className="underline underline-offset-2 hover:no-underline disabled:opacity-50 disabled:no-underline"
+                        >
+                          Retry
+                        </button>
+                      </span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ) : !fillHeight && isLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columnCount}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : rowCount > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        style={getCommonPinningStyles({ column: cell.column })}
+                        className={cell.column.columnDef.meta?.className ?? ""}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : !fillHeight ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columnCount}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell
+                    colSpan={columnCount}
+                    className="h-px border-0 p-0"
+                    aria-hidden
+                  />
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-      <div className="flex flex-col gap-2.5">
+      <div className={cn("flex flex-col gap-2.5", fillHeight && "shrink-0")}>
         {enablePagination && (
           <DataTablePagination
             table={table}

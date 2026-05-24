@@ -23,37 +23,42 @@ const ImportStudentsDatatable: FC = () => {
 
 
     return (
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex h-full min-h-0 flex-1 flex-col">
             <ContentLoader
                 isLoading={columnsLoading}
                 error={error}
                 forMeta
                 centered
             >
-                <DataTable<Student>
-                    columns={columns}
-                    source={{
-                        type: "server",
-                        options: {
-                            fetch: (state) => getImportStudentsList(state),
-                            queryKey: (state) => [IMPORT_STUDENTS_FETCH_PERSISTANT, "students", state],
-                            initialPerPage: 10,
-                        },
-                    }}
-                    initialState={{
-                        sorting: [{ id: "sp_id", desc: true }],
-                        columnPinning: { right: ["actions"] },
-                        columnVisibility,
-                    }}
-                    getRowId={(row) => String(row.sp_id)}
-                    enableToolbar
-                    enableAdvancedFilter
-                    enablePagination
-                    rowIdKey="sp_id"
-                    enableRowSelection
-                    disableParamPersistence={true}
-                    showTotalRows={true}
-                />
+                <div className="flex h-full min-h-0 flex-1 flex-col">
+                    <DataTable<Student>
+                        className="h-full"
+                        fillHeight
+                        showTotalRows
+                        stickyHeader={true}
+                        columns={columns}
+                        source={{
+                            type: "server",
+                            options: {
+                                fetch: (state) => getImportStudentsList(state),
+                                queryKey: (state) => [IMPORT_STUDENTS_FETCH_PERSISTANT, "students", state],
+                                initialPerPage: 10,
+                            },
+                        }}
+                        initialState={{
+                            sorting: [{ id: "sp_id", desc: true }],
+                            columnPinning: { right: ["actions"] },
+                            columnVisibility,
+                        }}
+                        getRowId={(row) => String(row.sp_id)}
+                        enableToolbar
+                        enableAdvancedFilter
+                        enablePagination
+                        rowIdKey="sp_id"
+                        enableRowSelection
+                        disableParamPersistence={true}
+                    />
+                </div>
             </ContentLoader>
         </div>
     );

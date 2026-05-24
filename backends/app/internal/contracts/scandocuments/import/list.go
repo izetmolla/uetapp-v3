@@ -145,9 +145,10 @@ func (cc *Controller) getStudentsColumns(reqCtx context.Context) ([]datatable.Co
 			},
 		},
 		{
-			ID:          "document_id",
-			AccessorKey: "document_id",
-			Header:      "Document ID",
+			ID:            "document_id",
+			AccessorKey:   "document_id",
+			Header:        "Document ID",
+			EnableSorting: true,
 		},
 		{
 			ID:                 "reg_year",
