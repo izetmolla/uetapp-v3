@@ -377,7 +377,7 @@ function DataTableCore<TData>({
         )}
       >
         {fillHeight && isLoading ? (
-          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-background/80 text-muted-foreground text-sm">
+          <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center bg-background/80 text-muted-foreground text-sm">
             <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
             Loading...
           </div>
@@ -407,7 +407,7 @@ function DataTableCore<TData>({
           </div>
         ) : null}
         {showEmptyOverlay ? (
-          <div className="absolute inset-0 z-[1] flex items-center justify-center text-muted-foreground text-sm">
+          <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center text-muted-foreground text-sm">
             No results.
           </div>
         ) : null}
@@ -424,7 +424,11 @@ function DataTableCore<TData>({
                   {headerGroup.headers.map((header) => {
                     const isPinned = header.column.getIsPinned();
                     const pinningStyle = isPinned
-                      ? getCommonPinningStyles({ column: header.column, withBorder: true })
+                      ? getCommonPinningStyles({
+                          column: header.column,
+                          withBorder: true,
+                          layer: "header",
+                        })
                       : {};
                     return (
                     <TableHead
@@ -432,12 +436,16 @@ function DataTableCore<TData>({
                       colSpan={header.colSpan}
                       style={{
                         ...pinningStyle,
-                        ...(isStickyHeader
+                        ...(isStickyHeader && !isPinned
                           ? {
                               top: 0,
-                              zIndex: isPinned ? 30 : 20,
+                              zIndex: 20,
                             }
-                          : {}),
+                          : isStickyHeader && isPinned
+                            ? {
+                                top: 0,
+                              }
+                            : {}),
                       }}
                       className={cn(
                         header.column.columnDef.meta?.className,
@@ -504,8 +512,16 @@ function DataTableCore<TData>({
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        style={getCommonPinningStyles({ column: cell.column })}
-                        className={cell.column.columnDef.meta?.className ?? ""}
+                        style={getCommonPinningStyles({
+                          column: cell.column,
+                          withBorder:
+                            cell.column.getIsPinned() === "right" ||
+                            cell.column.getIsPinned() === "left",
+                        })}
+                        className={cn(
+                          cell.column.columnDef.meta?.className,
+                          cell.column.id === "actions" && "relative bg-background",
+                        )}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

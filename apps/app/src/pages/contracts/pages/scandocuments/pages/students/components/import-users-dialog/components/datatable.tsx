@@ -8,7 +8,7 @@ import {
 } from "../api";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import { getActionsColumn, getColumnOverrides } from "./table-columns";
-import { ImportStudentsActions } from "./import-actions";
+import { ImportStudentsActions } from "./table-actions";
 
 
 

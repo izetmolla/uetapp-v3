@@ -24,6 +24,7 @@ export function getActionsColumn(): ColumnDef<Student>[] {
     return [
         {
             id: "actions",
+            meta: { className: "relative bg-background" },
             cell: function Cell({ row }) {
                 const status = row.original.status;
                 const canEnable = status === "inactive";
@@ -40,7 +41,7 @@ export function getActionsColumn(): ColumnDef<Student>[] {
                                 <Ellipsis className="size-4" aria-hidden="true" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuContent align="end" className="z-[100] w-48">
                             <DropdownMenuItem
                                 onSelect={() => { }}>
                                 <UserCog className="size-4 opacity-70" aria-hidden />

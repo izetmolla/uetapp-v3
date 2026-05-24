@@ -1,23 +1,13 @@
 // import { SelectTrigger } from "@radix-ui/react-select";
 import type { Table } from "@tanstack/react-table";
 import {
-    // ArrowUp, CheckCircle2, 
-    Download,
-    //  Trash2
+    Upload,
 } from "lucide-react";
-// import { toast } from "sonner";
-
-
-// import {
-//     Select,
-//     SelectContent,
-//     SelectGroup,
-//     SelectItem,
-// } from "@/components/ui/select";
 import { Separator } from "@workspace/ui/components/separator";
 import { useCallback, useState, useTransition } from "react";
 import type { Student } from "../api";
 import { DataTableActionBar, DataTableActionBarAction, DataTableActionBarSelection } from "@workspace/flowtrove/components/data-table/components/data-table-action-bar";
+import { useImportDialogPortalContainer } from "../portal-container-context";
 // import { exportTableToCSV } from "@/lib/export";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 // import { deletePreApplication } from "../api";
@@ -47,6 +37,7 @@ interface ImportStudentsActionsProps {
 // };
 export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
     const rows = table.getFilteredSelectedRowModel().rows;
+    const portalContainer = useImportDialogPortalContainer();
     const [isPending, startTransition] = useTransition();
     const [currentAction, setCurrentAction] = useState<Action | null>(null);
 
@@ -83,6 +74,7 @@ export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
     // );
 
     const onTaskExport = useCallback(() => {
+        alert("export");
         setCurrentAction("export");
         startTransition(() => {
             // exportTableToCSV(table, {
@@ -111,7 +103,12 @@ export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
     // }, [rows, table]);
 
     return (
-        <DataTableActionBar table={table} visible={rows.length > 0}>
+        <DataTableActionBar
+            table={table}
+            visible={rows.length > 0}
+            container={portalContainer}
+            className="z-[100]"
+        >
             <DataTableActionBarSelection table={table} />
             <Separator
                 orientation="vertical"
@@ -173,12 +170,13 @@ export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
                     </SelectContent>
                 </Select> */}
                 <DataTableActionBarAction
+                className="cursor-pointer"
                     size="icon"
-                    tooltip="Export tasks"
+                    tooltip="Import students"
                     isPending={getIsActionPending("export")}
                     onClick={onTaskExport}
                 >
-                    <Download />
+                    <Upload />
                 </DataTableActionBarAction>
                 {/* <DataTableActionBarAction
                     size="icon"

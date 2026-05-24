@@ -52,6 +52,10 @@ function DataTableActionBar<TData>({
   const visible =
     visibleProp ?? table.getFilteredSelectedRowModel().rows.length > 0;
 
+  const portaledToBody =
+    containerProp == null ||
+    container === globalThis.document?.body;
+
   return ReactDOM.createPortal(
     <AnimatePresence>
       {visible && (
@@ -63,7 +67,10 @@ function DataTableActionBar<TData>({
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.2, ease: "easeInOut" }}
           className={cn(
-            "fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit flex-wrap items-center justify-center gap-2 rounded-md border bg-background p-2 text-foreground shadow-sm",
+            "pointer-events-auto z-[100] mx-auto flex w-fit flex-wrap items-center justify-center gap-2 rounded-md border bg-background p-2 text-foreground shadow-sm",
+            portaledToBody
+              ? "fixed inset-x-0 bottom-6"
+              : "absolute inset-x-0 bottom-6",
             className,
           )}
           {...props}
@@ -96,7 +103,7 @@ function DataTableActionBarAction({
       variant="secondary"
       size={size}
       className={cn(
-        "gap-1.5 border border-secondary bg-secondary/50 hover:bg-secondary/70 [&>svg]:size-3.5",
+        "pointer-events-auto gap-1.5 border border-secondary bg-secondary/50 hover:bg-secondary/70 [&>svg]:size-3.5",
         size === "icon" ? "size-7" : "h-7",
         className,
       )}
@@ -147,7 +154,7 @@ function DataTableActionBarSelection<TData>({
           <Button
             variant="ghost"
             size="icon"
-            className="size-5"
+            className="pointer-events-auto size-5"
             onClick={onClearSelection}
           >
             <X className="size-3.5" />

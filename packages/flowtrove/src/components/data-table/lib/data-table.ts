@@ -10,15 +10,26 @@ import { dataTableConfig } from "../config/data-table";
 export function getCommonPinningStyles<TData>({
     column,
     withBorder = false,
+    layer = "body",
 }: {
     column: Column<TData>;
     withBorder?: boolean;
+    /** Header cells need a higher z-index than body cells when using sticky headers. */
+    layer?: "header" | "body";
 }): React.CSSProperties {
     const isPinned = column.getIsPinned();
     const isLastLeftPinnedColumn =
         isPinned === "left" && column.getIsLastColumn("left");
     const isFirstRightPinnedColumn =
         isPinned === "right" && column.getIsFirstColumn("right");
+
+    const zIndex = !isPinned
+        ? 0
+        : layer === "header"
+          ? 30
+          : column.id === "actions"
+            ? 25
+            : 15;
 
     return {
         boxShadow: withBorder
@@ -38,7 +49,7 @@ export function getCommonPinningStyles<TData>({
         backdropFilter: isPinned ? "blur(8px)" : undefined,
         WebkitBackdropFilter: isPinned ? "blur(8px)" : undefined,
         width: column.getSize(),
-        zIndex: isPinned ? 1 : 0,
+        zIndex,
     };
 }
 
