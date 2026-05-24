@@ -92,6 +92,13 @@ interface DataTableToolbarFilterProps<TData> {
   column: Column<TData>;
 }
 
+function formatTextFilterValue(value: unknown): string {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.join(" ");
+  return String(value);
+}
+
 function DataTableToolbarFilter<TData>({
   column,
 }: DataTableToolbarFilterProps<TData>) {
@@ -107,7 +114,7 @@ function DataTableToolbarFilter<TData>({
           return (
             <Input
               placeholder={columnMeta.placeholder ?? columnMeta.label}
-              value={(column.getFilterValue() as string) ?? ""}
+              value={formatTextFilterValue(column.getFilterValue())}
               onChange={(event) => column.setFilterValue(event.target.value)}
               disabled={disabled}
               className="h-8 w-40 lg:w-56"
@@ -121,7 +128,7 @@ function DataTableToolbarFilter<TData>({
                 type="number"
                 inputMode="numeric"
                 placeholder={columnMeta.placeholder ?? columnMeta.label}
-                value={(column.getFilterValue() as string) ?? ""}
+                value={formatTextFilterValue(column.getFilterValue())}
                 onChange={(event) => column.setFilterValue(event.target.value)}
                 disabled={disabled}
                 className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
