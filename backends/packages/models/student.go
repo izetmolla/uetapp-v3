@@ -21,6 +21,8 @@ type Student struct {
 	UserID string `json:"user_id" gorm:"type:uuid;default:null"`
 	User   User   `json:"user" gorm:"foreignKey:UserID;references:ID"`
 
+	Programs []StudentStudyProgram `json:"programs" gorm:"foreignKey:StudentID;references:ID"`
+
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`

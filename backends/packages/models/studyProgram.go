@@ -24,6 +24,7 @@ type StudyProgram struct {
 	Faculties   []FacultyStudyProgram `json:"faculties" gorm:"foreignKey:StudyProgramID;references:ID"`
 	Profiles    []StudyProgramProfile `json:"profiles" gorm:"foreignKey:StudyProgramID;references:ID"`
 	StudyLevels []StudyProgramLevels  `json:"study_levels" gorm:"foreignKey:StudyProgramID;references:ID"`
+	Students    []StudentStudyProgram `json:"students" gorm:"foreignKey:StudyProgramID;references:ID"`
 
 	Language   StudyProgramLanguage `json:"language" gorm:"foreignKey:LanguageID;references:ID"`
 	LanguageID *int64               `json:"language_id" gorm:"type:bigint;index"`

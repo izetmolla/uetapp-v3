@@ -68,7 +68,7 @@ func (c *Controller) getStudyLevels(ctx context.Context) ([]map[string]any, erro
 			"name":        studyLevel.Name,
 			"description": studyLevel.Description,
 			"duration":    studyLevel.Duration,
-			"students":    studyLevel.Students,
+			"students":    0,
 			"group":       studyLevel.Group,
 			"icon":        studyLevel.Icon,
 			"accent":      studyLevel.Accent,

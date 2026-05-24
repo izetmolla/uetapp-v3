@@ -24,13 +24,13 @@ type StudyLevel struct {
 	Status      StudyLevelStatus `json:"status" gorm:"default:active;"`
 
 	Duration string `json:"duration" gorm:"size:255;"`
-	Students int64  `json:"students" gorm:"-"`
 	Group    string `json:"group" gorm:"size:255;"`
 	Icon     string `json:"icon" gorm:"size:255;"`
 	Accent   string `json:"accent" gorm:"size:255;"`
 
-	Folders   []StudentScanFolder `json:"folders" gorm:"foreignKey:StudyLevelID;references:ID"`
-	Faculties []FacultyStudyLevel `json:"faculties" gorm:"foreignKey:StudyLevelID;references:ID"`
+	Folders   []StudentScanFolder   `json:"folders" gorm:"foreignKey:StudyLevelID;references:ID"`
+	Faculties []FacultyStudyLevel   `json:"faculties" gorm:"foreignKey:StudyLevelID;references:ID"`
+	Programs  []StudentStudyProgram `json:"programs" gorm:"foreignKey:StudyLevelID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
