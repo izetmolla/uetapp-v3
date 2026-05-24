@@ -3,6 +3,7 @@ package folders
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
+	"github.com/uetedu/app/internal/contracts/scandocuments/folders/device"
 )
 
 type Controller struct {
@@ -16,6 +17,7 @@ func NewController(app *config.AppClients) *Controller {
 func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api := apiGroup.Group("/folders")
+	device.SetupApiRoutes(api, appClients)
 	api.Get("/list", controller.GetListDataApi)
 	api.Post("/", controller.CreateFolder)
 }
