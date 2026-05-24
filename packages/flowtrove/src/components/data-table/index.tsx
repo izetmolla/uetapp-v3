@@ -78,6 +78,8 @@ export interface DataTableProps<TData> {
   enableAdvancedFilter?: boolean;
   /** Show pagination */
   enablePagination?: boolean;
+  /** When true, show total row count to the left of the rows-per-page selector */
+  showTotalRows?: boolean;
   /** Action bar when rows are selected. Can be a node or a render function receiving the table instance. */
   actionBar?: React.ReactNode | ((table: TanStackTable<TData>) => React.ReactNode);
   /** Callback when selection changes. Receives the selected row records. */
@@ -193,6 +195,7 @@ function DataTableCore<TData>({
   enableToolbar = true,
   enableAdvancedFilter = false,
   enablePagination = true,
+  showTotalRows = false,
   actionBar,
   onSelectionChange,
   className,
@@ -273,6 +276,10 @@ function DataTableCore<TData>({
   const fetchError = isServer ? serverData.error : null;
   const isFetching = isServer && serverData.isFetching;
   const columnCount = table.getAllColumns().length;
+
+  const totalRows = isServer
+    ? (serverData.pagination.total ?? 0)
+    : table.getFilteredRowModel().rows.length;
 
   const errorMessage = React.useMemo(() => {
     if (!fetchError) return null;
@@ -448,6 +455,8 @@ function DataTableCore<TData>({
             table={table}
             isFetching={isServer && serverData.isFetching}
             serverSide={isServer}
+            showTotalRows={showTotalRows}
+            totalRows={totalRows}
           />
         )}
         {actionBar &&

@@ -28,6 +28,10 @@ interface DataTablePaginationProps<TData> extends React.ComponentProps<"div"> {
   isFetching?: boolean;
   /** When true, skip client filtered row models (server already filters data). */
   serverSide?: boolean;
+  /** When true, show total row count to the left of the rows-per-page selector */
+  showTotalRows?: boolean;
+  /** Total rows (server total or client filtered count). Required when showTotalRows is true. */
+  totalRows?: number;
 }
 
 export function DataTablePagination<TData>({
@@ -35,6 +39,8 @@ export function DataTablePagination<TData>({
   perPageOptions = [10, 20, 30, 40, 50, 100, 200, 500, 1000, 1500, 2000, 5000, 10000, 100000, 500000],
   isFetching = false,
   serverSide = false,
+  showTotalRows = false,
+  totalRows,
   className,
   ...props
 }: DataTablePaginationProps<TData>) {
@@ -101,25 +107,32 @@ export function DataTablePagination<TData>({
       </div>
       <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
         <div className="flex items-center space-x-2">
-          <p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
-          <Select
-            value={`${perPage}`}
-            disabled={isDisabled}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger className="h-8 w-[4.5rem] [&[data-size]]:h-8">
-              <SelectValue placeholder={perPage} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {perPageOptions.map((size) => (
-                <SelectItem key={size} value={`${size}`}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {showTotalRows ? (
+            <p className="whitespace-nowrap font-medium text-sm text-muted-foreground bold">
+              ({totalRows != null ? totalRows.toLocaleString() : "—"} rows)
+            </p>
+          ) : null}
+          <div className="flex items-center space-x-2">
+            <p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
+            <Select
+              value={`${perPage}`}
+              disabled={isDisabled}
+              onValueChange={(value) => {
+                table.setPageSize(Number(value));
+              }}
+            >
+              <SelectTrigger className="h-8 w-[4.5rem] [&[data-size]]:h-8">
+                <SelectValue placeholder={perPage} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {perPageOptions.map((size) => (
+                  <SelectItem key={size} value={`${size}`}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="flex items-center justify-center font-medium text-sm">
           Page {page} of{" "}

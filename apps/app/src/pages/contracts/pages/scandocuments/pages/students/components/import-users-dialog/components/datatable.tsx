@@ -52,6 +52,7 @@ const ImportStudentsDatatable: FC = () => {
                     rowIdKey="sp_id"
                     enableRowSelection
                     disableParamPersistence={true}
+                    showTotalRows={true}
                 />
             </ContentLoader>
         </div>
