@@ -22,9 +22,9 @@ func Models() []any {
 		// &Resource{},
 		// &Role{},
 
-		&StudentScanFolder{},
-		&StudentScanFolderDoc{},
-		&StudentScanFolderDocFile{},
+		// &StudentScanFolder{},
+		// &StudentScanFolderDoc{},
+		// &StudentScanFolderDocFile{},
 
 		// &OrgUnit{},
 		// &Theme{},

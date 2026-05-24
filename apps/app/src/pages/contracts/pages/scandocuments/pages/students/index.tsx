@@ -57,7 +57,7 @@ const StudentsPage = () => {
     const pageStudents = filteredStudents.slice(start, start + PER_PAGE);
 
     const basePath = "/contracts/scandocuments";
-    const programLabel = data?.study_level.name ?? "";
+    const programLabel = data?.study_level?.name ?? "";
 
     return (
         <PageShell>

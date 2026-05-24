@@ -17,4 +17,5 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api := apiGroup.Group("/device")
 	api.Get("/folders-to-scan", controller.GetFoldersToScanByDevice)
+	api.Get("/students", controller.GetStudentsFromFolder)
 }
