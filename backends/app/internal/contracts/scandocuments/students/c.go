@@ -23,5 +23,5 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 
 func SetupWebRoutes(app fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	app.Get("/:year/:faculty_slug/:level_slug", controller.GetListDataView)
+	app.Get("/:year/:faculty_slug/:level_slug/:folder_id", controller.GetListDataView)
 }

@@ -33,7 +33,7 @@ const StudyLevelsPage = () => {
 
   const grouped = useMemo(() => {
     const g: { group: string; items: StudyLevel[] }[] = [];
-    data?.study_levels.forEach((l) => {
+    data?.study_levels?.forEach((l) => {
       const existing = g.find((entry) => entry.group === l.group);
       if (existing) {
         existing.items.push(l);

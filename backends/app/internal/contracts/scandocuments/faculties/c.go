@@ -20,5 +20,5 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 }
 func SetupWebRoutes(app fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	app.Get("/", controller.GetListDataView)
+	app.Get("/:year", controller.GetListDataView)
 }

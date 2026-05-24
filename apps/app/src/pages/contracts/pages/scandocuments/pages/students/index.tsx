@@ -71,7 +71,7 @@ const StudentsPage = () => {
                 ]}
             />
             <PageHeader
-                title={`${data?.folder.name ?? ""} — Student Documents`}
+                title={`${data?.folder?.name ?? ""} — Student Documents`}
                 subtitle={`${data?.study_level.name} · ${data?.faculty.short}`}
                 right={
                     <div className="flex w-full flex-col gap-1 sm:flex-row sm:items-center sm:justify-end sm:gap-1.5">
