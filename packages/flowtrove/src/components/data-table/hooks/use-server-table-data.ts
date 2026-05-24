@@ -171,8 +171,15 @@ export function useServerTableData<TData>(
     joinOperator,
   ]);
 
+  const stateParamsKey = React.useMemo(
+    () => JSON.stringify(serializeServerTableParams(state)),
+    [state],
+  );
+
   const resolvedQueryKey =
-    typeof queryKey === 'function' ? queryKey(state) : [...queryKey, state];
+    typeof queryKey === "function"
+      ? queryKey(state)
+      : [...queryKey, stateParamsKey];
 
   const query = useQuery({
     queryKey: resolvedQueryKey,

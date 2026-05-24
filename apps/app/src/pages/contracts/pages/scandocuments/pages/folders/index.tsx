@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Folder as FolderIcon, Eye, FolderOpen, Users, ScanLine, Clock } from "lucide-react";
+import { Folder as FolderIcon, FolderOpen, Users, ScanLine, Clock, ArrowRight } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import { Progress } from "@workspace/ui/components/progress";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@workspace/ui/components/table";
@@ -12,11 +13,12 @@ import {
 import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
 import { Crumbs } from "../../components/crumbs";
 import { PageHeader, PageShell } from "../../components/page-shell";
-import { TableSkeleton } from "../../components/skeleton-page";
+import { GridSkeleton, TableSkeleton } from "../../components/skeleton-page";
+import { ViewToggle } from "../../components/view-toggle";
 import { Link, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
-import { getFolders, type GetFoldersResponse } from "./api";
+import { getFolders, type Folder, type GetFoldersResponse } from "./api";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import CreateNewFolderDialog from "./components/create-new-folder-dialog";
 import useFoldersStore from "./store";
@@ -26,6 +28,7 @@ const PER_PAGE = 10;
 const FoldersPage = () => {
   const { year = "", faculty_slug = "", level = "" } = useParams();
   const setIsCreateFolderDialogOpen = useFoldersStore((s) => s.setIsCreateFolderDialogOpen);
+  const [list, setList] = useState(true);
   const [page, setPage] = useState(1);
 
   const { data, isLoading, error } = useQuery({
@@ -68,10 +71,13 @@ const FoldersPage = () => {
         title={`Folders — ${data?.study_level?.name ?? ""}`}
         subtitle={data?.faculty?.name ?? ""}
         right={
-          <Button type="button" onClick={() => setIsCreateFolderDialogOpen(true)}>
-            <FolderIcon className="mr-2 size-4" aria-hidden />
-            New folder
-          </Button>
+          <div className="flex items-center gap-3">
+            <ViewToggle list={list} onChange={setList} id="folders-view" />
+            <Button type="button" onClick={() => setIsCreateFolderDialogOpen(true)}>
+              <FolderIcon className="mr-2 size-4" aria-hidden />
+              New folder
+            </Button>
+          </div>
         }
       />
 
@@ -102,99 +108,23 @@ const FoldersPage = () => {
         isLoading={isLoading}
         error={withError(error, data)}
         forMeta
-        customLoader={<TableSkeleton />}
+        customLoader={list ? <TableSkeleton /> : <GridSkeleton />}
       >
-        <div className="glass-card rounded-2xl overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead className="w-12"></TableHead>
-                <TableHead>Folder Name</TableHead>
-                <TableHead>Students</TableHead>
-                <TableHead>Scanned</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Modified</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pageFolders.map((f, i) => (
-                <TableRow key={f.id} className="hover:bg-secondary/30 transition-colors">
-                  <TableCell className="text-muted-foreground">{start + i + 1}</TableCell>
-                  <TableCell>
-                    <FolderIcon className="w-5 h-5 text-amber-400 fill-amber-400/20" />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <Link to={`${f.id}`}>{f.name}</Link>
-                  </TableCell>
-                  <TableCell>{f.students}</TableCell>
-                  <TableCell>
-                    {f.scanned} / {f.students}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={f.status} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatFolderDate(f.last_modified)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild size="icon" variant="ghost">
-                      <Link to={`${f.id}`}>
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        {list ? (
+          <FoldersListView folders={pageFolders} start={start} />
+        ) : (
+          <FoldersGridView folders={pageFolders} />
+        )}
 
-        <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
-          <span>
-            Showing {folders.length === 0 ? 0 : start + 1}–
-            {Math.min(start + PER_PAGE, folders.length)} of {folders.length} folders
-          </span>
-          {totalPages > 1 ? (
-            <Pagination className="mx-0 w-auto">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage((p) => Math.max(1, p - 1));
-                    }}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      href="#"
-                      isActive={page === i + 1}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(i + 1);
-                      }}
-                    >
-                      {i + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage((p) => Math.min(totalPages, p + 1));
-                    }}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          ) : null}
-        </div>
+        <PaginationBar
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages}
+          total={folders.length}
+          start={start}
+          perPage={PER_PAGE}
+          label="folders"
+        />
       </ContentLoader>
       <CreateNewFolderDialog />
     </PageShell>
@@ -202,6 +132,159 @@ const FoldersPage = () => {
 };
 
 export default FoldersPage;
+
+function FoldersGridView({ folders }: { folders: Folder[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {folders.map((f) => {
+        const percent = f.students > 0 ? Math.round((f.scanned / f.students) * 100) : 0;
+        return (
+          <Link
+            key={f.id}
+            to={`${f.id}`}
+            className="glass-card glow-hover rounded-2xl border-l-4 border-amber-400 p-6"
+          >
+            <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-amber-400/10">
+              <FolderIcon className="h-6 w-6 text-amber-400 fill-amber-400/20" />
+            </div>
+            <h3 className="font-display mb-1 text-lg font-semibold leading-snug">{f.name}</h3>
+            <p className="mb-4 text-xs text-muted-foreground">
+              Updated {formatFolderDate(f.last_modified)}
+            </p>
+            <div className="mb-3 space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Scanned</span>
+                <span>
+                  {f.scanned} / {f.students} ({percent}%)
+                </span>
+              </div>
+              <Progress value={percent} className="h-1.5" />
+            </div>
+            <div className="flex items-center justify-between">
+              <StatusBadge status={f.status} />
+              <Badge variant="secondary">{f.students} students</Badge>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function FoldersListView({ folders, start }: { folders: Folder[]; start: number }) {
+  return (
+    <div className="glass-card overflow-hidden rounded-2xl">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12">#</TableHead>
+            <TableHead className="w-12"></TableHead>
+            <TableHead>Folder Name</TableHead>
+            <TableHead>Students</TableHead>
+            <TableHead>Scanned</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Last Modified</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {folders.map((f, i) => (
+            <TableRow key={f.id} className="hover:bg-secondary/30 transition-colors">
+              <TableCell className="text-muted-foreground">{start + i + 1}</TableCell>
+              <TableCell>
+                <FolderIcon className="w-5 h-5 text-amber-400 fill-amber-400/20" />
+              </TableCell>
+              <TableCell className="font-medium">
+                <Link to={`${f.id}`}>{f.name}</Link>
+              </TableCell>
+              <TableCell>{f.students}</TableCell>
+              <TableCell>
+                {f.scanned} / {f.students}
+              </TableCell>
+              <TableCell>
+                <StatusBadge status={f.status} />
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                {formatFolderDate(f.last_modified)}
+              </TableCell>
+              <TableCell className="text-right">
+                <Button asChild size="sm" variant="ghost">
+                  <Link to={`${f.id}`}>
+                    View <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function PaginationBar({
+  page,
+  setPage,
+  totalPages,
+  total,
+  start,
+  perPage,
+  label,
+}: {
+  page: number;
+  setPage: (fn: (p: number) => number) => void;
+  totalPages: number;
+  total: number;
+  start: number;
+  perPage: number;
+  label: string;
+}) {
+  return (
+    <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+      <span>
+        Showing {total === 0 ? 0 : start + 1}–{Math.min(start + perPage, total)} of {total} {label}
+      </span>
+      {totalPages > 1 ? (
+        <Pagination className="mx-0 w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPage((p) => Math.max(1, p - 1));
+                }}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  href="#"
+                  isActive={page === i + 1}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage(() => i + 1);
+                  }}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPage((p) => Math.min(totalPages, p + 1));
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) : null}
+    </div>
+  );
+}
 
 function formatFolderDate(raw: string | undefined): string {
   if (!raw) return "—";
@@ -213,10 +296,10 @@ function formatFolderDate(raw: string | undefined): string {
 function StatBox({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
     <div className="glass-card rounded-xl p-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+      <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
         {icon} {label}
       </div>
-      <div className="text-xl font-semibold font-display">{value}</div>
+      <div className="font-display text-xl font-semibold">{value}</div>
     </div>
   );
 }

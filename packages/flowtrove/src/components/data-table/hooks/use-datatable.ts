@@ -40,6 +40,25 @@ import { getSortingStateParser } from "../lib/parsers";
 import type { ExtendedColumnSort } from "../types/data-table";
 import { useDebouncedCallback } from "./use-debounced-callback";
 
+const coreRowModel = getCoreRowModel();
+const filteredRowModel = getFilteredRowModel();
+const paginationRowModel = getPaginationRowModel();
+const sortedRowModel = getSortedRowModel();
+const facetedRowModel = getFacetedRowModel();
+const facetedUniqueValues = getFacetedUniqueValues();
+const facetedMinMaxValues = getFacetedMinMaxValues();
+
+const CLIENT_ROW_MODELS = {
+  getFilteredRowModel: filteredRowModel,
+  getPaginationRowModel: paginationRowModel,
+  getSortedRowModel: sortedRowModel,
+  getFacetedRowModel: facetedRowModel,
+  getFacetedUniqueValues: facetedUniqueValues,
+  getFacetedMinMaxValues: facetedMinMaxValues,
+} as const;
+
+const DEFAULT_TABLE_COLUMN = { enableColumnFilter: false } as const;
+
 interface UseDataTableProps<TData>
   extends Omit<
       TableOptions<TData>,
@@ -296,7 +315,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     },
     defaultColumn: {
       ...tableProps.defaultColumn,
-      enableColumnFilter: false,
+      ...DEFAULT_TABLE_COLUMN,
     },
     enableRowSelection,
     onRowSelectionChange: setRowSelection,
@@ -304,13 +323,8 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     onSortingChange,
     onColumnFiltersChange,
     onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    getCoreRowModel: coreRowModel,
+    ...(serverSide ? {} : (CLIENT_ROW_MODELS as Partial<TableOptions<TData>>)),
     manualPagination: serverSide,
     manualSorting: serverSide,
     manualFiltering: serverSide,

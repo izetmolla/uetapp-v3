@@ -96,16 +96,36 @@ export function DataTableFilterList<TData>({
   const [open, setOpen] = React.useState(false);
   const addButtonRef = React.useRef<HTMLButtonElement>(null);
 
+  const columnDefs = table.options.columns;
+
   const columns = React.useMemo(() => {
     return table
       .getAllColumns()
       .filter((column) => column.columnDef.enableColumnFilter);
-  }, [table]);
+  }, [columnDefs, table]);
+
+  const columnIdsToken = React.useMemo(
+    () =>
+      columns
+        .map((column) => column.id)
+        .filter(Boolean)
+        .sort()
+        .join(","),
+    [columns],
+  );
+
+  const filtersParser = React.useMemo(
+    () =>
+      getFiltersStateParser<TData>(
+        columnIdsToken ? columnIdsToken.split(",") : [],
+      ),
+    [columnIdsToken],
+  );
 
   const localState = useOptionalDataTableLocalState<TData>();
   const [urlFilters, setUrlFilters] = useQueryState(
     FILTERS_KEY,
-    getFiltersStateParser<TData>(columns.map((field) => field.id))
+    filtersParser
       .withDefault([])
       .withOptions({
         clearOnDefault: true,
@@ -188,13 +208,13 @@ export function DataTableFilterList<TData>({
   const onFiltersReset = React.useCallback(() => {
     if (localState) {
       localState.clearAdvancedFilters();
-      localState.clearSorting();
+      clearSorting();
       return;
     }
     void setUrlFilters(null);
     void setUrlJoinOperator("and");
-    void setUrlSorting(null);
-  }, [localState, setUrlFilters, setUrlJoinOperator, setUrlSorting]);
+    clearSorting();
+  }, [localState, clearSorting, setUrlFilters, setUrlJoinOperator]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -243,12 +263,7 @@ export function DataTableFilterList<TData>({
   );
 
   return (
-    <Sortable
-      value={filters}
-      onValueChange={setFilters}
-      getItemValue={(item) => item.filterId}
-    >
-      <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" onKeyDown={onTriggerKeyDown}>
             <ListFilter />
@@ -285,27 +300,43 @@ export function DataTableFilterList<TData>({
                 : "Add filters to refine your rows."}
             </p>
           </div>
-          {filters.length > 0 ? (
-            <SortableContent asChild>
-              <div
-                role="list"
-                className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
-              >
-                {filters.map((filter, index) => (
-                  <DataTableFilterItem<TData>
-                    key={filter.filterId}
-                    filter={filter}
-                    index={index}
-                    filterItemId={`${id}-filter-${filter.filterId}`}
-                    joinOperator={joinOperator}
-                    setJoinOperator={setJoinOperator}
-                    columns={columns}
-                    onFilterUpdate={onFilterUpdate}
-                    onFilterRemove={onFilterRemove}
-                  />
-                ))}
-              </div>
-            </SortableContent>
+          {open && filters.length > 0 ? (
+            <Sortable
+              value={filters}
+              onValueChange={setFilters}
+              getItemValue={(item) => item.filterId}
+            >
+              <SortableContent asChild>
+                <div
+                  role="list"
+                  className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
+                >
+                  {filters.map((filter, index) => (
+                    <DataTableFilterItem<TData>
+                      key={filter.filterId}
+                      filter={filter}
+                      index={index}
+                      filterItemId={`${id}-filter-${filter.filterId}`}
+                      joinOperator={joinOperator}
+                      setJoinOperator={setJoinOperator}
+                      columns={columns}
+                      onFilterUpdate={onFilterUpdate}
+                      onFilterRemove={onFilterRemove}
+                    />
+                  ))}
+                </div>
+              </SortableContent>
+              <SortableOverlay>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 min-w-[72px] rounded-sm bg-primary/10" />
+                  <div className="h-8 w-32 rounded-sm bg-primary/10" />
+                  <div className="h-8 w-32 rounded-sm bg-primary/10" />
+                  <div className="h-8 min-w-36 flex-1 rounded-sm bg-primary/10" />
+                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                </div>
+              </SortableOverlay>
+            </Sortable>
           ) : null}
           <div className="flex w-full items-center gap-2">
             <Button
@@ -328,18 +359,7 @@ export function DataTableFilterList<TData>({
             ) : null}
           </div>
         </PopoverContent>
-      </Popover>
-      <SortableOverlay>
-        <div className="flex items-center gap-2">
-          <div className="h-8 min-w-[72px] rounded-sm bg-primary/10" />
-          <div className="h-8 w-32 rounded-sm bg-primary/10" />
-          <div className="h-8 w-32 rounded-sm bg-primary/10" />
-          <div className="h-8 min-w-36 flex-1 rounded-sm bg-primary/10" />
-          <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-          <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-        </div>
-      </SortableOverlay>
-    </Sortable>
+    </Popover>
   );
 }
 

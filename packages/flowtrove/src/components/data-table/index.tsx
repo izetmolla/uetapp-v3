@@ -247,6 +247,15 @@ function DataTableCore<TData>({
       ? serverData.pagination.pageCount ?? 0
       : -1;
 
+  const mergedInitialState = React.useMemo(
+    () =>
+      ({
+        columnPinning: { right: ["actions"] },
+        ...initialState,
+      }) as typeof initialState & { columnPinning: { right: string[] } },
+    [initialState],
+  );
+
   const { table, shallow, debounceMs, throttleMs } = useDataTable({
     data: data ?? [],
     columns: tableColumns,
@@ -254,12 +263,8 @@ function DataTableCore<TData>({
     serverSide: isServer,
     enableAdvancedFilter: effectiveAdvancedFilter,
     enableRowSelection,
-    initialState: {
-      columnPinning: { right: ["actions"] },
-      ...initialState,
-    } as typeof initialState & { columnPinning: { right: string[] } },
+    initialState: mergedInitialState,
     getRowId,
-    shallow: false,
     clearOnDefault: true,
   });
 
@@ -298,11 +303,11 @@ function DataTableCore<TData>({
   const rowSelection = table.getState().rowSelection;
   React.useEffect(() => {
     if (!onSelectionChange) return;
-    const selectedRows = table.getFilteredSelectedRowModel().rows.map(
+    const selectedRows = table.getSelectedRowModel().rows.map(
       (row) => row.original
     );
     onSelectionChange(selectedRows);
-  }, [rowSelection, onSelectionChange]);
+  }, [rowSelection, onSelectionChange, table]);
 
   const clearColumnFilters = isServer ? serverData.clearColumnFilters : undefined;
 
@@ -442,10 +447,11 @@ function DataTableCore<TData>({
           <DataTablePagination
             table={table}
             isFetching={isServer && serverData.isFetching}
+            serverSide={isServer}
           />
         )}
         {actionBar &&
-          table.getFilteredSelectedRowModel().rows.length > 0 &&
+          table.getSelectedRowModel().rows.length > 0 &&
           (typeof actionBar === "function" ? actionBar(table) : actionBar)}
       </div>
     </div>

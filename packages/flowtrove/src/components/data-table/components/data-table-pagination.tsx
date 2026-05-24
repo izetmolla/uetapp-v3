@@ -26,12 +26,15 @@ interface DataTablePaginationProps<TData> extends React.ComponentProps<"div"> {
   perPageOptions?: number[];
   /** When true (e.g. server fetch in progress), pagination buttons are disabled and show loading on the clicked one */
   isFetching?: boolean;
+  /** When true, skip client filtered row models (server already filters data). */
+  serverSide?: boolean;
 }
 
 export function DataTablePagination<TData>({
   table,
   perPageOptions = [10, 20, 30, 40, 50, 100, 200, 500, 1000, 1500, 2000, 5000, 10000, 100000, 500000],
   isFetching = false,
+  serverSide = false,
   className,
   ...props
 }: DataTablePaginationProps<TData>) {
@@ -80,6 +83,11 @@ export function DataTablePagination<TData>({
       <Loader2 className="size-4 animate-spin" />
     ) : null;
 
+  const selectedCount = table.getSelectedRowModel().rows.length;
+  const visibleCount = serverSide
+    ? table.getRowModel().rows.length
+    : table.getFilteredRowModel().rows.length;
+
   return (
     <div
       className={cn(
@@ -89,8 +97,7 @@ export function DataTablePagination<TData>({
       {...props}
     >
       <div className="flex-1 whitespace-nowrap text-muted-foreground text-sm">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
+        {selectedCount} of {visibleCount} row(s) selected.
       </div>
       <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
         <div className="flex items-center space-x-2">

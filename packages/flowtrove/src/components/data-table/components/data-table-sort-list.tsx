@@ -55,6 +55,8 @@ export function DataTableSortList<TData>({
   const sorting = table.getState().sorting;
   const onSortingChange = table.setSorting;
 
+  const columnDefs = table.options.columns;
+
   const { columnLabels, columns } = React.useMemo(() => {
     const labels = new Map<string, string>();
     const sortingIds = new Set(sorting.map((s) => s.id));
@@ -75,7 +77,7 @@ export function DataTableSortList<TData>({
       columnLabels: labels,
       columns: availableColumns,
     };
-  }, [sorting, table]);
+  }, [sorting, columnDefs, table]);
 
   const onSortAdd = React.useCallback(() => {
     const firstColumn = columns[0];
@@ -160,12 +162,7 @@ export function DataTableSortList<TData>({
   );
 
   return (
-    <Sortable
-      value={sorting}
-      onValueChange={onSortingChange}
-      getItemValue={(item) => item.id}
-    >
-      <Popover open={open} onOpenChange={setOpen} modal={false}>
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" onKeyDown={onTriggerKeyDown}>
             <ArrowDownUp />
@@ -202,26 +199,40 @@ export function DataTableSortList<TData>({
                 : "Add sorting to organize your rows."}
             </p>
           </div>
-          {sorting.length > 0 && (
-            <SortableContent asChild>
-              <div
-                role="list"
-                className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
-              >
-                {sorting.map((sort) => (
-                  <DataTableSortItem
-                    key={sort.id}
-                    sort={sort}
-                    sortItemId={`${id}-sort-${sort.id}`}
-                    columns={columns}
-                    columnLabels={columnLabels}
-                    onSortUpdate={onSortUpdate}
-                    onSortRemove={onSortRemove}
-                  />
-                ))}
-              </div>
-            </SortableContent>
-          )}
+          {open && sorting.length > 0 ? (
+            <Sortable
+              value={sorting}
+              onValueChange={onSortingChange}
+              getItemValue={(item) => item.id}
+            >
+              <SortableContent asChild>
+                <div
+                  role="list"
+                  className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
+                >
+                  {sorting.map((sort) => (
+                    <DataTableSortItem
+                      key={sort.id}
+                      sort={sort}
+                      sortItemId={`${id}-sort-${sort.id}`}
+                      columns={columns}
+                      columnLabels={columnLabels}
+                      onSortUpdate={onSortUpdate}
+                      onSortRemove={onSortRemove}
+                    />
+                  ))}
+                </div>
+              </SortableContent>
+              <SortableOverlay>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-[180px] rounded-sm bg-primary/10" />
+                  <div className="h-8 w-24 rounded-sm bg-primary/10" />
+                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                </div>
+              </SortableOverlay>
+            </Sortable>
+          ) : null}
           <div className="flex w-full items-center gap-2">
             <Button
               size="sm"
@@ -244,16 +255,7 @@ export function DataTableSortList<TData>({
             )}
           </div>
         </PopoverContent>
-      </Popover>
-      <SortableOverlay>
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-[180px] rounded-sm bg-primary/10" />
-          <div className="h-8 w-24 rounded-sm bg-primary/10" />
-          <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-          <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-        </div>
-      </SortableOverlay>
-    </Sortable>
+    </Popover>
   );
 }
 

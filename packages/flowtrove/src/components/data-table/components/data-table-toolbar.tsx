@@ -12,8 +12,9 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
 import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
-import { QUERY_KEYS } from "../lib/constants";
+import { DEBOUNCE_MS_DEFAULT, QUERY_KEYS } from "../lib/constants";
 import { hasValidFilterVariant } from "../lib/filter-variants";
+import { useDebouncedCallback } from "../hooks/use-debounced-callback";
 import { DataTableAdvancedOptions } from "./data-table-advanced-options";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
@@ -33,6 +34,7 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0;
   const localState = useOptionalDataTableLocalState();
   const [, setUrlSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
+  const columnDefs = table.options.columns;
 
   const columns = React.useMemo(
     () =>
@@ -45,7 +47,7 @@ export function DataTableToolbar<TData>({
             !column.columnDef.meta?.enableOnlyAdvancedFilters &&
             !column.columnDef.meta?.hidden,
         ),
-    [table],
+    [columnDefs, table],
   );
 
   const onReset = React.useCallback(() => {
@@ -94,6 +96,7 @@ export function DataTableToolbar<TData>({
     </div>
   );
 }
+
 interface DataTableToolbarFilterProps<TData> {
   column: Column<TData>;
 }
@@ -105,85 +108,120 @@ function formatTextFilterValue(value: unknown): string {
   return String(value);
 }
 
+function DebouncedColumnTextFilter<TData>({
+  column,
+  placeholder,
+  disabled,
+  type = "text",
+  className,
+  unit,
+}: {
+  column: Column<TData>;
+  placeholder?: string;
+  disabled?: boolean;
+  type?: "text" | "number";
+  className?: string;
+  unit?: string;
+}) {
+  const committed = formatTextFilterValue(column.getFilterValue());
+  const [draft, setDraft] = React.useState(committed);
+
+  React.useEffect(() => {
+    setDraft(committed);
+  }, [committed]);
+
+  const debouncedCommit = useDebouncedCallback((value: string) => {
+    column.setFilterValue(value || undefined);
+  }, DEBOUNCE_MS_DEFAULT);
+
+  return (
+    <div className={unit ? "relative" : undefined}>
+      <Input
+        type={type}
+        inputMode={type === "number" ? "numeric" : undefined}
+        placeholder={placeholder}
+        value={draft}
+        onChange={(event) => {
+          const value = event.target.value;
+          setDraft(value);
+          debouncedCommit(value);
+        }}
+        disabled={disabled}
+        className={className}
+      />
+      {unit ? (
+        <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
+          {unit}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function DataTableToolbarFilter<TData>({
   column,
 }: DataTableToolbarFilterProps<TData>) {
-  {
-    const columnMeta = column.columnDef.meta;
-    const disabled = columnMeta?.disabled === true;
+  const columnMeta = column.columnDef.meta;
+  const disabled = columnMeta?.disabled === true;
 
-    const onFilterRender = React.useCallback(() => {
-      if (!columnMeta?.variant) return null;
+  if (!columnMeta?.variant) return null;
 
-      switch (columnMeta.variant) {
-        case "text":
-          return (
-            <Input
-              placeholder={columnMeta.placeholder ?? columnMeta.label}
-              value={formatTextFilterValue(column.getFilterValue())}
-              onChange={(event) => column.setFilterValue(event.target.value)}
-              disabled={disabled}
-              className="h-8 w-40 lg:w-56"
-            />
-          );
+  switch (columnMeta.variant) {
+    case "text":
+      return (
+        <DebouncedColumnTextFilter
+          column={column}
+          placeholder={columnMeta.placeholder ?? columnMeta.label}
+          disabled={disabled}
+          className="h-8 w-40 lg:w-56"
+        />
+      );
 
-        case "number":
-          return (
-            <div className="relative">
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder={columnMeta.placeholder ?? columnMeta.label}
-                value={formatTextFilterValue(column.getFilterValue())}
-                onChange={(event) => column.setFilterValue(event.target.value)}
-                disabled={disabled}
-                className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
-              />
-              {columnMeta.unit && (
-                <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
-                  {columnMeta.unit}
-                </span>
-              )}
-            </div>
-          );
+    case "number":
+      return (
+        <DebouncedColumnTextFilter
+          column={column}
+          type="number"
+          placeholder={columnMeta.placeholder ?? columnMeta.label}
+          disabled={disabled}
+          unit={columnMeta.unit}
+          className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
+        />
+      );
 
-        case "range":
-          return (
-            <DataTableSliderFilter
-              column={column}
-              title={columnMeta.label ?? column.id}
-              disabled={disabled}
-            />
-          );
+    case "range":
+      return (
+        <DataTableSliderFilter
+          column={column}
+          title={columnMeta.label ?? column.id}
+          disabled={disabled}
+        />
+      );
 
-        case "date":
-        case "dateRange":
-          return (
-            <DataTableDateFilter
-              column={column}
-              title={columnMeta.label ?? column.id}
-              multiple={columnMeta.variant === "dateRange"}
-              disabled={disabled}
-            />
-          );
+    case "date":
+    case "dateRange":
+      return (
+        <DataTableDateFilter
+          column={column}
+          title={columnMeta.label ?? column.id}
+          multiple={columnMeta.variant === "dateRange"}
+          disabled={disabled}
+        />
+      );
 
-        case "select":
-        case "multiSelect":
-          return (
-            <DataTableFacetedFilter
-              column={column}
-              title={columnMeta.label ?? column.id}
-              options={columnMeta.options ?? []}
-              multiple={columnMeta.variant === "multiSelect"}
-              disabled={disabled}
-            />
-          );
+    case "select":
+    case "multiSelect":
+      return (
+        <DataTableFacetedFilter
+          column={column}
+          title={columnMeta.label ?? column.id}
+          options={columnMeta.options ?? []}
+          multiple={columnMeta.variant === "multiSelect"}
+          disabled={disabled}
+        />
+      );
 
-        default:
-          return null;
-      }
-    }, [column, columnMeta, disabled]);
-
-    return onFilterRender();
+    default:
+      return null;
   }
 }
