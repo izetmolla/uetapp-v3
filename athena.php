@@ -99,7 +99,7 @@ function getUsers()
     global $DB;
     $keyword = optional_param('keyword', '', PARAM_RAW);
     $page = max(0, optional_param('page', 0, PARAM_INT));
-    $perpage = min(100, max(1, optional_param('perpage', 10, PARAM_INT)));
+    $perpage = optional_param('perpage', 10, PARAM_INT);
 
     if (!$keyword || $keyword === '') {
         return [
@@ -281,8 +281,8 @@ function parseDatatablePagination()
         }
     }
 
-    $page = max(1, $page > 0 ? $page : 1);
-    $perPage = min(100, max(1, $perPage > 0 ? $perPage : 10));
+    $page =  $page > 0 ? $page : 1;
+    $perPage =  $perPage > 0 ? $perPage : 10;
 
     return [$page, $perPage];
 }

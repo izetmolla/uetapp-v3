@@ -265,6 +265,9 @@ func getFacultiesColumns(orgUnits []UniversityOrgUnitType) ([]datatable.OptionIt
 	faculties := []datatable.OptionItem{}
 	seenFaculties := make(map[string]struct{})
 	for _, orgUnit := range orgUnits {
+		if orgUnit.Faculty == "" {
+			continue
+		}
 		if _, ok := seenFaculties[orgUnit.Faculty]; ok {
 			continue
 		}
@@ -302,6 +305,9 @@ func getStudyProfiles(orgUnits []UniversityOrgUnitType) ([]datatable.OptionItem,
 	studyProfiles := []datatable.OptionItem{}
 	seenStudyProfiles := make(map[string]struct{})
 	for _, orgUnit := range orgUnits {
+		if orgUnit.ProgramSpecialty == "" {
+			continue
+		}
 		if _, ok := seenStudyProfiles[orgUnit.ProgramSpecialty]; ok {
 			continue
 		}
