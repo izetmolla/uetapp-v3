@@ -1,6 +1,6 @@
 "use client";
 
-import type { ColumnSort, SortDirection, Table } from "@tanstack/react-table";
+import type { ColumnSort, Table } from "@tanstack/react-table";
 import {
   ArrowDownUp,
   ChevronsUpDown,
@@ -24,13 +24,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import {
   Sortable,
   SortableContent,
@@ -172,7 +165,7 @@ export function DataTableSortList<TData>({
       onValueChange={onSortingChange}
       getItemValue={(item) => item.id}
     >
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen} modal={false}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" onKeyDown={onTriggerKeyDown}>
             <ArrowDownUp />
@@ -319,7 +312,7 @@ function DataTableSortItem({
         className="flex items-center gap-2"
         onKeyDown={onItemKeyDown}
       >
-        <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector}>
+        <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector} modal={false}>
           <PopoverTrigger asChild>
             <Button
               id={fieldTriggerId}
@@ -356,31 +349,44 @@ function DataTableSortItem({
             </Command>
           </PopoverContent>
         </Popover>
-        <Select
-          open={showDirectionSelector}
-          onOpenChange={setShowDirectionSelector}
-          value={sort.desc ? "desc" : "asc"}
-          onValueChange={(value: SortDirection) =>
-            onSortUpdate(sort.id, { desc: value === "desc" })
-          }
-        >
-          <SelectTrigger
-            aria-controls={directionListboxId}
-            className="h-8 w-24 rounded [&[data-size]]:h-8"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent
+        <Popover open={showDirectionSelector} onOpenChange={setShowDirectionSelector} modal={false}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              role="combobox"
+              aria-controls={directionListboxId}
+              className="h-8 w-24 justify-between rounded font-normal"
+            >
+              <span>{sort.desc ? "Desc" : "Asc"}</span>
+              <ChevronsUpDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
             id={directionListboxId}
-            className="min-w-[var(--radix-select-trigger-width)] origin-[var(--radix-select-content-transform-origin)]"
+            align="start"
+            className="w-24 origin-[var(--radix-popover-content-transform-origin)] p-0"
           >
-            {dataTableConfig.sortOrders.map((order) => (
-              <SelectItem key={order.value} value={order.value}>
-                {order.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <Command>
+              <CommandList>
+                <CommandGroup>
+                  {dataTableConfig.sortOrders.map((order) => (
+                    <CommandItem
+                      key={order.value}
+                      value={order.value}
+                      onSelect={(value) => {
+                        onSortUpdate(sort.id, { desc: value === "desc" });
+                        setShowDirectionSelector(false);
+                      }}
+                    >
+                      {order.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
         <Button
           aria-controls={sortItemId}
           variant="outline"

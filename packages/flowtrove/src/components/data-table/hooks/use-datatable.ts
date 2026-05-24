@@ -29,6 +29,7 @@ import {
 } from "nuqs";
 import * as React from "react";
 
+import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import {
   ARRAY_SEPARATOR,
   DEBOUNCE_MS_DEFAULT,
@@ -72,6 +73,7 @@ interface UseDataTableProps<TData>
  * Use with server-side data (manual*: true) or client-side (manual*: false).
  */
 export function useDataTable<TData>(props: UseDataTableProps<TData>) {
+  const localState = useOptionalDataTableLocalState<TData>();
   const {
     columns,
     pageCount = -1,
@@ -118,16 +120,20 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(initialState?.columnVisibility ?? {});
 
-  const [page, setPage] = useQueryState(
+  const [urlPage, setUrlPage] = useQueryState(
     QUERY_KEYS.PAGE,
     parseAsInteger.withOptions(queryStateOptions).withDefault(1),
   );
-  const [perPage, setPerPage] = useQueryState(
+  const [urlPerPage, setUrlPerPage] = useQueryState(
     QUERY_KEYS.PER_PAGE,
     parseAsInteger
       .withOptions(queryStateOptions)
       .withDefault(initialState?.pagination?.pageSize ?? 10),
   );
+  const page = localState?.page ?? urlPage;
+  const setPage = localState?.setPage ?? setUrlPage;
+  const perPage = localState?.perPage ?? urlPerPage;
+  const setPerPage = localState?.setPerPage ?? setUrlPerPage;
 
   const pagination: PaginationState = React.useMemo(() => {
     return {
@@ -156,12 +162,14 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     );
   }, [columns]);
 
-  const [sorting, setSorting] = useQueryState(
+  const [urlSorting, setUrlSorting] = useQueryState(
     QUERY_KEYS.SORT,
     getSortingStateParser<TData>(columnIds)
       .withOptions(queryStateOptions)
       .withDefault(initialState?.sorting ?? []),
   );
+  const sorting = localState?.sorting ?? urlSorting;
+  const setSorting = localState?.setSorting ?? setUrlSorting;
 
   const onSortingChange = React.useCallback(
     (updaterOrValue: Updater<SortingState>) => {
@@ -203,12 +211,14 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     }, {});
   }, [filterableColumns, queryStateOptions, enableAdvancedFilter]);
 
-  const [filterValues, setFilterValues] = useQueryStates(filterParsers);
+  const [urlFilterValues, setUrlFilterValues] = useQueryStates(filterParsers);
+  const filterValues = localState?.filterValues ?? urlFilterValues;
+  const setFilterValues = localState?.setFilterValues ?? setUrlFilterValues;
 
   const debouncedSetFilterValues = useDebouncedCallback(
-    (values: typeof filterValues) => {
-      void setPage(1);
-      void setFilterValues(values);
+    (values: Record<string, string | string[] | null>) => {
+      setPage(1);
+      setFilterValues(values);
     },
     debounceMs,
   );

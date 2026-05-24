@@ -5,6 +5,7 @@ import { FileSpreadsheetIcon, ListFilter, RotateCcw } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { ToggleGroup, ToggleGroupItem } from "@workspace/ui/components/toggle-group";
 
+import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { QUERY_KEYS } from "../lib/constants";
 
 export type FilterMode = "simple" | "advancedFilters";
@@ -15,7 +16,8 @@ const ADVANCED_VALUE: FilterMode = "advancedFilters";
 const validValues: FilterMode[] = [SIMPLE_VALUE as FilterMode, ADVANCED_VALUE];
 
 export function useTableAdvancedOptions() {
-  const [filterFlag, setFilterFlag] = useQueryState<FilterMode | null>(
+  const localState = useOptionalDataTableLocalState();
+  const [urlFilterFlag, setUrlFilterFlag] = useQueryState<FilterMode | null>(
     "filterFlag",
     {
       parse: (value) => {
@@ -31,6 +33,9 @@ export function useTableAdvancedOptions() {
       eq: (a, b) => (!a && !b) || a === b,
     },
   );
+
+  const filterFlag = localState?.filterFlag ?? urlFilterFlag;
+  const setFilterFlag = localState?.setFilterFlag ?? setUrlFilterFlag;
 
   return {
     enableAdvancedFilter: filterFlag === ADVANCED_VALUE,
@@ -57,23 +62,35 @@ function hasActiveAdvancedFilters(rawFilters: string | null | unknown): boolean 
 /** Reset button for advanced filters; visible only when advanced mode is on and any filter is applied. Render after the Filter button in the toolbar. Clears filters, join operator, and sortings. */
 export function DataTableAdvancedResetButton() {
   const { filterFlag } = useTableAdvancedOptions();
-  const [rawFilters, setFilters] = useQueryState(
+  const localState = useOptionalDataTableLocalState();
+  const [rawFilters, setUrlFilters] = useQueryState(
     QUERY_KEYS.FILTERS,
     parseAsString
   );
-  const [, setJoinOperator] = useQueryState(
+  const [, setUrlJoinOperator] = useQueryState(
     QUERY_KEYS.JOIN_OPERATOR,
     parseAsString
   );
-  const [, setSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
+  const [, setUrlSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
 
+  const rawFiltersValue = localState?.advancedFilters ?? rawFilters ?? null;
   const showReset =
-    filterFlag === ADVANCED_VALUE && hasActiveAdvancedFilters(rawFilters ?? null);
+    filterFlag === ADVANCED_VALUE &&
+    hasActiveAdvancedFilters(
+      localState
+        ? localState.advancedFilters
+        : (rawFiltersValue as string | null),
+    );
 
   const handleResetFilters = () => {
-    setFilters(null);
-    setJoinOperator(null);
-    setSorting(null);
+    if (localState) {
+      localState.clearAdvancedFilters();
+      localState.clearSorting();
+      return;
+    }
+    setUrlFilters(null);
+    setUrlJoinOperator(null);
+    setUrlSorting(null);
   };
 
   if (!showReset) return null;
@@ -96,8 +113,9 @@ export function DataTableAdvancedOptions({
   clearColumnFilters,
 }: DataTableAdvancedOptionsProps = {}) {
   const { filterFlag, setFilterFlag } = useTableAdvancedOptions();
-  const [, setFilters] = useQueryState(QUERY_KEYS.FILTERS, parseAsString);
-  const [, setJoinOperator] = useQueryState(
+  const localState = useOptionalDataTableLocalState();
+  const [, setUrlFilters] = useQueryState(QUERY_KEYS.FILTERS, parseAsString);
+  const [, setUrlJoinOperator] = useQueryState(
     QUERY_KEYS.JOIN_OPERATOR,
     parseAsString
   );
@@ -107,8 +125,12 @@ export function DataTableAdvancedOptions({
 
   const handleModeChange = (value: string | null) => {
     if (value === SIMPLE_VALUE) {
-      setFilters(null);
-      setJoinOperator(null);
+      if (localState) {
+        localState.clearAdvancedFilters();
+      } else {
+        setUrlFilters(null);
+        setUrlJoinOperator(null);
+      }
       setFilterFlag(null);
     } else if (value === ADVANCED_VALUE) {
       clearColumnFilters?.();

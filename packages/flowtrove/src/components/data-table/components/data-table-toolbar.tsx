@@ -11,6 +11,7 @@ import { DataTableSliderFilter } from "./data-table-slider-filter";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
+import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { QUERY_KEYS } from "../lib/constants";
 import { hasValidFilterVariant } from "../lib/filter-variants";
 import { DataTableAdvancedOptions } from "./data-table-advanced-options";
@@ -30,7 +31,8 @@ export function DataTableToolbar<TData>({
   ...props
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const [, setSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
+  const localState = useOptionalDataTableLocalState();
+  const [, setUrlSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
 
   const columns = React.useMemo(
     () =>
@@ -49,8 +51,12 @@ export function DataTableToolbar<TData>({
   const onReset = React.useCallback(() => {
     clearColumnFilters?.();
     table.resetColumnFilters();
-    setSorting(null);
-  }, [table, clearColumnFilters, setSorting]);
+    if (localState) {
+      localState.clearSorting();
+    } else {
+      setUrlSorting(null);
+    }
+  }, [table, clearColumnFilters, localState, setUrlSorting]);
 
   return (
     <div

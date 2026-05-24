@@ -54,6 +54,7 @@ import {
   SortableOverlay,
 } from "../components/ui/sortable";
 import { dataTableConfig } from "../config/data-table";
+import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { useDebouncedCallback } from "../hooks/use-debounced-callback";
 import { getDefaultFilterOperator, getFilterOperators } from "../lib/data-table";
 import { formatDate } from "../lib/format";
@@ -101,7 +102,8 @@ export function DataTableFilterList<TData>({
       .filter((column) => column.columnDef.enableColumnFilter);
   }, [table]);
 
-  const [filters, setFilters] = useQueryState(
+  const localState = useOptionalDataTableLocalState<TData>();
+  const [urlFilters, setUrlFilters] = useQueryState(
     FILTERS_KEY,
     getFiltersStateParser<TData>(columns.map((field) => field.id))
       .withDefault([])
@@ -111,16 +113,27 @@ export function DataTableFilterList<TData>({
         throttleMs,
       }),
   );
+  const filters = localState?.advancedFilters ?? urlFilters ?? [];
+  const setFilters = localState?.setAdvancedFilters ?? setUrlFilters;
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
-  const [joinOperator, setJoinOperator] = useQueryState(
+  const [urlJoinOperator, setUrlJoinOperator] = useQueryState(
     JOIN_OPERATOR_KEY,
     parseAsStringEnum(["and", "or"]).withDefault("and").withOptions({
       clearOnDefault: true,
       shallow,
     }),
   );
-  const [, setSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
+  const joinOperator = localState?.joinOperator ?? urlJoinOperator ?? "and";
+  const setJoinOperator = localState?.setJoinOperator ?? setUrlJoinOperator;
+  const [, setUrlSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
+  const clearSorting = React.useCallback(() => {
+    if (localState) {
+      localState.clearSorting();
+      return;
+    }
+    setUrlSorting(null);
+  }, [localState, setUrlSorting]);
 
   const onFilterAdd = React.useCallback(() => {
     const column = columns[0];
@@ -173,10 +186,15 @@ export function DataTableFilterList<TData>({
   );
 
   const onFiltersReset = React.useCallback(() => {
-    void setFilters(null);
-    void setJoinOperator("and");
-    void setSorting(null);
-  }, [setFilters, setJoinOperator, setSorting]);
+    if (localState) {
+      localState.clearAdvancedFilters();
+      localState.clearSorting();
+      return;
+    }
+    void setUrlFilters(null);
+    void setUrlJoinOperator("and");
+    void setUrlSorting(null);
+  }, [localState, setUrlFilters, setUrlJoinOperator, setUrlSorting]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {

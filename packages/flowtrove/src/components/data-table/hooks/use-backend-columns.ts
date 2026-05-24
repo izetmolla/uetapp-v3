@@ -11,6 +11,7 @@ import * as React from "react";
 
 import { ARRAY_SEPARATOR } from "../lib/constants";
 import { convertBackendColumns } from "../lib/column-converter";
+import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import type {
   BackendColumnDefinition,
   BackendColumnsResponse,
@@ -143,7 +144,9 @@ export function useBackendColumns<TData = Record<string, unknown>>(
     return out;
   }, [filterByKeys]);
 
-  const [filterByValues] = useQueryStates(filterByParsers);
+  const [urlFilterByValues] = useQueryStates(filterByParsers);
+  const localState = useOptionalDataTableLocalState();
+  const filterByValues = localState?.filterValues ?? urlFilterByValues;
 
   // Stable string signature of the *active* filterBy values, so the dependent
   // query only re-runs when something meaningful actually changed.

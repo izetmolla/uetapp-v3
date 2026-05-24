@@ -51,6 +51,7 @@ const ImportStudentsDatatable: FC = () => {
                     enablePagination
                     rowIdKey="id"
                     enableRowSelection
+                    disableParamPersistence={true}
                 />
             </ContentLoader>
         </div>

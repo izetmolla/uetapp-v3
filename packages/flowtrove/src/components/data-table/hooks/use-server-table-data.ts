@@ -14,6 +14,7 @@ import {
 import * as React from "react";
 
 import { dataTableConfig } from "../config/data-table";
+import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { ARRAY_SEPARATOR, QUERY_KEYS } from "../lib/constants";
 import { getFiltersStateParser, getSortingStateParser } from "../lib/parsers";
 import { serializeServerTableParams } from "../lib/serialize-server-table-params";
@@ -48,6 +49,7 @@ export function useServerTableData<TData>(
     enabled = true,
   } = options;
 
+  const localState = useOptionalDataTableLocalState<TData>();
   const defaultPerPage = initialPerPage  ?? 10;
 
   const columnIds = React.useMemo(
@@ -61,12 +63,15 @@ export function useServerTableData<TData>(
     [columnIds]
   );
 
-  const [page] = useQueryState(QUERY_KEYS.PAGE, parseAsInteger.withDefault(1));
-  const [perPage] = useQueryState(
+  const [urlPage] = useQueryState(QUERY_KEYS.PAGE, parseAsInteger.withDefault(1));
+  const [urlPerPage] = useQueryState(
     QUERY_KEYS.PER_PAGE,
     parseAsInteger.withDefault(defaultPerPage)
   );
-  const [sorting] = useQueryState(QUERY_KEYS.SORT, sortParser.withDefault([]));
+  const [urlSorting] = useQueryState(QUERY_KEYS.SORT, sortParser.withDefault([]));
+  const page = localState?.page ?? urlPage;
+  const perPage = localState?.perPage ?? urlPerPage;
+  const sorting = localState?.sorting ?? urlSorting;
 
   const filterableColumns = React.useMemo(
     () =>
@@ -94,28 +99,35 @@ export function useServerTableData<TData>(
     );
   }, [filterableColumns]);
 
-  const [filterValues, setFilterValues] = useQueryStates(filterParsers);
+  const [urlFilterValues, setUrlFilterValues] = useQueryStates(filterParsers);
+  const filterValues = localState?.filterValues ?? urlFilterValues;
 
   const clearColumnFilters = React.useCallback(() => {
-    setFilterValues(
+    if (localState) {
+      localState.clearColumnFilters();
+      return;
+    }
+    setUrlFilterValues(
       Object.fromEntries(
         Object.keys(filterParsers).map((k) => [k, null])
       ) as Record<string, string | string[] | null>
     );
-  }, [filterParsers, setFilterValues]);
+  }, [filterParsers, localState, setUrlFilterValues]);
 
   const filtersParser = React.useMemo(
     () => getFiltersStateParser<TData>(columnIds),
     [columnIds]
   );
-  const [advancedFilters] = useQueryState(
+  const [urlAdvancedFilters] = useQueryState(
     QUERY_KEYS.FILTERS,
     filtersParser.withDefault([])
   );
-  const [joinOperator] = useQueryState(
+  const [urlJoinOperator] = useQueryState(
     QUERY_KEYS.JOIN_OPERATOR,
     parseAsStringEnum([...dataTableConfig.joinOperators]).withDefault("and")
   );
+  const advancedFilters = localState?.advancedFilters ?? urlAdvancedFilters;
+  const joinOperator = localState?.joinOperator ?? urlJoinOperator;
 
   const state: ServerTableState<TData> = React.useMemo(() => {
     const columnFilters = enableAdvancedFilter

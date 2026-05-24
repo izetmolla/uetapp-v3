@@ -31,6 +31,10 @@ import { getCommonPinningStyles } from "./lib/data-table";
 import { useDataTable } from "./hooks/use-datatable";
 import { useServerTableData } from "./hooks/use-server-table-data";
 import { useTableAdvancedOptions } from "./components/data-table-advanced-options";
+import {
+  DataTableLocalStateProvider,
+  useCreateDataTableLocalState,
+} from "./context/data-table-local-state";
 import type { UseServerTableDataOptions, ExtendedColumnSort } from "./types/data-table";
 import type { Table as TanStackTable, TableState } from "@tanstack/react-table";
 import { cn } from "@workspace/ui/lib/utils";
@@ -78,6 +82,11 @@ export interface DataTableProps<TData> {
   actionBar?: React.ReactNode | ((table: TanStackTable<TData>) => React.ReactNode);
   /** Callback when selection changes. Receives the selected row records. */
   onSelectionChange?: (selectedRows: TData[]) => void;
+  /**
+   * When true, pagination, sorting, and filters are kept in component state
+   * instead of being synced to the page URL. Use for dialogs or embedded tables.
+   */
+  disableParamPersistence?: boolean;
   className?: string;
 }
 
@@ -149,7 +158,32 @@ function getSelectColumnDef<TData>(): ColumnDef<TData> {
   };
 }
 
-export function DataTable<TData>({
+function DataTableWithLocalState<TData>(props: DataTableProps<TData>) {
+  const initialPerPage =
+    props.source.type === "server"
+      ? (props.source.options.initialPerPage ?? 10)
+      : (props.initialState?.pagination?.pageSize ?? 10);
+  const localState = useCreateDataTableLocalState<TData>({
+    initialSorting: props.initialState?.sorting,
+    initialPerPage,
+  });
+
+  return (
+    <DataTableLocalStateProvider value={localState}>
+      <DataTableCore {...props} />
+    </DataTableLocalStateProvider>
+  );
+}
+
+export function DataTable<TData>(props: DataTableProps<TData>) {
+  if (props.disableParamPersistence) {
+    return <DataTableWithLocalState {...props} />;
+  }
+
+  return <DataTableCore {...props} />;
+}
+
+function DataTableCore<TData>({
   columns,
   source,
   initialState,
