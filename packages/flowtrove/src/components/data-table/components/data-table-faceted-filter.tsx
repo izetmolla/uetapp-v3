@@ -26,6 +26,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   title?: string;
   options: Option[];
   multiple?: boolean;
+  disabled?: boolean;
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
@@ -33,6 +34,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
   multiple,
+  disabled,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const [open, setOpen] = React.useState(false);
 
@@ -70,68 +72,91 @@ export function DataTableFacetedFilter<TData, TValue>({
     [column],
   );
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
-          {selectedValues?.size > 0 ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              onClick={onReset}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <PlusCircle />
-          )}
-          {title}
-          {selectedValues?.size > 0 && (
-            <>
-              <Separator
-                orientation="vertical"
-                className="mx-0.5 data-[orientation=vertical]:h-4"
-              />
+  const triggerContent = (
+    <>
+      {selectedValues?.size > 0 ? (
+        <div
+          role="button"
+          aria-label={`Clear ${title} filter`}
+          tabIndex={0}
+          onClick={disabled ? undefined : onReset}
+          className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <XCircle />
+        </div>
+      ) : (
+        <PlusCircle />
+      )}
+      {title}
+      {selectedValues?.size > 0 && (
+        <>
+          <Separator
+            orientation="vertical"
+            className="mx-0.5 data-[orientation=vertical]:h-4"
+          />
+          <Badge
+            variant="secondary"
+            className="rounded-sm px-1 font-normal lg:hidden"
+          >
+            {selectedValues.size}
+          </Badge>
+          <div className="hidden items-center gap-1 lg:flex">
+            {selectedValues.size > 2 ? (
               <Badge
                 variant="secondary"
-                className="rounded-sm px-1 font-normal lg:hidden"
+                className="rounded-sm px-1 font-normal"
               >
-                {selectedValues.size}
+                {selectedValues.size} selected
               </Badge>
-              <div className="hidden items-center gap-1 lg:flex">
-                {selectedValues.size > 2 ? (
+            ) : (
+              options
+                .filter((option) => selectedValues.has(option.value))
+                .map((option) => (
                   <Badge
                     variant="secondary"
+                    key={option.value}
                     className="rounded-sm px-1 font-normal"
                   >
-                    {selectedValues.size} selected
+                    {option.label}
                   </Badge>
-                ) : (
-                  options
-                    .filter((option) => selectedValues.has(option.value))
-                    .map((option) => (
-                      <Badge
-                        variant="secondary"
-                        key={option.value}
-                        className="rounded-sm px-1 font-normal"
-                      >
-                        {option.label}
-                      </Badge>
-                    ))
-                )}
-              </div>
-            </>
-          )}
+                ))
+            )}
+          </div>
+        </>
+      )}
+    </>
+  );
+
+  // When disabled, render a plain disabled button (no popover wiring) so the
+  // `disabled` attribute lands on the DOM and Tailwind's `disabled:*` styles apply.
+  if (disabled) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="border-dashed"
+        disabled
+        aria-disabled="true"
+      >
+        {triggerContent}
+      </Button>
+    );
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen} modal>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="border-dashed">
+          {triggerContent}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full min-w-[12.5rem] p-0" align="start">
         <Command>
           <CommandInput placeholder={title} />
-          <CommandList className="max-h-full">
+          <CommandList className="max-h-[min(18.75rem,50dvh)]">
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-[18.75rem] overflow-y-auto overflow-x-hidden">
+            <CommandGroup>
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
 

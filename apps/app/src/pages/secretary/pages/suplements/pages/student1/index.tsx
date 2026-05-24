@@ -34,7 +34,7 @@ const StudentsListPage = () => {
         error,
         columnVisibility,
     } = useBackendColumns<Student>({
-        fetchColumns: async () => getStudentsColumns(),
+        fetchColumns: async (filters) => getStudentsColumns(filters),
         queryKey: [STUDENTS_FETCH_KEY, "columns"],
         appendColumns: getActionsColumn(onDownload),
         overrideColumns: overrideColumns(),

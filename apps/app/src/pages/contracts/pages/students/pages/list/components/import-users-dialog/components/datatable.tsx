@@ -15,7 +15,7 @@ import { getActionsColumn, getColumnOverrides } from "./table-columns";
 
 const ImportStudentsDatatable: FC = () => {
     const { columns, isLoading: columnsLoading, error, columnVisibility } = useBackendColumns<Student>({
-        fetchColumns: async () => getImportStudentsColumns(),
+        fetchColumns: async (filters) => getImportStudentsColumns(filters),
         queryKey: [IMPORT_STUDENTS_FETCH_PERSISTANT, "columns"],
         appendColumns: getActionsColumn(),
         overrideColumns: getColumnOverrides(),

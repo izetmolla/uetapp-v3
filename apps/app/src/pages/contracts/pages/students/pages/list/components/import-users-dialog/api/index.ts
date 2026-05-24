@@ -38,10 +38,11 @@ export async function getImportStudentsList(params: unknown) {
     });
 }
 
-export async function getImportStudentsColumns() {
+export async function getImportStudentsColumns(filters?: Record<string, unknown>) {
     return ApiService.fetchData<ImportStudentsColumnsResponse>({
         url: withAPI(`${IMPORT_STUDENTS_LIST_BASE}/columns`),
         method: "get",
+        params: filters,
     });
 }
 

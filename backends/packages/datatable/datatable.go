@@ -9,6 +9,21 @@ type ColumnMeta struct {
 	Variant     string       `json:"variant"`
 	Placeholder string       `json:"placeholder,omitempty"`
 	Options     []OptionItem `json:"options,omitempty"`
+
+	// Hidden hides this column's filter input from the simple filter toolbar
+	// (it is still usable in advanced filters). The column itself is unaffected.
+	Hidden bool `json:"hidden,omitempty"`
+
+	// Disabled renders the filter input in a disabled (read-only) state on the frontend.
+	// Use to show that filtering is currently unavailable (e.g. a dependent option set
+	// has not been resolved yet) without removing the input from the UI.
+	Disabled bool `json:"disabled,omitempty"`
+
+	// FilterBy declares that this column's options depend on another column's filter value.
+	// When the referenced column's filter changes, the frontend will refetch the columns
+	// endpoint, forwarding the referenced filter value as a query parameter so the backend
+	// can recompute Options accordingly (e.g. faculties depend on study_level).
+	FilterBy string `json:"filterBy,omitempty"`
 }
 
 type OptionItem struct {

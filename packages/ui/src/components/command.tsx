@@ -88,13 +88,18 @@ function CommandInput({
 
 function CommandList({
   className,
+  onWheel,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (
     <CommandPrimitive.List
       data-slot="command-list"
+      onWheel={(event) => {
+        event.stopPropagation()
+        onWheel?.(event)
+      }}
       className={cn(
-        "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+        "no-scrollbar max-h-72 min-h-0 scroll-py-1 overflow-x-hidden overflow-y-auto overscroll-y-contain touch-pan-y outline-none",
         className
       )}
       {...props}

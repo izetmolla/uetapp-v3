@@ -35,11 +35,13 @@ function getIsValidRange(value: unknown): value is RangeValue {
 interface DataTableSliderFilterProps<TData> {
   column: Column<TData, unknown>;
   title?: string;
+  disabled?: boolean;
 }
 
 export function DataTableSliderFilter<TData>({
   column,
   title,
+  disabled,
 }: DataTableSliderFilterProps<TData>) {
   const id = React.useId();
 
@@ -128,35 +130,56 @@ export function DataTableSliderFilter<TData>({
     [column],
   );
 
+  const triggerContent = (
+    <>
+      {columnFilterValue ? (
+        <div
+          role="button"
+          aria-label={`Clear ${title} filter`}
+          tabIndex={0}
+          className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          onClick={disabled ? undefined : onReset}
+        >
+          <XCircle />
+        </div>
+      ) : (
+        <PlusCircle />
+      )}
+      <span>{title}</span>
+      {columnFilterValue ? (
+        <>
+          <Separator
+            orientation="vertical"
+            className="mx-0.5 data-[orientation=vertical]:h-4"
+          />
+          {formatValue(columnFilterValue[0])} -{" "}
+          {formatValue(columnFilterValue[1])}
+          {unit ? ` ${unit}` : ""}
+        </>
+      ) : null}
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="border-dashed"
+        disabled
+        aria-disabled="true"
+      >
+        {triggerContent}
+      </Button>
+    );
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="border-dashed">
-          {columnFilterValue ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              onClick={onReset}
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <PlusCircle />
-          )}
-          <span>{title}</span>
-          {columnFilterValue ? (
-            <>
-              <Separator
-                orientation="vertical"
-                className="mx-0.5 data-[orientation=vertical]:h-4"
-              />
-              {formatValue(columnFilterValue[0])} -{" "}
-              {formatValue(columnFilterValue[1])}
-              {unit ? ` ${unit}` : ""}
-            </>
-          ) : null}
+          {triggerContent}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">

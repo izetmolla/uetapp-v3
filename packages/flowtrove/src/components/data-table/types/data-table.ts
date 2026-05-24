@@ -14,6 +14,16 @@ declare module "@tanstack/react-table" {
         icon?: React.FC<React.SVGProps<SVGSVGElement>>;
         /** When true, this column only appears in Advanced Filters, not in simple column filters. */
         enableOnlyAdvancedFilters?: boolean;
+        /** When true, hide this column's filter input from the simple toolbar (still usable in advanced filters). */
+        hidden?: boolean;
+        /** When true, render the filter input in a disabled/read-only state. */
+        disabled?: boolean;
+        /**
+         * Declares that this column's options depend on another column's filter value.
+         * When the referenced column's filter changes, the columns endpoint is refetched
+         * with that filter value as a query parameter so the backend can recompute Options.
+         */
+        filterBy?: string;
         /** Applied to header and body cells (e.g. `!whitespace-normal` for wrapping text). */
         className?: string;
     }
@@ -98,6 +108,16 @@ export interface BackendColumnMeta {
     variant?: string;
     placeholder?: string;
     options?: BackendColumnOption[];
+    /** When true, hide this column's filter input from the simple toolbar. */
+    hidden?: boolean;
+    /** When true, render the filter input in a disabled/read-only state. */
+    disabled?: boolean;
+    /**
+     * When set, declares that this column's options depend on another column's filter value.
+     * The columns endpoint is refetched (with the referenced filter value as a query param)
+     * whenever that filter changes.
+     */
+    filterBy?: string;
 }
 
 export interface BackendColumnDefinition {

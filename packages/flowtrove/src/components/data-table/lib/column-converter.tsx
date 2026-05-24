@@ -68,6 +68,9 @@ export function convertBackendColumns<TData extends Record<string, unknown>>(
         options,
         className: "w-full",
         ...(onlyAdvancedFilters && { enableOnlyAdvancedFilters: true }),
+        ...(meta?.hidden && { hidden: true }),
+        ...(meta?.disabled && { disabled: true }),
+        ...(meta?.filterBy && { filterBy: meta.filterBy }),
       },
     };
 

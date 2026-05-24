@@ -65,9 +65,9 @@ func getStudentsColumns() ([]datatable.Column, error) {
 			Hidden:      true,
 		},
 		{
-			ID:          "status",
-			AccessorKey: "status",
-			Header:      "Statusi",
+			ID:            "status",
+			AccessorKey:   "status",
+			Header:        "Statusi",
 			EnableSorting: true,
 		},
 		{
@@ -149,10 +149,10 @@ func getStudentsColumns() ([]datatable.Column, error) {
 			},
 		},
 		{
-			ID:          "created_at",
-			AccessorKey: "created_at",
-			Header:      "Krijuar",
-			Hidden:      true,
+			ID:            "created_at",
+			AccessorKey:   "created_at",
+			Header:        "Krijuar",
+			Hidden:        true,
 			EnableSorting: true,
 		},
 	}, nil

@@ -10,13 +10,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func (cc *Controller) filterOptions(ctx context.Context, option string, optionId string) []datatable.OptionItem {
+func (cc *Controller) filterOptions(ctx context.Context, option string, optionIds []string) []datatable.OptionItem {
 	switch option {
 	case "study_level":
 		study_levels, _ := cc.getStudyLevels(ctx)
 		return study_levels
 	case "faculties":
-		faculties, _ := cc.getFaculties(ctx)
+		faculties, _ := cc.getFaculties(ctx, optionIds)
 		return faculties
 	case "study_program":
 		studyPrograms, _ := cc.getStudyPrograms(ctx)
@@ -45,7 +45,7 @@ func (cc *Controller) getStudyLevels(ctx context.Context) ([]datatable.OptionIte
 	return studyLevels, nil
 }
 
-func (cc *Controller) getFaculties(ctx context.Context) ([]datatable.OptionItem, error) {
+func (cc *Controller) getFaculties(ctx context.Context, studyLevels []string) ([]datatable.OptionItem, error) {
 	faculties := []datatable.OptionItem{}
 	facultiesDb, err := gorm.G[models.Faculty](cc.app.Postgres()).Find(ctx)
 	if err != nil {
@@ -91,4 +91,38 @@ func (cc *Controller) getStudyProfiles(ctx context.Context) ([]datatable.OptionI
 		}
 	}
 	return studyProfiles, nil
+}
+
+// Other
+func (cc *Controller) getStudyProgramOldIds(ctx context.Context, levelIds []string, studyProgramIds []string) []string {
+	oldIDs := []string{}
+	db := gorm.G[models.StudyProgramLevels](cc.app.Postgres().Debug())
+
+	var (
+		studyProgramLevels []models.StudyProgramLevels
+		err                error
+	)
+	switch {
+	case len(levelIds) > 0 && len(studyProgramIds) > 0:
+		studyProgramLevels, err = db.Where("study_level_id IN ?", levelIds).
+			Where("study_program_id IN ?", studyProgramIds).
+			Find(ctx)
+	case len(levelIds) > 0:
+		studyProgramLevels, err = db.Where("study_level_id IN ?", levelIds).Find(ctx)
+	case len(studyProgramIds) > 0:
+		studyProgramLevels, err = db.Where("study_program_id IN ?", studyProgramIds).Find(ctx)
+	default:
+		studyProgramLevels, err = db.Find(ctx)
+	}
+
+	if err != nil {
+		fmt.Println("Error getting study program levels: ", err)
+	} else {
+		for _, level := range studyProgramLevels {
+			if level.OldID != "" {
+				oldIDs = append(oldIDs, level.OldID)
+			}
+		}
+	}
+	return oldIDs
 }

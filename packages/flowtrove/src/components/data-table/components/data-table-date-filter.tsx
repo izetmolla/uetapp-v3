@@ -52,12 +52,14 @@ interface DataTableDateFilterProps<TData> {
   column: Column<TData, unknown>;
   title?: string;
   multiple?: boolean;
+  disabled?: boolean;
 }
 
 export function DataTableDateFilter<TData>({
   column,
   title,
   multiple,
+  disabled,
 }: DataTableDateFilterProps<TData>) {
   const columnFilterValue = column.getFilterValue();
 
@@ -170,24 +172,45 @@ export function DataTableDateFilter<TData>({
     );
   }, [selectedDates, multiple, formatDateRange, title]);
 
+  const triggerContent = (
+    <>
+      {hasValue ? (
+        <div
+          role="button"
+          aria-label={`Clear ${title} filter`}
+          tabIndex={0}
+          onClick={disabled ? undefined : onReset}
+          className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <XCircle />
+        </div>
+      ) : (
+        <CalendarIcon />
+      )}
+      {label}
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="border-dashed"
+        disabled
+        aria-disabled="true"
+      >
+        {triggerContent}
+      </Button>
+    );
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="border-dashed">
-          {hasValue ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              onClick={onReset}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <CalendarIcon />
-          )}
-          {label}
+          {triggerContent}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

@@ -40,7 +40,8 @@ export function DataTableToolbar<TData>({
           (column) =>
             column.getCanFilter() &&
             hasValidFilterVariant(column.columnDef.meta?.variant) &&
-            !column.columnDef.meta?.enableOnlyAdvancedFilters,
+            !column.columnDef.meta?.enableOnlyAdvancedFilters &&
+            !column.columnDef.meta?.hidden,
         ),
     [table],
   );
@@ -96,6 +97,7 @@ function DataTableToolbarFilter<TData>({
 }: DataTableToolbarFilterProps<TData>) {
   {
     const columnMeta = column.columnDef.meta;
+    const disabled = columnMeta?.disabled === true;
 
     const onFilterRender = React.useCallback(() => {
       if (!columnMeta?.variant) return null;
@@ -107,6 +109,7 @@ function DataTableToolbarFilter<TData>({
               placeholder={columnMeta.placeholder ?? columnMeta.label}
               value={(column.getFilterValue() as string) ?? ""}
               onChange={(event) => column.setFilterValue(event.target.value)}
+              disabled={disabled}
               className="h-8 w-40 lg:w-56"
             />
           );
@@ -120,6 +123,7 @@ function DataTableToolbarFilter<TData>({
                 placeholder={columnMeta.placeholder ?? columnMeta.label}
                 value={(column.getFilterValue() as string) ?? ""}
                 onChange={(event) => column.setFilterValue(event.target.value)}
+                disabled={disabled}
                 className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
               />
               {columnMeta.unit && (
@@ -135,6 +139,7 @@ function DataTableToolbarFilter<TData>({
             <DataTableSliderFilter
               column={column}
               title={columnMeta.label ?? column.id}
+              disabled={disabled}
             />
           );
 
@@ -145,6 +150,7 @@ function DataTableToolbarFilter<TData>({
               column={column}
               title={columnMeta.label ?? column.id}
               multiple={columnMeta.variant === "dateRange"}
+              disabled={disabled}
             />
           );
 
@@ -156,13 +162,14 @@ function DataTableToolbarFilter<TData>({
               title={columnMeta.label ?? column.id}
               options={columnMeta.options ?? []}
               multiple={columnMeta.variant === "multiSelect"}
+              disabled={disabled}
             />
           );
 
         default:
           return null;
       }
-    }, [column, columnMeta]);
+    }, [column, columnMeta, disabled]);
 
     return onFilterRender();
   }

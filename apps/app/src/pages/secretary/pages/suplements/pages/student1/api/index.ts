@@ -42,10 +42,11 @@ export interface StudentsListResponse extends ResponseWithPagination<Student> {
     templates?: { id: string; name: string }[];
 }
 
-export async function getStudentsColumns() {
+export async function getStudentsColumns(filters?: Record<string, unknown>) {
     return ApiService.fetchData<StudentsColumnsResponse>({
         url: withAPI("/secretary/suplements/students/columns"),
         method: "get",
+        params: filters,
     });
 }
 
