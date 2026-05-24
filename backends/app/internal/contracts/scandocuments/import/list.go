@@ -53,7 +53,15 @@ func (cc *Controller) GetStudentsListAPI(c fiber.Ctx) error {
 		return cc.app.Api(c, r.WithError(err))
 	}
 
-	return cc.app.Api(c, r.WithData(res.Body))
+	body := res.Body
+	if body == nil {
+		body = map[string]any{}
+	}
+
+	return cc.app.Api(c, r.WithData(fiber.Map{
+		"data":       body["data"],
+		"pagination": body["pagination"],
+	}))
 }
 
 func (cc *Controller) GetStudentsColumns(c fiber.Ctx) error {
