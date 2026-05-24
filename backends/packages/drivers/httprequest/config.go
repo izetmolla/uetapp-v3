@@ -27,7 +27,7 @@ func FromConfigContext(ctx context.Context, config map[string]any) (*HttpRequest
 		Method:  configStringOptional(config, "method"),
 		Headers: configStringMap(config, "headers"),
 		Body:    configAnyMap(config, "body"),
-		Params:  configStringMap(config, "params"),
+		Params:  configParamMap(config, "params"),
 	}, nil
 }
 
@@ -72,6 +72,26 @@ func configStringMap(m map[string]any, key string) map[string]string {
 			} else {
 				out[k] = fmt.Sprint(val)
 			}
+		}
+		return out
+	default:
+		return nil
+	}
+}
+
+func configParamMap(m map[string]any, key string) map[string]any {
+	v, ok := m[key]
+	if !ok || v == nil {
+		return nil
+	}
+
+	switch h := v.(type) {
+	case map[string]any:
+		return h
+	case map[string]string:
+		out := make(map[string]any, len(h))
+		for k, val := range h {
+			out[k] = val
 		}
 		return out
 	default:

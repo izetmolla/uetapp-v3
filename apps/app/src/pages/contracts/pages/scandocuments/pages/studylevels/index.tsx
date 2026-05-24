@@ -23,7 +23,7 @@ import Icon from "@workspace/ui/components/icon";
 
 const StudyLevelsPage = () => {
   const { year = "", faculty_slug = "" } = useParams();
-  const [list, setList] = useState(false);
+  const [list, setList] = useState(true);
 
   const { data, isLoading, error } = useQuery({
     queryFn: () => getStudyLevels({ year, faculty_slug }),

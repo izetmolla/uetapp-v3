@@ -6,17 +6,34 @@ export const IMPORT_STUDENTS_FETCH_PERSISTANT = "import-scandocuments-students";
 export const IMPORT_STUDENTS_LIST_BASE = "/contracts/scandocuments/import";
 
 export interface Student {
-    id: number;
+    student_fid: string;
+    sp_id: string;
+    person_id: string;
+    status: string;
+    status_type: string;
+    surname: string;
     firstname: string;
-    lastname: string;
-    email?: string;
-    id_number?: string;
-    pasport_number?: string;
-    status?: string;
-    user_id?: string;
-    full_name?: string;
-    created_at?: string;
-    updated_at?: string;
+    fathersname: string;
+    phone: string;
+    mobile: string;
+    email: string;
+    email_uet: string;
+    document_id: string;
+    document_type: string;
+    department: string;
+    program_id: string;
+    program: string;
+    program_specialty: string;
+    reg_date: string;
+    reg_year: string;
+    faculty: string;
+    study_level: string;
+    nationality: string;
+    nat_code: string;
+    city: string;
+    address: string;
+    lastsyncdate: string;
+    fullname: string;
 }
 
 export interface ImportStudentsMutationResponse extends ResponseWithError {

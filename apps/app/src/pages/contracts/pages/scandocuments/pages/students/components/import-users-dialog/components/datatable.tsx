@@ -41,15 +41,15 @@ const ImportStudentsDatatable: FC = () => {
                         },
                     }}
                     initialState={{
-                        sorting: [{ id: "created_at", desc: true }],
+                        sorting: [{ id: "sp_id", desc: true }],
                         columnPinning: { right: ["actions"] },
                         columnVisibility,
                     }}
-                    getRowId={(row) => String(row.id)}
+                    getRowId={(row) => String(row.sp_id)}
                     enableToolbar
                     enableAdvancedFilter
                     enablePagination
-                    rowIdKey="id"
+                    rowIdKey="sp_id"
                     enableRowSelection
                     disableParamPersistence={true}
                 />

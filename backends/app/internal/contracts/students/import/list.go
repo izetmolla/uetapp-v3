@@ -86,7 +86,7 @@ func (cc *Controller) GetImportStudentsListAPI(c fiber.Ctx) error {
 	}
 
 	if req.Params == nil {
-		req.Params = map[string]string{}
+		req.Params = map[string]any{}
 	}
 	req.Params["action"] = "getUsers"
 	if kw := strings.TrimSpace(tablequery.GetFilterValue(c, "full_name")); kw != "" {

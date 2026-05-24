@@ -3,6 +3,7 @@ package httprequest
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v3/client"
@@ -14,7 +15,7 @@ type HttpRequestDriver struct {
 	Method  string            `json:"method"`
 	Headers map[string]string `json:"headers"`
 	Body    map[string]any    `json:"body"`
-	Params  map[string]string `json:"params"`
+	Params  map[string]any    `json:"params"`
 }
 
 type HttpRequestDriverOption func(*HttpRequestDriverOptions)
@@ -22,7 +23,7 @@ type HttpRequestDriverOption func(*HttpRequestDriverOptions)
 type HttpRequestDriverOptions struct {
 	Headers map[string]string
 	Body    map[string]any
-	Params  map[string]string
+	Params  map[string]any
 }
 
 func defaultHttpRequestDriverOptions() HttpRequestDriverOptions {
@@ -41,7 +42,7 @@ func WithRequestBody(body map[string]any) HttpRequestDriverOption {
 	}
 }
 
-func WithRequestParams(params map[string]string) HttpRequestDriverOption {
+func WithRequestParams(params map[string]any) HttpRequestDriverOption {
 	return func(o *HttpRequestDriverOptions) {
 		o.Params = params
 	}
@@ -91,7 +92,7 @@ func executeMethod[T any](d *HttpRequestDriver, method string, opts ...HttpReque
 	return Execute[T](&clone, opts...)
 }
 
-func (d *HttpRequestDriver) WithParams(params map[string]string) *HttpRequestDriver {
+func (d *HttpRequestDriver) WithParams(params map[string]any) *HttpRequestDriver {
 	d.Params = params
 	return d
 }
@@ -157,18 +158,39 @@ func (d *HttpRequestDriver) buildClientConfig(opts ...HttpRequestDriverOption) (
 	}
 
 	headers := mergeStringMaps(d.Headers, o.Headers)
-	params := mergeStringMaps(d.Params, o.Params)
+	params := mergeAnyMaps(d.Params, o.Params)
 	body := mergeAnyMaps(d.Body, o.Body)
 
 	cfg := client.Config{
 		Ctx:    ctx,
 		Header: headers,
-		Param:  params,
+		Param:  paramsToStringMap(params),
 	}
 	if len(body) > 0 {
 		cfg.Body = body
 	}
 	return cfg, nil
+}
+
+func paramsToStringMap(params map[string]any) map[string]string {
+	if len(params) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(params))
+	for k, v := range params {
+		if v == nil {
+			continue
+		}
+		switch val := v.(type) {
+		case string:
+			out[k] = val
+		case fmt.Stringer:
+			out[k] = val.String()
+		default:
+			out[k] = fmt.Sprint(val)
+		}
+	}
+	return out
 }
 
 func mergeStringMaps(base, override map[string]string) map[string]string {

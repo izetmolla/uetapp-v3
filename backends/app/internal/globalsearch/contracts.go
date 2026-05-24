@@ -44,7 +44,7 @@ func (c *Controller) getStudentsToSearch(ctx context.Context, keyword string, _ 
 	}
 
 	if req.Params == nil {
-		req.Params = map[string]string{}
+		req.Params = map[string]any{}
 	}
 	req.Params["action"] = "getUsers"
 	if kw := strings.TrimSpace(keyword); kw != "" {

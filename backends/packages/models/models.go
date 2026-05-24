@@ -41,15 +41,16 @@ func Models() []any {
 
 		// &Faculty{},
 		// &FacultyStudyLevel{},
-		&StudyLevel{},
-		&Faculty{},
-		&FacultyStudyLevel{},
-		&StudyProgram{},
-		&FacultyStudyProgram{},
-		&StudyProfile{},
-		&StudyProgramProfile{},
-		&StudyProgramLevels{},
-		&StudyProgramLanguage{},
+		// &StudyLevel{},
+		// &Faculty{},
+		// &FacultyStudyLevel{},
+		// &StudyProgram{},
+		// &FacultyStudyProgram{},
+		// &StudyProfile{},
+		// &StudyProgramProfile{},
+		// &StudyProgramLevels{},
+		// &StudyProgramLanguage{},
+		// &StudentStatus{},
 	}
 
 	if len(models) > 0 {

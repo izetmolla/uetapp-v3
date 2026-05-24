@@ -68,7 +68,7 @@ func fetchUniversityOrgUnits(ctx context.Context, db *gorm.DB, resourceID int64)
 			"Content-Type":  "application/json",
 			"Authorization": "Bearer " + resource.Config["authorization"].(string),
 		},
-		Params: map[string]string{
+		Params: map[string]any{
 			"action": "getOrgUnits",
 		},
 	}))

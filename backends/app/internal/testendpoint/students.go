@@ -4,29 +4,10 @@ import (
 	"github.com/flowtrove/packages/drivers/httprequest"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
-	"github.com/uetedu/app/config"
 	"gorm.io/gorm"
 )
 
-type Controller struct {
-	app *config.AppClients
-}
-
-func NewController(app *config.AppClients) *Controller {
-	return &Controller{
-		app: app,
-	}
-}
-
-func SetupRoutes(api fiber.Router, appClients *config.AppClients) {
-	controller := NewController(appClients)
-	// api.Get("/test/httprequest", controller.TestEndpoint)
-	api.Get("/test/university-unit", controller.GetUniversityUnit)
-	api.Get("/test/students", controller.GetStudentsListAPI)
-	api.Get("/test/units", controller.GetUnitsListAPI)
-}
-
-func (cc *Controller) TestEndpoint(c fiber.Ctx) error {
+func (cc *Controller) GetStudentsListAPI(c fiber.Ctx) error {
 	reqCtx := c.Context()
 	db := cc.app.Postgres()
 	r := cc.app.Render()
@@ -46,21 +27,17 @@ func (cc *Controller) TestEndpoint(c fiber.Ctx) error {
 			"Content-Type":  "application/json",
 			"Authorization": "Bearer " + resource.Config["authorization"].(string),
 		},
-		// Body: map[string]any{
-		// 	"action": "getStudent",
-		// },
 		Params: map[string]any{
-			"action":  "getUsers",
+			"action":  "getStudents",
 			"keyword": "izet molla",
+			"page":    1,
+			"perPage": 10,
 		},
 	}))
 	if err != nil {
 		return cc.app.Api(c, r.WithError(err))
 	}
-
-	return c.JSON(fiber.Map{
-		"status_code": res.StatusCode,
-		"status":      res.Status,
-		"response":    res.Body,
-	})
+	return cc.app.Api(c, cc.app.Render().WithData(fiber.Map{
+		"content": res.Body,
+	}))
 }
