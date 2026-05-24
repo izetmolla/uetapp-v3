@@ -8,6 +8,7 @@ import {
 } from "../api";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import { getActionsColumn, getColumnOverrides } from "./table-columns";
+import { ImportStudentsActions } from "./import-actions";
 
 
 
@@ -57,6 +58,7 @@ const ImportStudentsDatatable: FC = () => {
                         rowIdKey="sp_id"
                         enableRowSelection
                         disableParamPersistence={true}
+                        actionBar={(table) => <ImportStudentsActions table={table} />}
                     />
                 </div>
             </ContentLoader>
