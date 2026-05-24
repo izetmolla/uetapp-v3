@@ -18,11 +18,18 @@ type StudentScanFolder struct {
 	StudyLevelID   int64        `json:"study_level_id" gorm:"type:bigint;not null;index"`
 	StudyLevel     StudyLevel   `json:"study_level" gorm:"foreignKey:StudyLevelID;references:ID"`
 
-	Docs []StudentScanFolderDoc `json:"docs" gorm:"foreignKey:StudentScanFolderID;references:ID"`
+	Docs []StudentScanFolderDoc `json:"docs" gorm:"foreignKey:StudentScanFolderID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+}
+
+func (b *StudentScanFolder) BeforeDelete(tx *gorm.DB) (err error) {
+	if b.ID == 0 {
+		return nil
+	}
+	return tx.Where("student_scan_folder_id = ?", b.ID).Delete(&StudentScanFolderDoc{}).Error
 }
 
 func (b *StudentScanFolder) BeforeCreate(_ *gorm.DB) (err error) {

@@ -15,16 +15,16 @@ var ErrJSONBArrayMarshal = errors.New("jsonb array marshal")
 func Models() []any {
 	models := []any{
 
-		// &Student{},
+		&Student{},
 		// &Employe{},
 		// &AcademicYear{},
 		// &Department{},
 		// &Resource{},
 		// &Role{},
 
-		// &StudentScanFolder{},
-		// &StudentScanFolderDoc{},
-		// &StudentScanFolderDocFile{},
+		&StudentScanFolder{},
+		&StudentScanFolderDoc{},
+		&StudentScanFolderDocFile{},
 
 		// &OrgUnit{},
 		// &Theme{},

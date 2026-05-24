@@ -11,7 +11,7 @@ type StudentScanFolderDocFile struct {
 	ID int64 `json:"id" gorm:"primaryKey;autoIncrement"`
 
 	StudentScanFolderDocID int64                `json:"student_scan_folder_doc_id" gorm:"type:bigint;not null;index"`
-	StudentScanFolderDoc   StudentScanFolderDoc `json:"student_scan_folder_doc" gorm:"foreignKey:StudentScanFolderDocID;references:ID"`
+	StudentScanFolderDoc   StudentScanFolderDoc `json:"student_scan_folder_doc" gorm:"foreignKey:StudentScanFolderDocID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
