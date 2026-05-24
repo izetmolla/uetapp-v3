@@ -19,16 +19,14 @@ import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { getStudents, type GetStudentsResponse } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
-import AddStudentDialog from "./components/add-student-dialog";
 import { useStudentListStore } from "./store";
+import ImportUsersDialog from "./components/import-users-dialog";
 
 const PER_PAGE = 10;
 
 const StudentsPage = () => {
     const { year = "", faculty_slug = "", level = "", folder_id } = useParams();
-    const setIsAddStudentDialogOpen = useStudentListStore((s) => s.setIsAddStudentDialogOpen);
-
-
+    const setIsImportUsersDialogOpen = useStudentListStore((s) => s.setIsImportUsersDialogOpen);
 
     const [q, setQ] = useState("");
     const [page, setPage] = useState(1);
@@ -97,7 +95,7 @@ const StudentsPage = () => {
                                 type="button"
                                 size="sm"
                                 className="gap-1"
-                                onClick={() => setIsAddStudentDialogOpen(true)}
+                                onClick={() => setIsImportUsersDialogOpen(true)}
                             >
                                 <Plus className="size-4" aria-hidden />
                                 Add
@@ -188,7 +186,7 @@ const StudentsPage = () => {
                     </Pagination>
                 </div>
             </ContentLoader>
-            <AddStudentDialog />
+            <ImportUsersDialog />
         </PageShell>
     );
 }
