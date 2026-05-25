@@ -7,6 +7,7 @@ import (
 	"github.com/uetedu/app/config"
 	"github.com/uetedu/app/internal/contracts/scandocuments"
 	"github.com/uetedu/app/internal/contracts/students"
+	"github.com/uetedu/app/internal/contracts/syncstudent"
 )
 
 type Controller struct {
@@ -22,6 +23,7 @@ func NewController(app *config.AppClients) *Controller {
 func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api := apiGroup.Group("/contracts", controller.ContractsMiddlewareApi)
+	syncstudent.SetupApiRoutes(api, appClients)
 	scandocuments.SetupApiRoutes(api, appClients)
 	students.SetupApiRoutes(api, appClients)
 	// suplements.SetupApiRoutes(api, appClients)

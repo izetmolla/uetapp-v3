@@ -16,7 +16,7 @@ const (
 // Server specific settings.
 type Faculty struct {
 	ID          int64         `json:"id" gorm:"primaryKey;autoIncrement"`
-	Name        string        `json:"name" gorm:"size:255;"`
+	Name        string        `json:"name" gorm:"size:255;unique;"`
 	Slug        string        `json:"slug" gorm:"size:255;default:null;"`
 	Description string        `json:"description" gorm:"type:text;"`
 	Image       string        `json:"image" gorm:"size:255;"`

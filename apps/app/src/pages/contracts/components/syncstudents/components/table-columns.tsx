@@ -10,6 +10,9 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
 import type { Student } from "../api";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
+import { generateAvatarFallback } from "@workspace/ui/lib/utils";
+import LongText from "@workspace/ui/components/long-text";
 
 function statusVariant(status: string | undefined): "default" | "secondary" | "outline" {
     if (status === "active" || !status) return "default";
@@ -21,6 +24,7 @@ export function getActionsColumn(): ColumnDef<Student>[] {
     return [
         {
             id: "actions",
+            meta: { className: "relative bg-background" },
             cell: function Cell({ row }) {
                 const status = row.original.status;
                 const canEnable = status === "inactive";
@@ -37,7 +41,7 @@ export function getActionsColumn(): ColumnDef<Student>[] {
                                 <Ellipsis className="size-4" aria-hidden="true" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuContent align="end" className="z-[100] w-48">
                             <DropdownMenuItem
                                 onSelect={() => { }}>
                                 <UserCog className="size-4 opacity-70" aria-hidden />
@@ -67,17 +71,29 @@ export function getActionsColumn(): ColumnDef<Student>[] {
 export function getColumnOverrides(): Array<{ id: string } & Partial<ColumnDef<Student>>> {
     return [
         {
-            id: "full_name",
-            cell: ({ row }) => (
-                <div className="flex flex-col gap-0.5">
-                    <span className="font-medium">{row.getValue("full_name") ?? "—"}</span>
-                    {row.original.email ? (
-                        <span className="text-muted-foreground line-clamp-1 text-xs">
-                            {row.original.email}
-                        </span>
-                    ) : null}
-                </div>
-            ),
+            id: "fullname",
+            cell: ({ row }) => {
+                const year = row.original?.reg_year ? `(${row.original?.reg_year}-${Number(row.original?.reg_year) + 1})` : "-";
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            <Avatar>
+                                <AvatarImage src={"#"} alt={row.getValue("fullname") ?? "-"} />
+                                <AvatarFallback>{generateAvatarFallback(row.getValue("fullname") ?? "-")}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <div className="flex items-center gap-1">
+                                    <LongText className='max-w-50'>
+                                        <strong>{row.getValue("fullname") || "-"}</strong>
+                                    </LongText>
+                                    {year}
+                                </div>
+                                <small className="font-semibold">{row.original?.program ?? "-"}</small> - <small>{row.original?.faculty ?? "-"}</small>
+                            </div>
+                        </div>
+                    </div>
+                )
+            },
         },
         {
             id: "status",

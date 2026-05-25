@@ -8,6 +8,7 @@ import (
 
 // Server specific settings.
 type StudentStudyProgram struct {
+	ID             int64        `json:"id" gorm:"primaryKey;autoIncrement"`
 	StudentID      int64        `json:"student_id" gorm:"type:bigint;not null;uniqueIndex:idx_student_study_program"`
 	Student        Student      `json:"student" gorm:"foreignKey:StudentID;references:ID"`
 	StudyProgramID int64        `json:"study_program_id" gorm:"type:bigint;not null;uniqueIndex:idx_student_study_program"`

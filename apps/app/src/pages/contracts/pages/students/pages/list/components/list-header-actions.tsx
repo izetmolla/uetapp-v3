@@ -9,7 +9,7 @@ import TableConfigCustomizator from "./table-config-customizator";
 
 const StudentsListHeaderActions: FC = () => {
     const openCreateStudent = useStudentsListStore((s) => s.openCreateStudent);
-    const openImportUsers = useStudentsListStore((s) => s.openImportUsers);
+    const openSyncStudents = useStudentsListStore((s) => s.openSyncStudents);
     const [search, setSearch] = useQueryState(
         "full_name",
         parseAsString.withDefault("").withOptions({ throttleMs: 300 }),
@@ -41,9 +41,9 @@ const StudentsListHeaderActions: FC = () => {
                     <UserPlus className="size-4" aria-hidden />
                     Create
                 </Button>
-                <Button type="button" variant="default" onClick={openImportUsers}>
+                <Button type="button" variant="default" onClick={openSyncStudents}>
                     <UsersIcon className="size-4" aria-hidden />
-                    Import
+                    Sync
                 </Button>
                 <TableConfigCustomizator />
             </div>

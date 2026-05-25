@@ -12,13 +12,15 @@ import StudentsListHeaderActions from "./components/list-header-actions";
 import QuickEditStudent from "./components/quick-edit-student";
 import DisableStudentDialog from "./components/disable-student-dialog";
 import EnableStudentDialog from "./components/enable-student-dialog";
-import ImportUsersDialog from "./components/import-users-dialog";
+import SyncStudentsDialog from "@/pages/contracts/components/syncstudents";
+import useStudentsListStore from "./store";
 
 const breadcrumb: BreadcrumbItem[] = [
     { label: "Contracts", to: "/contracts" },
 ];
 
 const StudentsListPage = () => {
+    const { isSyncStudentsDialogOpen, setSyncStudentsDialogOpen } = useStudentsListStore();
     const { columns, isLoading: columnsLoading, error, columnVisibility } = useBackendColumns<Student>({
         fetchColumns: async () => getStudentsColumns(),
         queryKey: [STUDENTS_FETCH_PERSISTANT, "columns"],
@@ -62,7 +64,10 @@ const StudentsListPage = () => {
             <QuickEditStudent />
             <DisableStudentDialog />
             <EnableStudentDialog />
-            <ImportUsersDialog />
+            <SyncStudentsDialog
+                isOpen={isSyncStudentsDialogOpen}
+                onClose={() => setSyncStudentsDialogOpen(false)}
+            />
         </ContentLoader>
     );
 };
