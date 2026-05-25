@@ -20,6 +20,8 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	device.SetupApiRoutes(api, appClients)
 	api.Get("/list", controller.GetListDataApi)
 	api.Post("/", controller.CreateFolder)
+	api.Get("/:id/download", controller.DownloadFolder)
+	api.Delete("/:id", controller.DeleteFolder)
 }
 func SetupWebRoutes(app fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)

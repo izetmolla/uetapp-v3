@@ -33,6 +33,29 @@ export function createFolder(params: CreateFolderParams) {
     });
 }
 
+export function saveFolder(data: Record<string, any>) {
+    return ApiService.fetchData<CreateFolderResponse>({
+        url: withAPI("/contracts/scandocuments/folders/save"),
+        method: "post",
+        data: data,
+    });
+}
+
+export const saveFolderSchema = z.object({
+    name: z
+        .string()
+        .trim()
+        .min(1, { message: "Name is required" })
+        .max(255, { message: "Name must be at most 255 characters" }),
+    id: z.string().optional(),
+    year: z.string().optional(),
+    level_slug: z.string().optional(),
+    faculty_slug: z.string().optional(),
+});
+
+export type SaveFolderSchema = z.infer<typeof saveFolderSchema>;
+
+
 
 export const createFolderSchema = z.object({
     name: z
@@ -40,6 +63,10 @@ export const createFolderSchema = z.object({
         .trim()
         .min(1, { message: "Name is required" })
         .max(255, { message: "Name must be at most 255 characters" }),
+    id: z.string().optional(),
+    year: z.string().optional(),
+    level_slug: z.string().optional(),
+    faculty_slug: z.string().optional(),
 });
 
 export type CreateFolderSchema = z.infer<typeof createFolderSchema>;

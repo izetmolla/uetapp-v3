@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Folder as FolderIcon, FolderOpen, Users, ScanLine, Clock, ArrowRight } from "lucide-react";
+import { Folder as FolderIcon, FolderOpen, Users, ScanLine, Clock } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Progress } from "@workspace/ui/components/progress";
@@ -20,14 +20,18 @@ import { useQuery } from "@tanstack/react-query";
 import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { getFolders, type Folder, type GetFoldersResponse } from "./api";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
-import CreateNewFolderDialog from "./components/create-new-folder-dialog";
+import SaveFolderDialog from "./components/save-folder-dialog";
+import DeleteFolderDialog from "./components/delete-folder-dialog";
+import DownloadFolderDialog from "./components/download-folder-dialog";
+import FolderAction from "./components/folder-action";
 import useFoldersStore from "./store";
 
 const PER_PAGE = 10;
 
 const FoldersPage = () => {
   const { year = "", faculty_slug = "", level = "" } = useParams();
-  const setIsCreateFolderDialogOpen = useFoldersStore((s) => s.setIsCreateFolderDialogOpen);
+  const setFolder = useFoldersStore((s) => s.setFolder);
+  const setIsSaveFolderDialogOpen = useFoldersStore((s) => s.setIsSaveFolderDialogOpen);
   const [list, setList] = useState(true);
   const [page, setPage] = useState(1);
 
@@ -73,7 +77,13 @@ const FoldersPage = () => {
         right={
           <div className="flex items-center gap-3">
             <ViewToggle list={list} onChange={setList} id="folders-view" />
-            <Button type="button" onClick={() => setIsCreateFolderDialogOpen(true)}>
+            <Button
+              type="button"
+              onClick={() => {
+                setFolder(null);
+                setIsSaveFolderDialogOpen(true);
+              }}
+            >
               <FolderIcon className="mr-2 size-4" aria-hidden />
               New folder
             </Button>
@@ -126,7 +136,9 @@ const FoldersPage = () => {
           label="folders"
         />
       </ContentLoader>
-      <CreateNewFolderDialog />
+      <SaveFolderDialog />
+      <DeleteFolderDialog />
+      <DownloadFolderDialog />
     </PageShell>
   );
 };
@@ -208,11 +220,7 @@ function FoldersListView({ folders, start }: { folders: Folder[]; start: number 
                 {formatFolderDate(f.last_modified)}
               </TableCell>
               <TableCell className="text-right">
-                <Button asChild size="sm" variant="ghost">
-                  <Link to={`${f.id}`}>
-                    View <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                  </Link>
-                </Button>
+                <FolderAction folder={f} />
               </TableCell>
             </TableRow>
           ))}

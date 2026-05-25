@@ -18,7 +18,8 @@ type StudentScanFolder struct {
 	StudyLevelID   int64        `json:"study_level_id" gorm:"type:bigint;not null;index"`
 	StudyLevel     StudyLevel   `json:"study_level" gorm:"foreignKey:StudyLevelID;references:ID"`
 
-	Docs []StudentScanFolderDoc `json:"docs" gorm:"foreignKey:StudentScanFolderID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Docs                 []StudentScanFolderDoc `json:"docs" gorm:"foreignKey:StudentScanFolderID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	StudentToScanFolders []StudentToScanFolder  `json:"student_to_scan_folders" gorm:"foreignKey:StudentScanFolderID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

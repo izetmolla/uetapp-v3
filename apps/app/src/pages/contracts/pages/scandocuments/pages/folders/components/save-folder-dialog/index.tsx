@@ -29,64 +29,77 @@ import {
     queryClient,
 } from "@workspace/flowtrove/lib/network";
 import useFoldersStore from "../../store";
-import { createFolder, createFolderSchema, type CreateFolderSchema } from "./api";
+import { saveFolder, saveFolderSchema, type SaveFolderSchema } from "./api";
 
-const FORM_ID = "create-folder-form";
+const FORM_ID = "save-folder-form";
 
-const defaultValues: CreateFolderSchema = {
-    name: "",
-};
 
-const CreateNewFolderDialog: FC = () => {
+
+
+
+interface SaveFolderDialogProps { }
+const SaveFolderDialog: FC<SaveFolderDialogProps> = () => {
     const { year = "", faculty_slug = "", level = "" } = useParams();
-    const { isCreateFolderDialogOpen, setIsCreateFolderDialogOpen } = useFoldersStore();
+    const { folder, setFolder, isSaveFolderDialogOpen, setIsSaveFolderDialogOpen } = useFoldersStore();
 
     const listQueryKey = ["folders", year, faculty_slug, level] as const;
 
-    const form = useForm<CreateFolderSchema>({
-        resolver: zodResolver(createFolderSchema),
-        defaultValues,
+    const form = useForm<SaveFolderSchema>({
+        resolver: zodResolver(saveFolderSchema),
+        defaultValues: {
+            id: folder?.id?.toString(),
+            name: folder?.name ?? "",
+            year,
+            faculty_slug,
+            level_slug: level,
+        },
     });
 
     useEffect(() => {
-        if (isCreateFolderDialogOpen) {
-            form.reset(defaultValues);
-        }
-    }, [form, isCreateFolderDialogOpen]);
+        if (!isSaveFolderDialogOpen) return;
+        form.reset({
+            id: folder?.id != null ? String(folder.id) : "",
+            name: folder?.name ?? "",
+            year,
+            faculty_slug,
+            level_slug: level,
+        });
+    }, [form, isSaveFolderDialogOpen, folder, year, faculty_slug, level]);
 
     const onClose = useCallback(() => {
-        form.reset(defaultValues);
-        setIsCreateFolderDialogOpen(false);
-    }, [form, setIsCreateFolderDialogOpen]);
+        setFolder(null);
+        form.reset({
+            name: "",
+            year: "",
+            faculty_slug: "",
+            level_slug: "",
+            id: "",
+        });
+        setIsSaveFolderDialogOpen(false);
+    }, [form, setIsSaveFolderDialogOpen, setFolder]);
 
     const mutation = useMutation({
-        mutationFn: (data: CreateFolderSchema) =>
-            createFolder({
-                year,
-                faculty_slug,
-                level_slug: level,
-                name: data.name,
-            }),
+        mutationFn: saveFolder,
         onSuccess: (res) => {
             if (isApiErrorBody(res)) {
-                toast.error(getApiErrorMessageFromBody(res, "Failed to create folder"), {
+                toast.error(getApiErrorMessageFromBody(res, "Failed to save folder"), {
                     richColors: true,
                 });
                 return;
             }
-            toast.success(res.message ?? "Folder created successfully", { richColors: true });
+            toast.success(res.message ?? "Folder saved successfully", { richColors: true });
             void queryClient.invalidateQueries({ queryKey: listQueryKey });
             onClose();
         },
         onError: (error: { response?: { data?: { message?: string } }; message?: string }) => {
-            toast.error(error?.response?.data?.message ?? error?.message ?? "Failed to create folder", {
+            toast.error(error?.response?.data?.message ?? error?.message ?? "Failed to save folder", {
                 richColors: true,
             });
         },
     });
 
     return (
-        <Dialog open={isCreateFolderDialogOpen} onOpenChange={(open) => !open && onClose()}>
+        <Dialog open={isSaveFolderDialogOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="max-w-md gap-0 overflow-hidden rounded-xl p-0">
                 <Form {...form}>
                     <form
@@ -98,9 +111,9 @@ const CreateNewFolderDialog: FC = () => {
                                 <FolderPlus className="size-5" aria-hidden />
                             </div>
                             <DialogHeader className="text-center">
-                                <DialogTitle>Create folder</DialogTitle>
+                                <DialogTitle>{folder?.id ? "Edit folder" : "Create new folder"}</DialogTitle>
                                 <DialogDescription>
-                                    Add a new scan folder for this study level.
+                                    {folder?.id ? "Save the folder details." : "Add a new scan folder for this study level."}
                                 </DialogDescription>
                             </DialogHeader>
                         </div>
@@ -151,4 +164,4 @@ const CreateNewFolderDialog: FC = () => {
     );
 };
 
-export default CreateNewFolderDialog;
+export default SaveFolderDialog;
