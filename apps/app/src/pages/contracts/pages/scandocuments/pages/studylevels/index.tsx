@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Users, Clock, ArrowRight } from "lucide-react";
+import { lazy, Suspense, useMemo, useState } from "react";
+import { Users, Clock, ArrowRight, FolderIcon } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -20,8 +20,13 @@ import { useQuery } from "@tanstack/react-query";
 import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { getStudyLevels, type GetStudyLevelsResponse, type StudyLevel } from "./api";
 import Icon from "@workspace/ui/components/icon";
+import useStudyLevelGroupStore from "./store";
+const EditStudyLevelGroupDialog = lazy(
+  () => import("./components/edit-academic-group"),
+);
 
 const StudyLevelsPage = () => {
+  const { setStudyLevelGroup, setIsEditStudyLevelGroupDialogOpen } = useStudyLevelGroupStore();
   const { year = "", faculty_slug = "" } = useParams();
   const [list, setList] = useState(true);
 
@@ -48,6 +53,9 @@ const StudyLevelsPage = () => {
   const basePath = "/contracts/scandocuments";
   const yearLabel = year.replace("-", " – ");
 
+
+  const errorMessage = withError(error, data);
+
   return (
     <PageShell>
       <Crumbs
@@ -60,12 +68,27 @@ const StudyLevelsPage = () => {
       <PageHeader
         title="Study Levels"
         subtitle={data?.faculty?.name ?? ""}
-        right={<ViewToggle list={list} onChange={setList} id="study-levels-view" />}
+        right={
+          <div className="flex items-center gap-3">
+            <ViewToggle list={list} onChange={setList} id="study-levels-view" />
+            <Button
+              disabled={errorMessage != null}
+              type="button"
+              onClick={() => {
+                setStudyLevelGroup(null);
+                setIsEditStudyLevelGroupDialogOpen(true);
+              }}
+            >
+              <FolderIcon className="mr-2 size-4" aria-hidden />
+              New Group
+            </Button>
+          </div>
+        }
       />
 
       <ContentLoader
         isLoading={isLoading}
-        error={withError(error, data)}
+        error={errorMessage}
         forMeta
         customLoader={list ? <TableSkeleton /> : <GridSkeleton count={5} />}
       >
@@ -74,6 +97,9 @@ const StudyLevelsPage = () => {
         ) : (
           <GridView grouped={grouped} />
         )}
+        <Suspense fallback={null}>
+          <EditStudyLevelGroupDialog studyLevels={studyLevels} />
+        </Suspense>
       </ContentLoader>
     </PageShell>
   );

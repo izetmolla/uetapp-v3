@@ -40,6 +40,8 @@ func Models() []any {
 		// &StudentStatus{},
 		// &Faculty{},
 		// &StudyLevel{},
+		// &StudentScanLevelGroup{},
+		// &StudentScanLevelGroupLevels{},
 		// &StudyProfile{},
 		// &StudyProgram{},
 		// &Student{},

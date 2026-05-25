@@ -29,9 +29,10 @@ type Faculty struct {
 	Accent     string `json:"accent" gorm:"size:255;"`
 	Icon       string `json:"icon" gorm:"size:255;"`
 
-	Departments   []Department          `json:"departments" gorm:"foreignKey:FacultyID;references:ID"`
-	StudyLevels   []FacultyStudyLevel   `json:"study_levels" gorm:"foreignKey:FacultyID;references:ID"`
-	StudyPrograms []FacultyStudyProgram `json:"study_programs" gorm:"foreignKey:FacultyID;references:ID"`
+	Departments            []Department            `json:"departments" gorm:"foreignKey:FacultyID;references:ID"`
+	StudyLevels            []FacultyStudyLevel     `json:"study_levels" gorm:"foreignKey:FacultyID;references:ID"`
+	StudyPrograms          []FacultyStudyProgram   `json:"study_programs" gorm:"foreignKey:FacultyID;references:ID"`
+	StudentScanLevelGroups []StudentScanLevelGroup `json:"student_scan_level_groups" gorm:"foreignKey:FacultyID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

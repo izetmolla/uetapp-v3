@@ -3,6 +3,7 @@ import type { Faculty } from "../../faculties/api";
 
 
 export type StudyLevel = {
+    id: number;
     slug: string;
     name: string;
     description: string;
@@ -13,10 +14,16 @@ export type StudyLevel = {
     accent: string;
 };
 
+export type StudyLevelGroup = {
+    id: number;
+    name: string;
+    study_levels: StudyLevel[];
+};
 
 export interface GetStudyLevelsResponse {
     study_levels: StudyLevel[];
     faculty: Faculty;
+    study_level_groups: StudyLevelGroup[];
 }
 
 export async function getStudyLevels(params: { year: string, faculty_slug: string }) {

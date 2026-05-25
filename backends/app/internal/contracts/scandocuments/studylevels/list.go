@@ -11,7 +11,14 @@ import (
 func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 	ctxPtr := ctx.Context()
 	r := c.app.Render()
-	facultySlug := ctx.Query("faculty_slug")
+	academicYear, err := c.getAcademicYear(ctxPtr, ctx.Query("year"))
+	if err != nil {
+		return c.app.Api(ctx,
+			r.WithError(err),
+			r.WithStatus(fiber.StatusInternalServerError),
+			r.WithCode("INTERNAL_SERVER_ERROR"),
+		)
+	}
 	study_levels, err := c.getStudyLevels(ctxPtr)
 	if err != nil {
 		return c.app.Api(ctx,
@@ -20,7 +27,7 @@ func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 			r.WithCode("INTERNAL_SERVER_ERROR"),
 		)
 	}
-	faculty, err := c.getFacultyBySlug(ctxPtr, facultySlug)
+	faculty, err := c.getFacultyBySlug(ctxPtr, ctx.Query("faculty_slug"))
 	if err != nil {
 		return c.app.Api(ctx,
 			r.WithError(err),
@@ -29,26 +36,44 @@ func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 		)
 	}
 
+	study_level_groups, err := c.getStudentScanLevelGroups(ctxPtr, faculty.ID, academicYear.ID)
+	if err != nil {
+		return c.app.Api(ctx,
+			r.WithError(err),
+			r.WithStatus(fiber.StatusInternalServerError),
+			r.WithCode("INTERNAL_SERVER_ERROR"),
+		)
+	}
 	return c.app.Api(ctx, r.WithData(fiber.Map{
-		"study_levels": study_levels,
-		"faculty":      faculty,
+		"study_levels":       study_levels,
+		"faculty":            &faculty,
+		"academic_year":      &academicYear,
+		"study_level_groups": study_level_groups,
 	}))
 }
 func (c *Controller) GetListDataView(ctx fiber.Ctx) error {
 	ctxPtr := ctx.Context()
 	r := c.app.Render()
-	facultySlug := ctx.Params("faculty_slug")
 	study_levels, err := c.getStudyLevels(ctxPtr)
 	if err != nil {
 		return c.app.View(ctx, r.WithError(err))
 	}
-	faculty, err := c.getFacultyBySlug(ctxPtr, facultySlug)
+	faculty, err := c.getFacultyBySlug(ctxPtr, ctx.Params("faculty_slug"))
+	if err != nil {
+		return c.app.View(ctx, r.WithError(err))
+	}
+	academicYear, err := c.getAcademicYear(ctxPtr, ctx.Params("year"))
+	if err != nil {
+		return c.app.View(ctx, r.WithError(err))
+	}
+	study_level_groups, err := c.getStudentScanLevelGroups(ctxPtr, faculty.ID, academicYear.ID)
 	if err != nil {
 		return c.app.View(ctx, r.WithError(err))
 	}
 	return c.app.View(ctx, r.WithData(fiber.Map{
-		"study_levels": study_levels,
-		"faculty":      &faculty,
+		"study_levels":       study_levels,
+		"faculty":            &faculty,
+		"study_level_groups": study_level_groups,
 	}))
 }
 
@@ -86,4 +111,43 @@ func (c *Controller) getFacultyBySlug(ctx context.Context, facultySlug string) (
 		return nil, err
 	}
 	return &faculty, nil
+}
+
+func (c *Controller) getAcademicYear(ctx context.Context, year string) (*models.AcademicYear, error) {
+	db := c.app.Postgres()
+	academicYear, err := gorm.G[models.AcademicYear](db).
+		Select("id", "year").
+		Where("year = ?", year).
+		First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &academicYear, nil
+}
+func (c *Controller) getStudentScanLevelGroups(ctx context.Context, facultyID, academicYearID int64) ([]map[string]any, error) {
+	res := make([]map[string]any, 0)
+	db := c.app.Postgres()
+	studentScanLevelGroups, err := gorm.G[models.StudentScanLevelGroup](db).
+		Where(&models.StudentScanLevelGroup{
+			FacultyID:      facultyID,
+			AcademicYearID: academicYearID,
+		}).
+		Preload("StudentScanLevelGroupLevels", func(pb gorm.PreloadBuilder) error {
+			pb.Select("id", "study_level_id", "study_level")
+			return nil
+		}).
+		Preload("StudentScanLevelGroupLevels.StudyLevel", func(pb gorm.PreloadBuilder) error {
+			pb.Select("id", "name", "slug", "description", "duration", "group", "icon", "accent")
+			return nil
+		}).
+		Find(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, studentScanLevelGroup := range studentScanLevelGroups {
+		res = append(res, map[string]any{
+			"id": int(studentScanLevelGroup.ID),
+		})
+	}
+	return res, nil
 }

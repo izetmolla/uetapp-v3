@@ -17,6 +17,7 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api := apiGroup.Group("/studylevels")
 	api.Get("/list", controller.GetListDataApi)
+	api.Post("/create-group", controller.CreateStudentScanLevelGroupApi)
 }
 func SetupWebRoutes(app fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)

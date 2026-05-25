@@ -19,11 +19,12 @@ type AcademicYear struct {
 	Year   string             `json:"year" gorm:"size:10;"`
 	Status AcademicYearStatus `json:"status" gorm:"default:active;"`
 
-	Folders    int64  `json:"folders" gorm:"-"`
-	Students   int64  `json:"students" gorm:"-"`
-	Faculties  int64  `json:"faculties" gorm:"-"`
-	Completion int64  `json:"completion" gorm:"-"`
-	Accent     string `json:"accent" gorm:"size:255;"`
+	Folders                int64                   `json:"folders" gorm:"-"`
+	Students               int64                   `json:"students" gorm:"-"`
+	Faculties              int64                   `json:"faculties" gorm:"-"`
+	Completion             int64                   `json:"completion" gorm:"-"`
+	Accent                 string                  `json:"accent" gorm:"size:255;"`
+	StudentScanLevelGroups []StudentScanLevelGroup `json:"student_scan_level_groups" gorm:"foreignKey:AcademicYearID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

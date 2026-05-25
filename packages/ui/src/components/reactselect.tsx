@@ -165,7 +165,7 @@ export function reactSelectClassNames<
                 "group/rs-menulist max-h-64 overflow-y-auto p-1",
                 wrapOptionText && "max-h-72",
             ),
-        menuPortal: () => "z-50 pointer-events-auto",
+        menuPortal: () => "z-[60] pointer-events-auto",
         group: () => "py-1",
         // Mirrors `SelectLabel`.
         groupHeading: () => "px-1.5 py-1 text-xs text-muted-foreground",
@@ -542,11 +542,22 @@ export function ReactSelect<
         options,
         isMulti,
         getOptionValue,
+        menuPortalTarget,
+        menuPosition,
         ...rest
     } = props as ReactSelectComponentProps<Option, IsMulti, Group> & {
         onValueChange?: (value: unknown) => void
         onChange?: ReactSelectProps<Option, IsMulti, Group>["onChange"]
     }
+
+    const resolvedMenuPortalTarget =
+        menuPortalTarget !== undefined
+            ? menuPortalTarget
+            : typeof document !== "undefined"
+              ? document.body
+              : null
+    const resolvedMenuPosition =
+        menuPosition ?? (resolvedMenuPortalTarget ? "fixed" : undefined)
 
     const resolvedValue = resolveValue<Option, Group>(
         providedValue,
@@ -595,6 +606,8 @@ export function ReactSelect<
             getOptionValue={getOptionValue}
             value={resolvedValue}
             onChange={resolvedOnChange}
+            menuPortalTarget={resolvedMenuPortalTarget}
+            menuPosition={resolvedMenuPosition}
             {...rest}
         />
     )

@@ -20,6 +20,7 @@ export default defineConfig(async ({ command }) => {
     // Source workspace packages: skip esbuild pre-bundle so Vite transforms TS/TSX and HMR stays correct.
     optimizeDeps: {
       exclude: ["@workspace/flowtrove", "@workspace/ui"],
+      include: ["react-select"],
     },
     server: {
       port: 4000,
