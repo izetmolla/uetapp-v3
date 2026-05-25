@@ -30,7 +30,10 @@ func (b *StudentScanFolder) BeforeDelete(tx *gorm.DB) (err error) {
 	if b.ID == 0 {
 		return nil
 	}
-	return tx.Where("student_scan_folder_id = ?", b.ID).Delete(&StudentScanFolderDoc{}).Error
+	if err := tx.Where("student_scan_folder_id = ?", b.ID).Delete(&StudentScanFolderDoc{}).Error; err != nil {
+		return err
+	}
+	return tx.Where("student_scan_folder_id = ?", b.ID).Delete(&StudentToScanFolder{}).Error
 }
 
 func (b *StudentScanFolder) BeforeCreate(_ *gorm.DB) (err error) {

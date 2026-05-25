@@ -19,7 +19,7 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	api := apiGroup.Group("/folders")
 	device.SetupApiRoutes(api, appClients)
 	api.Get("/list", controller.GetListDataApi)
-	api.Post("/", controller.CreateFolder)
+	api.Post("/save", controller.SaveFolder)
 	api.Get("/:id/download", controller.DownloadFolder)
 	api.Delete("/:id", controller.DeleteFolder)
 }

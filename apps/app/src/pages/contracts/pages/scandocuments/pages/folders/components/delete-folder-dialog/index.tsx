@@ -19,7 +19,7 @@ import {
     AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
 import useFoldersStore from "../../store";
-import { deleteFolder } from "../../api";
+import { deleteFolder } from "./api";
 
 const DeleteFolderDialog: FC = () => {
     const { year = "", faculty_slug = "", level = "" } = useParams();
@@ -69,8 +69,10 @@ const DeleteFolderDialog: FC = () => {
                     <div className="mx-auto flex size-11 items-center justify-center rounded-full border border-destructive/20 bg-destructive/10 text-destructive">
                         <Trash2 className="size-5" aria-hidden />
                     </div>
-                    <AlertDialogHeader className="space-y-3 text-center sm:text-center">
-                        <AlertDialogTitle>Delete folder</AlertDialogTitle>
+                    <AlertDialogHeader className="w-full place-items-center space-y-3 text-center sm:place-items-center sm:text-center">
+                        <AlertDialogTitle className="w-full text-center text-lg font-bold">
+                            Delete folder
+                        </AlertDialogTitle>
                         <AlertDialogDescription asChild>
                             <div className="space-y-3 text-sm text-muted-foreground">
                                 <p>

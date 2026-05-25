@@ -22,16 +22,42 @@ func (c *Controller) DeleteFolder(ctx fiber.Ctx) error {
 		)
 	}
 
-	db := c.app.Postgres()
-	result := db.WithContext(ctxPtr).Delete(&models.StudentScanFolder{}, folderID)
-	if result.Error != nil {
+	db := c.app.Postgres().WithContext(ctxPtr)
+	var rowsAffected int64
+
+	err = db.Transaction(func(tx *gorm.DB) error {
+		var docIDs []int64
+		if err := tx.Model(&models.StudentScanFolderDoc{}).
+			Where("student_scan_folder_id = ?", folderID).
+			Pluck("id", &docIDs).Error; err != nil {
+			return err
+		}
+		if len(docIDs) > 0 {
+			if err := tx.Where("student_scan_folder_doc_id IN ?", docIDs).
+				Delete(&models.StudentScanFolderDocFile{}).Error; err != nil {
+				return err
+			}
+			if err := tx.Where("student_scan_folder_id = ?", folderID).
+				Delete(&models.StudentScanFolderDoc{}).Error; err != nil {
+				return err
+			}
+		}
+		if err := tx.Where("student_scan_folder_id = ?", folderID).
+			Delete(&models.StudentToScanFolder{}).Error; err != nil {
+			return err
+		}
+		result := tx.Delete(&models.StudentScanFolder{}, folderID)
+		rowsAffected = result.RowsAffected
+		return result.Error
+	})
+	if err != nil {
 		return c.app.Api(ctx,
-			r.WithError(result.Error),
+			r.WithError(err),
 			r.WithStatus(fiber.StatusInternalServerError),
 			r.WithCode("INTERNAL_SERVER_ERROR"),
 		)
 	}
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return c.app.Api(ctx,
 			r.WithError(gorm.ErrRecordNotFound),
 			r.WithStatus(fiber.StatusNotFound),
