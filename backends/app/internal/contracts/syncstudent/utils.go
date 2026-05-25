@@ -3,8 +3,22 @@ package syncstudent
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 )
+
+var importProgramSuffixParen = regexp.MustCompile(`\s*\([^)]*\)$`)
+
+// normalizeImportName trims leading/trailing whitespace from reference labels.
+func normalizeImportName(name string) string {
+	return strings.TrimSpace(name)
+}
+
+// normalizeProgramImportName strips a trailing parenthetical suffix then trims.
+func normalizeProgramImportName(name string) string {
+	return normalizeImportName(importProgramSuffixParen.ReplaceAllString(name, ""))
+}
 
 type UniversityOrgUnitType struct {
 	ProgramOldId     string `json:"program_old_id"`
@@ -108,13 +122,13 @@ func extractHttpBodyRows(body map[string]any) ([]any, error) {
 func orgUnitFromRecord(record map[string]any) UniversityOrgUnitType {
 	return UniversityOrgUnitType{
 		ProgramOldId:     optionalString(record["program_old_id"]),
-		Program:          optionalString(record["program"]),
-		Profile:          optionalString(record["profile"]),
-		Faculty:          optionalString(record["faculty"]),
-		StudyLevel:       optionalString(record["study_level"]),
+		Program:          normalizeProgramImportName(optionalString(record["program"])),
+		Profile:          normalizeImportName(optionalString(record["profile"])),
+		Faculty:          normalizeImportName(optionalString(record["faculty"])),
+		StudyLevel:       normalizeImportName(optionalString(record["study_level"])),
 		ProgramID:        optionalString(record["program_id"]),
-		ProgramName:      optionalString(record["program_name"]),
-		ProgramSpecialty: optionalString(record["program_specialty"]),
+		ProgramName:      normalizeProgramImportName(optionalString(record["program_name"])),
+		ProgramSpecialty: normalizeProgramImportName(optionalString(record["program_specialty"])),
 	}
 }
 

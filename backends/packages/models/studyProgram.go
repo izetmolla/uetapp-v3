@@ -16,7 +16,7 @@ const (
 // Server specific settings.
 type StudyProgram struct {
 	ID   int64  `json:"id" gorm:"primaryKey;autoIncrement"`
-	Name string `json:"name" gorm:"size:255;"`
+	Name string `json:"name" gorm:"size:255;uniqueIndex"`
 	Slug string `json:"slug" gorm:"size:255;"`
 
 	Status StudyProgramStatus `json:"status" gorm:"default:active;"`

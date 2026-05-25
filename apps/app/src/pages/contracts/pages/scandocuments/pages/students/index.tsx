@@ -20,7 +20,7 @@ import { getStudents, type GetStudentsResponse } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import { useStudentListStore } from "./store";
-import ImportUsersDialog from "./components/import-users-dialog";
+import SyncStudentsDialog from "@/pages/contracts/components/syncstudents";
 
 const PER_PAGE = 10;
 
@@ -29,6 +29,7 @@ type Student = GetStudentsResponse["students"][number];
 const StudentsPage = () => {
     const { year = "", faculty_slug = "", level = "", folder_id } = useParams();
     const setIsImportUsersDialogOpen = useStudentListStore((s) => s.setIsImportUsersDialogOpen);
+    const isImportUsersDialogOpen = useStudentListStore((s) => s.isImportUsersDialogOpen);
 
     const [list, setList] = useState(true);
     const [q, setQ] = useState("");
@@ -137,7 +138,12 @@ const StudentsPage = () => {
                     label="students"
                 />
             </ContentLoader>
-            <ImportUsersDialog />
+            {/* <ImportUsersDialog /> */}
+            <SyncStudentsDialog
+                withParams={{ folder_id: Number(folder_id) }}
+                isOpen={isImportUsersDialogOpen}
+                onClose={() => setIsImportUsersDialogOpen(false)}
+            />
         </PageShell>
     );
 };

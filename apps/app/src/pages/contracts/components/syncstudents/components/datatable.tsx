@@ -13,8 +13,10 @@ import { ImportStudentsActions } from "./table-actions";
 
 
 
-
-const ImportStudentsDatatable: FC = () => {
+interface ImportStudentsDatatableProps {
+    withParams?: Record<string, unknown>;
+}
+const ImportStudentsDatatable: FC<ImportStudentsDatatableProps> = ({ withParams = {} }) => {
     const { columns, isLoading: columnsLoading, error, columnVisibility } = useBackendColumns<Student>({
         fetchColumns: async (filters) => getImportStudentsColumns(filters),
         queryKey: [SYNC_STUDENTS_FETCH_PERSISTANT, "columns"],
@@ -58,7 +60,7 @@ const ImportStudentsDatatable: FC = () => {
                         rowIdKey="sp_id"
                         enableRowSelection
                         disableParamPersistence={true}
-                        actionBar={(table) => <ImportStudentsActions table={table} />}
+                        actionBar={(table) => <ImportStudentsActions table={table} withParams={withParams} />}
                     />
                 </div>
             </ContentLoader>

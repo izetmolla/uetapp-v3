@@ -16,7 +16,7 @@ const (
 // Server specific settings.
 type StudyLevel struct {
 	ID          int64            `json:"id" gorm:"primaryKey;autoIncrement"`
-	Name        string           `json:"name" gorm:"size:255;"`
+	Name        string           `json:"name" gorm:"size:255;uniqueIndex"`
 	Code        string           `json:"code" gorm:"size:255;"`
 	Slug        string           `json:"slug" gorm:"size:255;"`
 	Description string           `json:"description" gorm:"type:text;"`

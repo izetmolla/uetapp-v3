@@ -2,8 +2,6 @@ package syncstudent
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
 )
 
 // AthenaUser mirrors a row from the athena_users source (import list / API payloads).
@@ -63,8 +61,8 @@ func athenaUserFromRecord(record map[string]any) AthenaUser {
 		StudentFID:       optionalString(record["student_fid"]),
 		SPID:             optionalString(record["sp_id"]),
 		PersonID:         optionalString(record["person_id"]),
-		Status:           optionalString(record["status"]),
-		StatusType:       optionalString(record["status_type"]),
+		Status:           normalizeImportName(optionalString(record["status"])),
+		StatusType:       normalizeImportName(optionalString(record["status_type"])),
 		Surname:          optionalString(record["surname"]),
 		Firstname:        optionalString(record["firstname"]),
 		Fathersname:      optionalString(record["fathersname"]),
@@ -76,12 +74,12 @@ func athenaUserFromRecord(record map[string]any) AthenaUser {
 		DocumentType:     optionalString(record["document_type"]),
 		Department:       optionalString(record["department"]),
 		ProgramID:        optionalString(record["program_id"]),
-		Program:          strings.TrimSpace(regexp.MustCompile(`\s*\([^)]*\)$`).ReplaceAllString(optionalString(record["program"]), "")),
-		ProgramSpecialty: strings.TrimSpace(regexp.MustCompile(`\s*\([^)]*\)$`).ReplaceAllString(optionalString(record["program_specialty"]), "")),
+		Program:          normalizeProgramImportName(optionalString(record["program"])),
+		ProgramSpecialty: normalizeProgramImportName(optionalString(record["program_specialty"])),
 		RegDate:          optionalString(record["reg_date"]),
-		RegYear:          optionalString(record["reg_year"]),
-		Faculty:          optionalString(record["faculty"]),
-		StudyLevel:       optionalString(record["study_level"]),
+		RegYear:          normalizeImportName(optionalString(record["reg_year"])),
+		Faculty:          normalizeImportName(optionalString(record["faculty"])),
+		StudyLevel:       normalizeImportName(optionalString(record["study_level"])),
 		Nationality:      optionalString(record["nationality"]),
 		NatCode:          optionalString(record["nat_code"]),
 		City:             optionalString(record["city"]),

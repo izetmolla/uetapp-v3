@@ -11,7 +11,6 @@ import { useImportDialogPortalContainer } from "../portal-container-context";
 import { ConfirmAlertDialog } from "./alert-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useParams } from "react-router";
 // import { exportTableToCSV } from "@/lib/export";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 // import { deletePreApplication } from "../api";
@@ -20,6 +19,7 @@ import { useParams } from "react-router";
 
 interface ImportStudentsActionsProps {
     table: Table<Student>;
+    withParams?: Record<string, unknown>;
 }
 
 type ActionConfig = {
@@ -30,8 +30,7 @@ type ActionConfig = {
     confirmLabel?: string;
     confirmVariant?: "default" | "destructive";
 }
-export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
-    const { folder_id } = useParams();
+export function ImportStudentsActions({ table, withParams = {} }: ImportStudentsActionsProps) {
     const rows = table.getFilteredSelectedRowModel().rows;
     const mutateImportStudents = useMutation({
         mutationFn: importStudents,
@@ -90,11 +89,11 @@ export function ImportStudentsActions({ table }: ImportStudentsActionsProps) {
     const onConfirm = useCallback(() => {
         if (action?.action === "import") {
             mutateImportStudents.mutate({
-                folder_id: Number(folder_id),
+                ...withParams,
                 students: rows.map((row) => row.original.sp_id),
             });
         }
-    }, [table, action?.action]);
+    }, [table, action?.action, withParams]);
 
 
 

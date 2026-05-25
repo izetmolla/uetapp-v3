@@ -16,8 +16,9 @@ const ImportStudentsDatatable = lazy(() => import("./components/datatable"));
 interface SyncStudentsDialogProps {
     isOpen: boolean;
     onClose: () => void;
+    withParams?: Record<string, unknown>;
 }
-const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose }) => {
+const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose, withParams = {} }) => {
     const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
     const setPortalRef = useCallback((node: HTMLDivElement | null) => {
@@ -48,7 +49,7 @@ const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose }) =>
                                     </div>
                                 }
                             >
-                                <ImportStudentsDatatable />
+                                <ImportStudentsDatatable withParams={withParams} />
                             </Suspense>
                         </div>
                     </ImportDialogPortalContext.Provider>

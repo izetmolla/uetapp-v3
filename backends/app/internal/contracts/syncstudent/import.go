@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/flowtrove/packages/drivers/httprequest"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
-	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 )
 
@@ -71,6 +69,9 @@ func (cc *Controller) ImportStudents(c fiber.Ctx) error {
 	if err != nil {
 		return cc.app.Api(c, r.WithError(err))
 	}
+
+	refCache := newImportRefCache()
+
 	// Use a worker pool to perform concurrent DB insert/update without overwhelming DB
 	const maxWorkers = 8
 	type result struct {
@@ -85,7 +86,7 @@ func (cc *Controller) ImportStudents(c fiber.Ctx) error {
 	for range maxWorkers {
 		go func() {
 			for student := range studentCh {
-				_, importErrors := cc.insertOrUpdateStudents(ctx, student, req.StudentScanFolderID)
+				_, importErrors := cc.insertOrUpdateStudents(ctx, student, req.StudentScanFolderID, refCache)
 				resultCh <- result{Errors: importErrors}
 			}
 		}()
@@ -190,7 +191,7 @@ func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, students []
 	return users, nil
 }
 
-func (cc *Controller) insertOrUpdateStudents(reqCtx context.Context, student *AthenaUser, folderID int64) (models.Student, []ImportLogError) {
+func (cc *Controller) insertOrUpdateStudents(reqCtx context.Context, student *AthenaUser, folderID int64, refCache *importRefCache) (models.Student, []ImportLogError) {
 	log := newImportLog(*student)
 	db := cc.app.Postgres()
 	if student.DocumentID == "" || len(student.DocumentID) < 3 {
@@ -203,19 +204,19 @@ func (cc *Controller) insertOrUpdateStudents(reqCtx context.Context, student *At
 		First(reqCtx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return cc.createStudent(reqCtx, *student, folderID, log)
+			return cc.createStudent(reqCtx, *student, folderID, refCache, log)
 		}
 		log.fail("student.find", err)
 		return models.Student{}, log.all()
 	}
 	if studentModel.ID > 0 {
-		cc.updateStudent(reqCtx, studentModel.ID, *student, folderID, log)
+		cc.updateStudent(reqCtx, studentModel.ID, *student, folderID, refCache, log)
 		return studentModel, log.all()
 	}
 	return studentModel, log.all()
 }
 
-func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, folderID int64, log *importLog) (models.Student, []ImportLogError) {
+func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, folderID int64, refCache *importRefCache, log *importLog) (models.Student, []ImportLogError) {
 	db := cc.app.Postgres()
 
 	studentModel := &models.Student{
@@ -229,7 +230,7 @@ func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, 
 		log.fail("student.create", err)
 		return models.Student{}, log.all()
 	}
-	cc.ensureStudentStudyProgram(reqCtx, studentModel.ID, student, log)
+	cc.ensureStudentStudyProgram(reqCtx, studentModel.ID, student, refCache, log)
 	if folderID > 0 {
 		cc.ensureStudentScanFolderDoc(reqCtx, folderID, studentModel.ID, studentScanFolderDocName(student), log)
 	}
@@ -237,7 +238,7 @@ func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, 
 	return *studentModel, log.all()
 }
 
-func (cc *Controller) updateStudent(reqCtx context.Context, id int64, student AthenaUser, folderID int64, log *importLog) {
+func (cc *Controller) updateStudent(reqCtx context.Context, id int64, student AthenaUser, folderID int64, refCache *importRefCache, log *importLog) {
 	db := cc.app.Postgres()
 
 	if _, err := gorm.G[models.Student](db).Where("id = ?", id).Updates(reqCtx, models.Student{
@@ -250,7 +251,7 @@ func (cc *Controller) updateStudent(reqCtx context.Context, id int64, student At
 		return
 	}
 
-	cc.ensureStudentStudyProgram(reqCtx, id, student, log)
+	cc.ensureStudentStudyProgram(reqCtx, id, student, refCache, log)
 	if folderID > 0 {
 		cc.ensureStudentScanFolderDoc(reqCtx, folderID, id, studentScanFolderDocName(student), log)
 	}
@@ -274,8 +275,8 @@ func studentStudyProgramScope(program models.StudentStudyProgram) func(*gorm.DB)
 	}
 }
 
-func (cc *Controller) ensureStudentStudyProgram(reqCtx context.Context, studentID int64, student AthenaUser, log *importLog) {
-	program, ok := cc.buildStudentStudyProgram(reqCtx, studentID, student, log)
+func (cc *Controller) ensureStudentStudyProgram(reqCtx context.Context, studentID int64, student AthenaUser, refCache *importRefCache, log *importLog) {
+	program, ok := cc.buildStudentStudyProgram(reqCtx, studentID, student, refCache, log)
 	if !ok {
 		return
 	}
@@ -378,33 +379,33 @@ func stringPtrChanged(current, next *string) bool {
 	return *current != *next
 }
 
-func (cc *Controller) buildStudentStudyProgram(reqCtx context.Context, studentID int64, student AthenaUser, log *importLog) (models.StudentStudyProgram, bool) {
-	facultyModel, err := cc.getOrCreateFaculty(reqCtx, student.Faculty)
+func (cc *Controller) buildStudentStudyProgram(reqCtx context.Context, studentID int64, student AthenaUser, refCache *importRefCache, log *importLog) (models.StudentStudyProgram, bool) {
+	facultyModel, err := refCache.faculty(reqCtx, cc, student.Faculty)
 	if err != nil {
 		log.fail("faculty.create", err)
 		return models.StudentStudyProgram{}, false
 	}
-	studyProgramModel, err := cc.getOrCreateStudyProgram(reqCtx, student.Program)
+	studyProgramModel, err := refCache.studyProgram(reqCtx, cc, student.Program)
 	if err != nil {
 		log.fail("study_program.create", err)
 		return models.StudentStudyProgram{}, false
 	}
-	studyLevelModel, err := cc.getOrCreateStudyLevel(reqCtx, student.StudyLevel)
+	studyLevelModel, err := refCache.studyLevel(reqCtx, cc, student.StudyLevel)
 	if err != nil {
 		log.fail("study_level.create", err)
 		return models.StudentStudyProgram{}, false
 	}
-	studyProfileModel, err := cc.getOrCreateStudyProfile(reqCtx, student.ProgramSpecialty)
+	studyProfileModel, err := refCache.studyProfile(reqCtx, cc, student.ProgramSpecialty)
 	if err != nil {
 		log.fail("study_profile.create", err)
 		return models.StudentStudyProgram{}, false
 	}
-	studentStatusModel, err := cc.getOrCreateStudentStatus(reqCtx, student.Status, student.StatusType)
+	studentStatusModel, err := refCache.studentStatus(reqCtx, cc, student.Status, student.StatusType)
 	if err != nil {
 		log.fail("student_status.create", err)
 		return models.StudentStudyProgram{}, false
 	}
-	academicYearModel, err := cc.getOrCreateAcademicYear(reqCtx, student.RegYear)
+	academicYearModel, err := refCache.academicYear(reqCtx, cc, student.RegYear)
 	if err != nil {
 		log.fail("academic_year.create", err)
 		return models.StudentStudyProgram{}, false
@@ -426,144 +427,4 @@ func (cc *Controller) buildStudentStudyProgram(reqCtx context.Context, studentID
 	applyStudentStudyProgramImportFields(&program, student)
 
 	return program, true
-}
-
-func (cc *Controller) getOrCreateStudyLevel(reqCtx context.Context, name string) (models.StudyLevel, error) {
-	db := cc.app.Postgres()
-	if name == "" {
-		return models.StudyLevel{}, errors.New("study level name must not be empty")
-	}
-	studyLevel, err := gorm.G[models.StudyLevel](db).
-		Where("name = ?", name).
-		First(reqCtx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			studyLevel = models.StudyLevel{Name: name, Slug: slug.Make(name)}
-			if err := db.Create(&studyLevel).Error; err != nil {
-				return models.StudyLevel{}, err
-			}
-			return studyLevel, nil
-		} else {
-			return models.StudyLevel{}, err
-		}
-	}
-	return studyLevel, nil
-}
-
-func (cc *Controller) getOrCreateStudyProgram(reqCtx context.Context, name string) (models.StudyProgram, error) {
-	db := cc.app.Postgres()
-	if name == "" {
-		return models.StudyProgram{}, errors.New("study program name must not be empty")
-	}
-	studyProgram, err := gorm.G[models.StudyProgram](db).
-		Where("name = ?", name).
-		First(reqCtx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			studyProgram = models.StudyProgram{Name: name, Slug: slug.Make(name)}
-			if err := db.Create(&studyProgram).Error; err != nil {
-				return models.StudyProgram{}, err
-			}
-			return studyProgram, nil
-		} else {
-			return models.StudyProgram{}, err
-		}
-	}
-	return studyProgram, nil
-}
-
-func (cc *Controller) getOrCreateStudyProfile(reqCtx context.Context, name string) (models.StudyProfile, error) {
-	db := cc.app.Postgres()
-	if name == "" {
-		return models.StudyProfile{}, nil
-	}
-	studyProfile, err := gorm.G[models.StudyProfile](db).
-		Where("name = ?", name).
-		First(reqCtx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			studyProfile = models.StudyProfile{Name: name, Slug: slug.Make(name)}
-			if err := db.Create(&studyProfile).Error; err != nil {
-				return models.StudyProfile{}, err
-			}
-			return studyProfile, nil
-		} else {
-			return models.StudyProfile{}, err
-		}
-	}
-	return studyProfile, nil
-}
-
-func (cc *Controller) getOrCreateFaculty(reqCtx context.Context, name string) (models.Faculty, error) {
-	db := cc.app.Postgres()
-	if name == "" {
-		return models.Faculty{}, errors.New("faculty name must not be empty")
-	}
-	faculty, err := gorm.G[models.Faculty](db).
-		Where("name = ?", name).
-		First(reqCtx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			faculty = models.Faculty{Name: name, Slug: slug.Make(name)}
-			if err := db.Create(&faculty).Error; err != nil {
-				return models.Faculty{}, err
-			}
-			return faculty, nil
-		} else {
-			return models.Faculty{}, err
-		}
-	}
-	return faculty, nil
-}
-
-func (cc *Controller) getOrCreateStudentStatus(reqCtx context.Context, name, statusType string) (models.StudentStatus, error) {
-	db := cc.app.Postgres()
-	if name == "" {
-		return models.StudentStatus{}, errors.New("student status name must not be empty")
-	}
-	studentStatus, err := gorm.G[models.StudentStatus](db).
-		Where("name = ?", name).
-		First(reqCtx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			studentStatus = models.StudentStatus{
-				Name: name,
-				Slug: slug.Make(name),
-				Type: statusType,
-			}
-			if err := db.Create(&studentStatus).Error; err != nil {
-				return models.StudentStatus{}, err
-			}
-			return studentStatus, nil
-		} else {
-			return models.StudentStatus{}, err
-		}
-	}
-	return studentStatus, nil
-}
-
-func (cc *Controller) getOrCreateAcademicYear(reqCtx context.Context, year string) (models.AcademicYear, error) {
-	db := cc.app.Postgres()
-	if year == "" {
-		return models.AcademicYear{}, errors.New("academic year year must not be empty")
-	}
-	yearInt, err := strconv.Atoi(year)
-	if err != nil {
-		return models.AcademicYear{}, err
-	}
-	academicYear, err := gorm.G[models.AcademicYear](db).
-		Where("year = ?", fmt.Sprintf("%d-%d", yearInt, yearInt+1)).
-		First(reqCtx)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			academicYear = models.AcademicYear{Year: fmt.Sprintf("%d-%d", yearInt, yearInt+1)}
-			if err := db.Create(&academicYear).Error; err != nil {
-				return models.AcademicYear{}, err
-			}
-			return academicYear, nil
-		} else {
-			return models.AcademicYear{}, err
-		}
-	}
-	return academicYear, nil
 }
