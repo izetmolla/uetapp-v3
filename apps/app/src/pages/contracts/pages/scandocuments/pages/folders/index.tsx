@@ -25,13 +25,17 @@ import DeleteFolderDialog from "./components/delete-folder-dialog";
 import DownloadFolderDialog from "./components/download-folder-dialog";
 import FolderAction from "./components/folder-action";
 import useFoldersStore from "./store";
+import SyncStudentsDialog from "@/pages/contracts/components/syncstudents";
 
 const PER_PAGE = 10;
 
 const FoldersPage = () => {
   const { year = "", faculty_slug = "", level = "" } = useParams();
+  const folder = useFoldersStore((s) => s.folder);
   const setFolder = useFoldersStore((s) => s.setFolder);
   const setIsSaveFolderDialogOpen = useFoldersStore((s) => s.setIsSaveFolderDialogOpen);
+  const setIsAddStudentToScanDialogOpen = useFoldersStore((s) => s.setIsAddStudentToScanDialogOpen);
+  const isAddStudentToScanDialogOpen = useFoldersStore((s) => s.isAddStudentToScanDialogOpen);
   const [list, setList] = useState(true);
   const [page, setPage] = useState(1);
 
@@ -139,6 +143,11 @@ const FoldersPage = () => {
       <SaveFolderDialog />
       <DeleteFolderDialog />
       <DownloadFolderDialog />
+      <SyncStudentsDialog
+        isOpen={isAddStudentToScanDialogOpen}
+        onClose={() => setIsAddStudentToScanDialogOpen(false)}
+        withParams={{ CUSTOM_URL: `/apppp`, folder_id: folder?.id, creat_user: true  }}
+      />
     </PageShell>
   );
 };

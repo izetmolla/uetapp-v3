@@ -67,8 +67,13 @@ export async function getImportStudentsColumns(filters?: Record<string, unknown>
 
 
 export function importStudents(data: Record<string, unknown>) {
+    let url = `${SYNC_STUDENTS_LIST_BASE}/import-students`;
+    if (data.CUSTOM_URL && typeof data.CUSTOM_URL === "string" && data.CUSTOM_URL != "") {
+        url = data.CUSTOM_URL;
+    }
+    delete data.CUSTOM_URL;
     return ApiService.fetchData<ImportStudentsMutationResponse>({
-        url: withAPI(`${SYNC_STUDENTS_LIST_BASE}/import-students`),
+        url: withAPI(url),
         method: "post",
         data,
     });
