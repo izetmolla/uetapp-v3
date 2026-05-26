@@ -11,12 +11,14 @@ type StudentScanFolder struct {
 	ID   int64  `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name string `json:"name" gorm:"size:255;"`
 
-	AcademicYearID int64        `json:"academic_year_id" gorm:"type:bigint;not null;index"`
-	AcademicYear   AcademicYear `json:"academic_year" gorm:"foreignKey:AcademicYearID;references:ID"`
-	FacultyID      int64        `json:"faculty_id" gorm:"type:bigint;not null;index"`
-	Faculty        Faculty      `json:"faculty" gorm:"foreignKey:FacultyID;references:ID"`
-	StudyLevelID   int64        `json:"study_level_id" gorm:"type:bigint;not null;index"`
-	StudyLevel     StudyLevel   `json:"study_level" gorm:"foreignKey:StudyLevelID;references:ID"`
+	AcademicYearID    int64                 `json:"academic_year_id" gorm:"type:bigint;not null;index"`
+	AcademicYear      AcademicYear          `json:"academic_year" gorm:"foreignKey:AcademicYearID;references:ID"`
+	FacultyID         int64                 `json:"faculty_id" gorm:"type:bigint;not null;index"`
+	Faculty           Faculty               `json:"faculty" gorm:"foreignKey:FacultyID;references:ID"`
+	StudyLevelID      *int64                `json:"study_level_id,omitempty" gorm:"type:bigint;index"`
+	StudyLevel        StudyLevel            `json:"study_level,omitempty" gorm:"foreignKey:StudyLevelID;references:ID"`
+	StudyLevelGroupID int64                 `json:"study_level_group_id" gorm:"type:bigint;not null;index"`
+	StudyLevelGroup   StudentScanLevelGroup `json:"study_level_group" gorm:"foreignKey:StudyLevelGroupID;references:ID"`
 
 	Docs                 []StudentScanFolderDoc `json:"docs" gorm:"foreignKey:StudentScanFolderID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	StudentToScanFolders []StudentToScanFolder  `json:"student_to_scan_folders" gorm:"foreignKey:StudentScanFolderID;references:ID"`

@@ -39,10 +39,10 @@ const FORM_ID = "save-folder-form";
 
 interface SaveFolderDialogProps { }
 const SaveFolderDialog: FC<SaveFolderDialogProps> = () => {
-    const { year = "", faculty_slug = "", level = "" } = useParams();
+    const { year = "", faculty_slug = "", group_id = "" } = useParams();
     const { folder, setFolder, isSaveFolderDialogOpen, setIsSaveFolderDialogOpen } = useFoldersStore();
 
-    const listQueryKey = ["folders", year, faculty_slug, level] as const;
+    const listQueryKey = ["folders", year, faculty_slug, group_id] as const;
 
     const form = useForm<SaveFolderSchema>({
         resolver: zodResolver(saveFolderSchema),
@@ -51,7 +51,7 @@ const SaveFolderDialog: FC<SaveFolderDialogProps> = () => {
             name: folder?.name ?? "",
             year,
             faculty_slug,
-            level_slug: level,
+            group_id,
         },
     });
 
@@ -62,9 +62,9 @@ const SaveFolderDialog: FC<SaveFolderDialogProps> = () => {
             name: folder?.name ?? "",
             year,
             faculty_slug,
-            level_slug: level,
+            group_id,
         });
-    }, [form, isSaveFolderDialogOpen, folder, year, faculty_slug, level]);
+    }, [form, isSaveFolderDialogOpen, folder, year, faculty_slug, group_id]);
 
     const onClose = useCallback(() => {
         setFolder(null);
@@ -72,7 +72,7 @@ const SaveFolderDialog: FC<SaveFolderDialogProps> = () => {
             name: "",
             year: "",
             faculty_slug: "",
-            level_slug: "",
+            group_id: "",
             id: "",
         });
         setIsSaveFolderDialogOpen(false);

@@ -14,7 +14,7 @@ func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 	r := c.app.Render()
 	year := ctx.Query("year")
 	facultySlug := ctx.Query("faculty_slug")
-	levelSlug := ctx.Query("level_slug")
+	groupID := ctx.Query("group_id")
 	folderID := ctx.Query("folder_id")
 	folderIDInt, err := strconv.ParseInt(folderID, 10, 64)
 	if err != nil {
@@ -28,7 +28,7 @@ func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}
-	studyLevel, err := c.getStudyLevel(ctxPtr, levelSlug)
+	studyLevelGroup, err := c.getStudyLevelGroup(ctxPtr, groupID)
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}
@@ -42,11 +42,11 @@ func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 	}
 
 	return c.app.Api(ctx, r.WithData(fiber.Map{
-		"students":      students,
-		"faculty":       &faculty,
-		"academic_year": &academicYear,
-		"study_level":   &studyLevel,
-		"folder":        &folder,
+		"students":          students,
+		"faculty":           &faculty,
+		"academic_year":     &academicYear,
+		"study_level_group": &studyLevelGroup,
+		"folder":            &folder,
 	}))
 }
 func (c *Controller) GetListDataView(ctx fiber.Ctx) error {
@@ -54,7 +54,7 @@ func (c *Controller) GetListDataView(ctx fiber.Ctx) error {
 	r := c.app.Render()
 	year := ctx.Params("year")
 	facultySlug := ctx.Params("faculty_slug")
-	levelSlug := ctx.Params("level_slug")
+	groupID := ctx.Params("group_id")
 	folderID := ctx.Params("folder_id")
 	folderIDInt, err := strconv.ParseInt(folderID, 10, 64)
 	if err != nil {
@@ -68,7 +68,7 @@ func (c *Controller) GetListDataView(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.View(ctx, r.WithError(err))
 	}
-	studyLevel, err := c.getStudyLevel(ctxPtr, levelSlug)
+	studyLevelGroup, err := c.getStudyLevelGroup(ctxPtr, groupID)
 	if err != nil {
 		return c.app.View(ctx, r.WithError(err))
 	}
@@ -81,11 +81,11 @@ func (c *Controller) GetListDataView(ctx fiber.Ctx) error {
 		return c.app.View(ctx, r.WithError(err))
 	}
 	return c.app.View(ctx, r.WithData(fiber.Map{
-		"students":      students,
-		"faculty":       &faculty,
-		"study_level":   &studyLevel,
-		"academic_year": &academicYear,
-		"folder":        &folder,
+		"students":          students,
+		"faculty":           &faculty,
+		"study_level_group": &studyLevelGroup,
+		"academic_year":     &academicYear,
+		"folder":            &folder,
 	}))
 }
 
@@ -110,15 +110,15 @@ func (c *Controller) getFaculty(ctx context.Context, facultySlug string) (*model
 	}
 	return &faculty, nil
 }
-func (c *Controller) getStudyLevel(ctx context.Context, levelSlug string) (*models.StudyLevel, error) {
+func (c *Controller) getStudyLevelGroup(ctx context.Context, groupID string) (*models.StudentScanLevelGroup, error) {
 	db := c.app.Postgres()
-	studyLevel, err := gorm.G[models.StudyLevel](db).
-		Where("slug = ?", levelSlug).
+	studyLevelGroup, err := gorm.G[models.StudentScanLevelGroup](db).
+		Where("id = ?", groupID).
 		First(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &studyLevel, nil
+	return &studyLevelGroup, nil
 }
 
 func (c *Controller) getFolder(ctx context.Context, folderID int64) (*models.StudentScanFolder, error) {

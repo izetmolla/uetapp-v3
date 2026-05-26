@@ -18,10 +18,10 @@ func (c *Controller) CreateFolder(ctx fiber.Ctx) error {
 
 	year := strings.TrimSpace(ctx.Query("year"))
 	facultySlug := strings.TrimSpace(ctx.Query("faculty_slug"))
-	levelSlug := strings.TrimSpace(ctx.Query("level_slug"))
-	if year == "" || facultySlug == "" || levelSlug == "" {
+	groupID := strings.TrimSpace(ctx.Query("group_id"))
+	if year == "" || facultySlug == "" || groupID == "" {
 		return c.app.Api(ctx,
-			r.WithError(errors.New("year, faculty_slug, and level_slug are required")),
+			r.WithError(errors.New("year, faculty_slug, and group_id are required")),
 			r.WithStatus(fiber.StatusBadRequest),
 			r.WithCode("BAD_REQUEST"),
 		)
@@ -60,7 +60,7 @@ func (c *Controller) CreateFolder(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))
 	}
-	studyLevel, err := c.getStudyLevel(ctxPtr, levelSlug)
+	studyLevelGroup, err := c.getStudyLevelGroup(ctxPtr, groupID)
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))
 	}
@@ -68,8 +68,12 @@ func (c *Controller) CreateFolder(ctx fiber.Ctx) error {
 	db := c.app.Postgres()
 	var count int64
 	if err := db.Model(&models.StudentScanFolder{}).
-		Where("academic_year_id = ? AND faculty_id = ? AND study_level_id = ? AND name = ?",
-			academicYear.ID, faculty.ID, studyLevel.ID, name).
+		Where(&models.StudentScanFolder{
+			AcademicYearID:    academicYear.ID,
+			FacultyID:         faculty.ID,
+			StudyLevelGroupID: studyLevelGroup.ID,
+			Name:              name,
+		}).
 		Count(&count).Error; err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}
@@ -82,10 +86,11 @@ func (c *Controller) CreateFolder(ctx fiber.Ctx) error {
 	}
 
 	folder := models.StudentScanFolder{
-		Name:           name,
-		AcademicYearID: academicYear.ID,
-		FacultyID:      faculty.ID,
-		StudyLevelID:   studyLevel.ID,
+		Name:              name,
+		AcademicYearID:    academicYear.ID,
+		FacultyID:         faculty.ID,
+		StudyLevelGroupID: studyLevelGroup.ID,
+		StudyLevelGroup:   *studyLevelGroup,
 	}
 	if err := db.Create(&folder).Error; err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))

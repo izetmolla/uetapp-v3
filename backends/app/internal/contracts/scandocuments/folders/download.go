@@ -28,10 +28,10 @@ func (c *Controller) DownloadFolder(ctx fiber.Ctx) error {
 
 	year := strings.TrimSpace(ctx.Query("year"))
 	facultySlug := strings.TrimSpace(ctx.Query("faculty_slug"))
-	levelSlug := strings.TrimSpace(ctx.Query("level_slug"))
-	if year == "" || facultySlug == "" || levelSlug == "" {
+	groupID := strings.TrimSpace(ctx.Query("group_id"))
+	if year == "" || facultySlug == "" || groupID == "" {
 		return c.app.Api(ctx,
-			r.WithError(errors.New("year, faculty_slug, and level_slug are required")),
+			r.WithError(errors.New("year, faculty_slug, and group_id are required")),
 			r.WithStatus(fiber.StatusBadRequest),
 			r.WithCode("BAD_REQUEST"),
 		)
@@ -45,7 +45,7 @@ func (c *Controller) DownloadFolder(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))
 	}
-	studyLevel, err := c.getStudyLevel(ctxPtr, levelSlug)
+	studyLevelGroup, err := c.getStudyLevelGroup(ctxPtr, groupID)
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))
 	}
@@ -53,8 +53,12 @@ func (c *Controller) DownloadFolder(ctx fiber.Ctx) error {
 	db := c.app.Postgres()
 	var folder models.StudentScanFolder
 	if err := db.WithContext(ctxPtr).
-		Where("id = ? AND academic_year_id = ? AND faculty_id = ? AND study_level_id = ?",
-			folderID, academicYear.ID, faculty.ID, studyLevel.ID).
+		Where(&models.StudentScanFolder{
+			ID:                folderID,
+			AcademicYearID:    academicYear.ID,
+			FacultyID:         faculty.ID,
+			StudyLevelGroupID: studyLevelGroup.ID,
+		}).
 		First(&folder).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))

@@ -30,10 +30,6 @@ import GroupRowAction from "./components/group-row-action";
 
 const EditStudyLevelGroupDialog = lazy(() => import("./components/edit-academic-group"));
 
-
-
-
-
 function StudyLevelLinkChip({
   level,
   levelId,

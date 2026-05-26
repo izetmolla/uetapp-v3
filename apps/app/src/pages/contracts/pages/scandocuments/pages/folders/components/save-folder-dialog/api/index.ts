@@ -29,7 +29,7 @@ export const saveFolderSchema = z.object({
         .max(255, { message: "Name must be at most 255 characters" }),
     id: z.string().optional(),
     year: z.string().optional(),
-    level_slug: z.string().optional(),
+    group_id: z.string().optional(),
     faculty_slug: z.string().optional(),
 });
 

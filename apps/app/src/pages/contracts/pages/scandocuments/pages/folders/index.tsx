@@ -15,7 +15,7 @@ import { Crumbs } from "../../components/crumbs";
 import { PageHeader, PageShell } from "../../components/page-shell";
 import { GridSkeleton, TableSkeleton } from "../../components/skeleton-page";
 import { ViewToggle } from "../../components/view-toggle";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { getFolders, type Folder, type GetFoldersResponse } from "./api";
@@ -30,7 +30,8 @@ import SyncStudentsDialog from "@/pages/contracts/components/syncstudents";
 const PER_PAGE = 10;
 
 const FoldersPage = () => {
-  const { year = "", faculty_slug = "", level = "" } = useParams();
+  const [sp] = useSearchParams()
+  const { year = "", faculty_slug = "", group_id = "" } = useParams();
   const folder = useFoldersStore((s) => s.folder);
   const setFolder = useFoldersStore((s) => s.setFolder);
   const setIsSaveFolderDialogOpen = useFoldersStore((s) => s.setIsSaveFolderDialogOpen);
@@ -39,9 +40,12 @@ const FoldersPage = () => {
   const [list, setList] = useState(true);
   const [page, setPage] = useState(1);
 
+
+  const queryKey = ["folders", year, faculty_slug, sp.get("level_id"), group_id]
+
   const { data, isLoading, error } = useQuery({
-    queryFn: () => getFolders({ year, faculty_slug, level_slug: level }),
-    queryKey: ["folders", year, faculty_slug, level],
+    queryFn: () => getFolders({ year, faculty_slug, level_id: sp.get("level_id"), group_id }),
+    queryKey: queryKey,
     ...withInitialData<GetFoldersResponse>(),
   });
 
@@ -72,7 +76,7 @@ const FoldersPage = () => {
           { label: "Documents", to: basePath },
           { label: year.replace("-", " – "), to: `${basePath}/${year}` },
           { label: data?.faculty?.name ?? "", to: `${basePath}/${year}/${faculty_slug}` },
-          { label: data?.study_level?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${level}` },
+          { label: data?.study_level?.name ?? "", to: `#` },
         ]}
       />
       <PageHeader
@@ -146,7 +150,7 @@ const FoldersPage = () => {
       <SyncStudentsDialog
         isOpen={isAddStudentToScanDialogOpen}
         onClose={() => setIsAddStudentToScanDialogOpen(false)}
-        withParams={{ CUSTOM_URL: `/apppp`, folder_id: folder?.id, creat_user: true  }}
+        withParams={{ CUSTOM_URL: `/apppp`, folder_id: folder?.id, creat_user: true }}
       />
     </PageShell>
   );

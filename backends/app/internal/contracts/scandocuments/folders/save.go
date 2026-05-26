@@ -15,7 +15,7 @@ type saveFolderPayload struct {
 	ID          string `json:"id"`
 	Year        string `json:"year"`
 	FacultySlug string `json:"faculty_slug"`
-	LevelSlug   string `json:"level_slug"`
+	GroupID     string `json:"group_id"`
 }
 
 func (c *Controller) SaveFolder(ctx fiber.Ctx) error {
@@ -33,10 +33,10 @@ func (c *Controller) SaveFolder(ctx fiber.Ctx) error {
 
 	year := strings.TrimSpace(payload.Year)
 	facultySlug := strings.TrimSpace(payload.FacultySlug)
-	levelSlug := strings.TrimSpace(payload.LevelSlug)
-	if year == "" || facultySlug == "" || levelSlug == "" {
+	groupID := strings.TrimSpace(payload.GroupID)
+	if year == "" || facultySlug == "" || groupID == "" {
 		return c.app.Api(ctx,
-			r.WithError(errors.New("year, faculty_slug, and level_slug are required")),
+			r.WithError(errors.New("year, faculty_slug, and group_id are required")),
 			r.WithStatus(fiber.StatusBadRequest),
 			r.WithCode("BAD_REQUEST"),
 		)
@@ -66,7 +66,7 @@ func (c *Controller) SaveFolder(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))
 	}
-	studyLevel, err := c.getStudyLevel(ctxPtr, levelSlug)
+	studyLevelGroup, err := c.getStudyLevelGroup(ctxPtr, groupID)
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))
 	}
@@ -75,24 +75,29 @@ func (c *Controller) SaveFolder(ctx fiber.Ctx) error {
 	folderID, _ := strconv.ParseInt(strings.TrimSpace(payload.ID), 10, 64)
 
 	if folderID > 0 {
-		return c.updateFolder(ctx, db.WithContext(ctxPtr), folderID, name, academicYear.ID, faculty.ID, studyLevel.ID)
+		return c.updateFolder(ctx, db.WithContext(ctxPtr), folderID, name, academicYear.ID, faculty.ID, studyLevelGroup.ID)
 	}
 
-	return c.createFolderRecord(ctx, db.WithContext(ctxPtr), name, academicYear.ID, faculty.ID, studyLevel.ID)
+	return c.createFolderRecord(ctx, db.WithContext(ctxPtr), name, academicYear.ID, faculty.ID, studyLevelGroup.ID)
 }
 
 func (c *Controller) createFolderRecord(
 	ctx fiber.Ctx,
 	db *gorm.DB,
 	name string,
-	academicYearID, facultyID, studyLevelID int64,
+	academicYearID, facultyID,
+	studyLevelGroupID int64,
 ) error {
 	r := c.app.Render()
 
 	var count int64
 	if err := db.Model(&models.StudentScanFolder{}).
-		Where("academic_year_id = ? AND faculty_id = ? AND study_level_id = ? AND name = ?",
-			academicYearID, facultyID, studyLevelID, name).
+		Where(&models.StudentScanFolder{
+			AcademicYearID:    academicYearID,
+			FacultyID:         facultyID,
+			StudyLevelGroupID: studyLevelGroupID,
+			Name:              name,
+		}).
 		Count(&count).Error; err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}
@@ -105,10 +110,10 @@ func (c *Controller) createFolderRecord(
 	}
 
 	folder := models.StudentScanFolder{
-		Name:           name,
-		AcademicYearID: academicYearID,
-		FacultyID:      facultyID,
-		StudyLevelID:   studyLevelID,
+		Name:              name,
+		AcademicYearID:    academicYearID,
+		FacultyID:         facultyID,
+		StudyLevelGroupID: studyLevelGroupID,
 	}
 	if err := db.Create(&folder).Error; err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
