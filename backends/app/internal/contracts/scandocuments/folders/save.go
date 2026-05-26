@@ -131,14 +131,18 @@ func (c *Controller) updateFolder(
 	db *gorm.DB,
 	folderID int64,
 	name string,
-	academicYearID, facultyID, studyLevelID int64,
+	academicYearID, facultyID, studyLevelGroupID int64,
 ) error {
 	r := c.app.Render()
 
 	var folder models.StudentScanFolder
 	if err := db.
-		Where("id = ? AND academic_year_id = ? AND faculty_id = ? AND study_level_id = ?",
-			folderID, academicYearID, facultyID, studyLevelID).
+		Where(&models.StudentScanFolder{
+			ID:                folderID,
+			AcademicYearID:    academicYearID,
+			FacultyID:         facultyID,
+			StudyLevelGroupID: studyLevelGroupID,
+		}).
 		First(&folder).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusNotFound), r.WithCode("NOT_FOUND"))
@@ -148,8 +152,13 @@ func (c *Controller) updateFolder(
 
 	var count int64
 	if err := db.Model(&models.StudentScanFolder{}).
-		Where("academic_year_id = ? AND faculty_id = ? AND study_level_id = ? AND name = ? AND id != ?",
-			academicYearID, facultyID, studyLevelID, name, folder.ID).
+		Where(&models.StudentScanFolder{
+			AcademicYearID:    academicYearID,
+			FacultyID:         facultyID,
+			StudyLevelGroupID: studyLevelGroupID,
+			Name:              name,
+		}).
+		Where("id != ?", folder.ID).
 		Count(&count).Error; err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}

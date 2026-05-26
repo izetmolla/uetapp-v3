@@ -32,7 +32,7 @@ type FoldersStats struct {
 
 func (c *Controller) listFoldersWithStats(
 	ctx context.Context,
-	academicYearID, facultyID, studyLevelID int64,
+	academicYearID, facultyID, studyLevelGroupID int64,
 ) ([]FolderListItem, FoldersStats, error) {
 	db := c.app.Postgres()
 
@@ -50,10 +50,10 @@ LEFT JOIN student_scan_folder_docs d
 WHERE f.deleted_at IS NULL
 	AND f.academic_year_id = ?
 	AND f.faculty_id = ?
-	AND f.study_level_id = ?
+	AND f.study_level_group_id = ?
 GROUP BY f.id, f.name
 ORDER BY f.name ASC
-`, academicYearID, facultyID, studyLevelID).Scan(&rows).Error
+`, academicYearID, facultyID, studyLevelGroupID).Scan(&rows).Error
 	if err != nil {
 		return nil, FoldersStats{}, err
 	}

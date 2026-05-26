@@ -1,4 +1,4 @@
-import type { StudyLevel } from "../../studylevels/api";
+import type { StudyLevel, StudyLevelGroup } from "../../studylevels/api";
 import type { Faculty } from "../../faculties/api";
 import ApiService, {
     withAPI,
@@ -26,6 +26,7 @@ export interface GetFoldersResponse {
     stats: FoldersStats;
     study_level: StudyLevel;
     faculty: Faculty;
+    study_level_group: StudyLevelGroup;
 }
 
 export function getFolders(params: Record<string, unknown>) {

@@ -27,17 +27,16 @@ const PER_PAGE = 10;
 type Student = GetStudentsResponse["students"][number];
 
 const StudentsPage = () => {
-    const { year = "", faculty_slug = "", level = "", folder_id } = useParams();
+    const { year = "", faculty_slug = "", group_id = "", folder_id } = useParams();
     const setIsImportUsersDialogOpen = useStudentListStore((s) => s.setIsImportUsersDialogOpen);
     const isImportUsersDialogOpen = useStudentListStore((s) => s.isImportUsersDialogOpen);
-
     const [list, setList] = useState(true);
     const [q, setQ] = useState("");
     const [page, setPage] = useState(1);
 
     const { data, isLoading, error } = useQuery({
-        queryFn: () => getStudents({ year, faculty_slug, level_slug: level, folder_id }),
-        queryKey: ["students", year, faculty_slug, level, folder_id],
+        queryFn: () => getStudents({ year, faculty_slug, group_id, folder_id }),
+        queryKey: ["students", year, faculty_slug, group_id, folder_id],
         ...withInitialData<GetStudentsResponse>(),
     });
 
@@ -67,13 +66,13 @@ const StudentsPage = () => {
                     { label: "Scan Documents", to: basePath },
                     { label: year.replace("-", " – "), to: `${basePath}/${year}` },
                     { label: data?.faculty?.name ?? "", to: `${basePath}/${year}/${faculty_slug}` },
-                    { label: data?.study_level?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${level}` },
-                    { label: data?.folder?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${level}/${folder_id}` },
+                    { label: data?.study_level?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${group_id}` },
+                    { label: data?.folder?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${group_id}/${folder_id}` },
                 ]}
             />
             <PageHeader
                 title={`${data?.folder?.name ?? ""} — Student Documents`}
-                subtitle={`${data?.study_level.name} · ${data?.faculty.short}`}
+                subtitle={`${data?.study_level_group?.name} · ${data?.faculty.short}`}
                 right={
                     <div className="flex w-full flex-col gap-1 sm:flex-row sm:items-center sm:justify-end sm:gap-1.5">
                         <ViewToggle list={list} onChange={setList} id="students-view" />

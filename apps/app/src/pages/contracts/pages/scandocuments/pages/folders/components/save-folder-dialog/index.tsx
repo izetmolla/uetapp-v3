@@ -2,7 +2,7 @@ import { useCallback, useEffect, type FC } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FolderPlus, Loader2 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, type QueryKey } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { Button } from "@workspace/ui/components/button";
@@ -37,12 +37,11 @@ const FORM_ID = "save-folder-form";
 
 
 
-interface SaveFolderDialogProps { }
-const SaveFolderDialog: FC<SaveFolderDialogProps> = () => {
+interface SaveFolderDialogProps { queryKey: QueryKey }
+const SaveFolderDialog: FC<SaveFolderDialogProps> = ({ queryKey }) => {
     const { year = "", faculty_slug = "", group_id = "" } = useParams();
     const { folder, setFolder, isSaveFolderDialogOpen, setIsSaveFolderDialogOpen } = useFoldersStore();
 
-    const listQueryKey = ["folders", year, faculty_slug, group_id] as const;
 
     const form = useForm<SaveFolderSchema>({
         resolver: zodResolver(saveFolderSchema),
@@ -88,7 +87,7 @@ const SaveFolderDialog: FC<SaveFolderDialogProps> = () => {
                 return;
             }
             toast.success(res.message ?? "Folder saved successfully", { richColors: true });
-            void queryClient.invalidateQueries({ queryKey: listQueryKey });
+            void queryClient.invalidateQueries({ queryKey });
             onClose();
         },
         onError: (error: { response?: { data?: { message?: string } }; message?: string }) => {

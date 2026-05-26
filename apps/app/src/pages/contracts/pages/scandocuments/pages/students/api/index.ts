@@ -3,6 +3,7 @@ import type { Faculty } from "../../../data/mockData";
 import type { StudyLevel } from "../../../data/mockData";
 import type { AcademicYear } from "../../../data/mockData";
 import type { Folder } from "../../../data/mockData";
+import type { StudyLevelGroup } from "../../studylevels/api";
 
 type Student = {
     id: number;
@@ -18,6 +19,7 @@ export interface GetStudentsResponse {
     students: Student[];
     faculty: Faculty;
     study_level: StudyLevel;
+    study_level_group: StudyLevelGroup;
     academic_year: AcademicYear;
     folder: Folder;
 }

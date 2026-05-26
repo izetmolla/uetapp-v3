@@ -76,11 +76,11 @@ const FoldersPage = () => {
           { label: "Documents", to: basePath },
           { label: year.replace("-", " – "), to: `${basePath}/${year}` },
           { label: data?.faculty?.name ?? "", to: `${basePath}/${year}/${faculty_slug}` },
-          { label: data?.study_level?.name ?? "", to: `#` },
+          { label: data?.study_level_group?.name ?? "", to: `#` },
         ]}
       />
       <PageHeader
-        title={`Folders — ${data?.study_level?.name ?? ""}`}
+        title={`Folders — ${data?.study_level_group?.name ?? ""}`}
         subtitle={data?.faculty?.name ?? ""}
         right={
           <div className="flex items-center gap-3">
@@ -144,7 +144,7 @@ const FoldersPage = () => {
           label="folders"
         />
       </ContentLoader>
-      <SaveFolderDialog />
+      <SaveFolderDialog queryKey={queryKey} />
       <DeleteFolderDialog />
       <DownloadFolderDialog />
       <SyncStudentsDialog

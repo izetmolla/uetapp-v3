@@ -28,6 +28,7 @@ func (c *Controller) GetListDataApi(ctx fiber.Ctx) error {
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 	}
+
 	studyLevelGroup, err := c.getStudyLevelGroup(ctxPtr, groupID)
 	if err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
