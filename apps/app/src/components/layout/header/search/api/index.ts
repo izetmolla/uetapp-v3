@@ -12,8 +12,33 @@ export type SearchService = {
 export type Student = {
     id: string;
     full_name: string;
+    student_fid: string;
+    sp_id: string;
+    person_id: string;
+    status: string;
+    status_type: string;
+    surname: string;
+    firstname: string;
+    fathersname: string;
+    phone: string;
+    mobile: string;
     email: string;
+    email_uet: string;
+    document_id: string;
+    document_type: string;
+    department: string;
+    program_id: string;
+    program: string;
+    program_specialty: string;
+    reg_date: string;
+    reg_year: string;
     faculty: string;
+    study_level: string;
+    nationality: string;
+    nat_code: string;
+    city: string;
+    address: string;
+    lastsyncdate: string;
 };
 export type Students = Student[];
 export type Employee = {

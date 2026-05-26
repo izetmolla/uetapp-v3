@@ -67,11 +67,11 @@ const searchFilters = [
 ] as const;
 
 const people: Person[] = [
-    { name: "Marcus Chen", initials: "MC" },
-    { name: "Sarah Williams", initials: "SW" },
-    { name: "James O'Brien", initials: "JO" },
-    { name: "Priya Sharma", initials: "PS" },
-    { name: "Elena Novak", initials: "EN" }
+    // { name: "Marcus Chen", initials: "MC" },
+    // { name: "Sarah Williams", initials: "SW" },
+    // { name: "James O'Brien", initials: "JO" },
+    // { name: "Priya Sharma", initials: "PS" },
+    // { name: "Elena Novak", initials: "EN" }
 ];
 
 const DROPDOWN_GAP_PX = 8;
@@ -384,6 +384,12 @@ function SearchInputField({
     );
 }
 
+function studentSearchSubtitle(student: Student) {
+    return [student.email, student.faculty, student.program, student.study_level]
+        .filter(Boolean)
+        .join(" · ");
+}
+
 function initialsFromName(name: string) {
     const parts = name.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return "?";
@@ -394,19 +400,29 @@ function initialsFromName(name: string) {
 function SearchResultRow({
     name,
     subtitle,
-    onSelect
+    onSelect,
+    url
 }: {
     name: string;
     subtitle: string;
     onSelect?: () => void;
+    url: string;
 }) {
+    const navigate = useNavigate();
+
+
+    const handleNavigate = useCallback(() => {
+        navigate(url);
+        onSelect?.();
+    }, [navigate]);
+
     return (
         <li>
             <button
                 type="button"
                 className="hover:bg-muted flex w-full items-start gap-3 rounded-md px-2 py-2 text-left transition-colors"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={onSelect}>
+                onClick={handleNavigate}>
                 <Avatar className="mt-0.5 size-8 shrink-0">
                     <AvatarFallback className="text-xs">{initialsFromName(name)}</AvatarFallback>
                 </Avatar>
@@ -455,8 +471,9 @@ function SearchDataGroups() {
                                 <SearchResultRow
                                     key={student.id}
                                     name={student.full_name}
-                                    subtitle={[student.email, student.faculty].filter(Boolean).join(" · ")}
+                                    subtitle={studentSearchSubtitle(student)}
                                     onSelect={() => setQuery(student.full_name)}
+                                    url={`/contracts/students/${student.id}`}
                                 />
                             ))}
                         {isEmployeesGroup(group) &&
@@ -466,6 +483,7 @@ function SearchDataGroups() {
                                     name={employee.full_name}
                                     subtitle={[employee.email, employee.department].filter(Boolean).join(" · ")}
                                     onSelect={() => setQuery(employee.full_name)}
+                                    url={`/hr/employees/${employee.id}`}
                                 />
                             ))}
                     </ul>

@@ -14,7 +14,7 @@ func (c *Controller) getStudentsToSearch(ctx context.Context, keyword string, _ 
 	data := map[string]any{
 		"id":    "students",
 		"title": "Students",
-		"data":  []Student{},
+		"data":  []SearchStudentItem{},
 	}
 
 	resource, err := gorm.G[models.Resource](db).
@@ -57,7 +57,11 @@ func (c *Controller) getStudentsToSearch(ctx context.Context, keyword string, _ 
 	}
 
 	students, meta := parseStudentsSearchBody(res.Body)
-	data["data"] = formatStudentsForSearch(students)
+	studentsItems, err := c.formatStudentsForSearch(ctx, students)
+	if err != nil {
+		return nil, err
+	}
+	data["data"] = studentsItems
 	data["meta"] = meta
 	return data, nil
 }
