@@ -2,11 +2,11 @@ package contracts
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/config"
 	"github.com/uetedu/app/internal/contracts/scandocuments"
-	"github.com/uetedu/app/internal/contracts/scandocuments/folders"
 	"github.com/uetedu/app/internal/contracts/students"
 	"github.com/uetedu/app/internal/contracts/syncstudent"
 )
@@ -37,7 +37,6 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 
 func SetupWebRoutes(appGroup fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
-	folders.SetupApiRoutes(appGroup.Group("/contracts/scandocuments/folders"), appClients)
 	app := appGroup.Group("/contracts", controller.ContractsMiddlewareView)
 	scandocuments.SetupWebRoutes(app, appClients)
 	students.SetupWebRoutes(app, appClients)
@@ -74,5 +73,8 @@ func (cc *Controller) ContractsMiddlewareApi(ctx fiber.Ctx) error {
 }
 
 func (cc *Controller) ContractsMiddlewareView(ctx fiber.Ctx) error {
+	if strings.HasPrefix(ctx.Path(), "/contracts/scandocuments/folders/device") {
+		return ctx.Next()
+	}
 	return cc.contractsMiddleware(ctx, false)
 }
