@@ -59,6 +59,9 @@ const StudentsPage = () => {
     const basePath = "/contracts/scandocuments";
     const programLabel = data?.study_level?.name ?? "";
 
+
+    const stydyLevels = data?.study_level_group?.study_levels?.map((s) => s.name).join(", ");
+
     return (
         <PageShell>
             <Crumbs
@@ -66,13 +69,13 @@ const StudentsPage = () => {
                     { label: "Scan Documents", to: basePath },
                     { label: year.replace("-", " – "), to: `${basePath}/${year}` },
                     { label: data?.faculty?.name ?? "", to: `${basePath}/${year}/${faculty_slug}` },
-                    { label: data?.study_level?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${group_id}` },
+                    { label: data?.study_level_group?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${group_id}` },
                     { label: data?.folder?.name ?? "", to: `${basePath}/${year}/${faculty_slug}/${group_id}/${folder_id}` },
                 ]}
             />
             <PageHeader
                 title={`${data?.folder?.name ?? ""} — Student Documents`}
-                subtitle={`${data?.study_level_group?.name} · ${data?.faculty.short}`}
+                subtitle={stydyLevels}
                 right={
                     <div className="flex w-full flex-col gap-1 sm:flex-row sm:items-center sm:justify-end sm:gap-1.5">
                         <ViewToggle list={list} onChange={setList} id="students-view" />
