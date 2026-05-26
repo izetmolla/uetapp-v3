@@ -26,7 +26,12 @@ import { Link, useLocation } from "react-router";
 import Icon from "@workspace/ui/components/icon";
 import { cn } from "@workspace/ui/lib/utils";
 import { useEffect, useState, type FC } from "react";
-import { isNavItemActive, isNavTreeActive, type NavigationItem } from "./nav-utils";
+import {
+    collectNavPaths,
+    isNavItemActive,
+    isNavTreeActive,
+    type NavigationItem,
+} from "./nav-utils";
 
 export type { NavigationItem };
 
@@ -43,10 +48,11 @@ type NavCollapsibleProps = {
     item: NavigationItem;
     pathname: string;
     isMobile: boolean;
+    groupPaths: string[];
 };
 
-const NavCollapsible: FC<NavCollapsibleProps> = ({ item, pathname, isMobile }) => {
-    const branchActive = isNavTreeActive(pathname, item);
+const NavCollapsible: FC<NavCollapsibleProps> = ({ item, pathname, isMobile, groupPaths }) => {
+    const branchActive = isNavTreeActive(pathname, item, groupPaths);
     const [open, setOpen] = useState(branchActive);
 
     useEffect(() => {
@@ -76,7 +82,7 @@ const NavCollapsible: FC<NavCollapsibleProps> = ({ item, pathname, isMobile }) =
                             <DropdownMenuItem
                                 className={cn(
                                     "hover:text-foreground active:text-foreground hover:bg-[var(--primary)]/10! active:bg-[var(--primary)]/10!",
-                                    isNavItemActive(pathname, subItem.to) &&
+                                    isNavItemActive(pathname, subItem.to, groupPaths) &&
                                         "bg-[var(--primary)]/10 text-foreground",
                                 )}
                                 asChild
@@ -112,7 +118,7 @@ const NavCollapsible: FC<NavCollapsibleProps> = ({ item, pathname, isMobile }) =
                             <SidebarMenuSubItem key={subItem.title}>
                                 <SidebarMenuSubButton
                                     className={menuButtonClassName}
-                                    isActive={isNavItemActive(pathname, subItem.to)}
+                                    isActive={isNavItemActive(pathname, subItem.to, groupPaths)}
                                     asChild>
                                     <Link
                                         to={subItem.to}
@@ -136,7 +142,10 @@ export const NavigationItems: FC<NavigationItemsProps> = ({ navigations }) => {
 
     return (
         <>
-            {navigations.map((nav) => (
+            {navigations.map((nav) => {
+                const groupPaths = collectNavPaths(nav.children);
+
+                return (
                 <SidebarGroup key={nav.title}>
                     <SidebarGroupLabel>{nav.title}</SidebarGroupLabel>
                     <SidebarGroupContent className="flex flex-col gap-2">
@@ -144,11 +153,16 @@ export const NavigationItems: FC<NavigationItemsProps> = ({ navigations }) => {
                             {nav?.children?.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     {Array.isArray(item.children) && item.children.length > 0 ? (
-                                        <NavCollapsible item={item} pathname={pathname} isMobile={isMobile} />
+                                        <NavCollapsible
+                                            item={item}
+                                            pathname={pathname}
+                                            isMobile={isMobile}
+                                            groupPaths={groupPaths}
+                                        />
                                     ) : (
                                         <SidebarMenuButton
                                             className={menuButtonClassName}
-                                            isActive={isNavItemActive(pathname, item.to)}
+                                            isActive={isNavItemActive(pathname, item.to, groupPaths)}
                                             tooltip={item.title}
                                             asChild>
                                             <Link
@@ -180,7 +194,8 @@ export const NavigationItems: FC<NavigationItemsProps> = ({ navigations }) => {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-            ))}
+                );
+            })}
         </>
     );
 };
