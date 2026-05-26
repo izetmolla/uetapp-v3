@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@workspace/ui/componen
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
+import { Progress } from "@workspace/ui/components/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@workspace/ui/components/avatar";
 import {
     Select,
@@ -25,12 +26,14 @@ import {
     Clock,
     Award,
     Wallet,
+    type LucideIcon,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getStudentDetail } from "./api";
 import { useParams } from "react-router";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import { withError } from "@workspace/flowtrove/lib/network";
+import { cn } from "@workspace/ui/lib/utils";
 
 
 const studentMockData = {
@@ -51,8 +54,6 @@ const studentMockData = {
         faculty: "Faculty of Engineering",
         academicYear: "2024–2025",
         program: "BSc Computer Science",
-        gpa: 3.72,
-        gpaMax: 4.0,
     },
     programs: [
         {
@@ -66,6 +67,10 @@ const studentMockData = {
             speciality: "Software Engineering",
             fundingType: "State-Funded",
             status: "Active",
+            gpa: 3.72,
+            gpaMax: 4.0,
+            creditsEarned: 156,
+            creditsRequired: 240,
         },
         {
             type: "Minor",
@@ -78,12 +83,26 @@ const studentMockData = {
             speciality: "",
             fundingType: "Self-Funded",
             status: "Active",
+            gpa: 3.85,
+            gpaMax: 4.0,
+            creditsEarned: 42,
+            creditsRequired: 60,
         },
     ],
 };
 
 type Identity = typeof studentMockData.identity;
 type Program = (typeof studentMockData.programs)[number];
+
+const profileTabs: { value: string; label: string; icon: LucideIcon }[] = [
+    { value: "information", label: "Information", icon: ClipboardList },
+    { value: "addresses", label: "Addresses", icon: MapPin },
+    { value: "academic", label: "Academic", icon: BookOpen },
+    { value: "documents", label: "Documents", icon: FileText },
+    { value: "timetable", label: "Timetable", icon: Clock },
+    { value: "grades", label: "Grades", icon: Award },
+    { value: "finance", label: "Finance", icon: Wallet },
+];
 
 function Field({
     label,
@@ -131,6 +150,219 @@ function Field({
     );
 }
 
+function progressPct(value: number, max: number): number {
+    if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) return 0;
+    return Math.min(100, (value / max) * 100);
+}
+
+function AcademicProgressCard({
+    gpa,
+    gpaMax,
+    creditsEarned,
+    creditsRequired,
+}: {
+    gpa?: number;
+    gpaMax?: number;
+    creditsEarned?: number;
+    creditsRequired?: number;
+}) {
+    const gpaPct = progressPct(gpa ?? 0, gpaMax ?? 0);
+    const creditsPct = progressPct(creditsEarned ?? 0, creditsRequired ?? 0);
+    const hasCredits =
+        creditsEarned !== undefined &&
+        creditsRequired !== undefined &&
+        Number.isFinite(creditsEarned) &&
+        Number.isFinite(creditsRequired);
+    let creditsRemaining: number | null = null;
+    let creditsLabel = "—";
+    if (hasCredits) {
+        creditsRemaining = Math.max(0, creditsRequired - creditsEarned);
+        creditsLabel = `${creditsEarned} / ${creditsRequired}`;
+    }
+
+    const hasGpa = gpa !== undefined && gpaMax !== undefined && Number.isFinite(gpa) && Number.isFinite(gpaMax);
+    let gpaLabel = "—";
+    if (hasGpa) {
+        gpaLabel = `${gpa.toFixed(2)} / ${gpaMax.toFixed(1)}`;
+    }
+
+    return (
+        <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+            <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-1.5">
+                        <Award className="size-3.5 shrink-0 text-primary" aria-hidden />
+                        <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                            GPA
+                        </span>
+                        <span className="truncate text-sm font-semibold tabular-nums text-foreground">
+                            {gpaLabel}
+                        </span>
+                    </div>
+                    {hasGpa ? (
+                        <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
+                            {gpaPct.toFixed(0)}%
+                        </span>
+                    ) : null}
+                </div>
+                <Progress value={gpaPct} className="h-1 bg-primary/15" aria-label="GPA progress" />
+            </div>
+
+            <div className="space-y-1.5 sm:border-l sm:border-t-0 sm:border-border/60 sm:pl-4 sm:pt-0 border-t border-border/60 pt-3 sm:pt-0">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-1.5">
+                        <BookOpen className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                        <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                            Credits
+                        </span>
+                        <span className="truncate text-sm font-semibold tabular-nums text-foreground">
+                            {creditsLabel}
+                        </span>
+                    </div>
+                    {creditsRemaining !== null ? (
+                        <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
+                            {creditsRemaining} left
+                        </span>
+                    ) : null}
+                </div>
+                <Progress value={creditsPct} className="h-1" aria-label="Credits progress" />
+            </div>
+        </div>
+    );
+}
+
+function ProgramCard({
+    program,
+    editing,
+    onFieldChange,
+}: {
+    program: any;
+    editing: boolean;
+    onFieldChange: (key: keyof Program, value: string) => void;
+}) {
+    const isPrimary = program?.type === "Primary";
+
+    console.log(program);
+
+    return (
+        <article
+            className={cn(
+                "glass-card w-full overflow-hidden rounded-2xl border border-border/70",
+                isPrimary ? "border-l-4 border-l-primary" : "border-l-4 border-l-border",
+            )}
+        >
+            <header className="flex flex-col gap-3 border-b border-border/60 bg-muted/25 px-6 py-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                    <div
+                        className={cn(
+                            "flex size-10 shrink-0 items-center justify-center rounded-xl",
+                            isPrimary ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+                        )}
+                    >
+                        <GraduationCap className="size-5" aria-hidden />
+                    </div>
+                    <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Badge
+                                className={cn(
+                                    "border-0 font-medium",
+                                    isPrimary
+                                        ? "bg-primary/10 text-primary hover:bg-primary/10"
+                                        : "bg-secondary text-secondary-foreground hover:bg-secondary",
+                                )}
+                            >
+                                {program?.type}
+                            </Badge>
+                            <Badge
+                                variant="outline"
+                                className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                            >
+                                {program?.status}
+                            </Badge>
+                        </div>
+                        <h3 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
+                            {program?.programName}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">{program?.faculty}</p>
+                    </div>
+                </div>
+                <p className="text-xs text-muted-foreground sm:text-right">
+                    {program?.department}
+                </p>
+            </header>
+
+            <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <Field
+                    label="Program Name"
+                    value={program?.name}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("programName", v)}
+                />
+                <Field
+                    label="Faculty"
+                    value={program?.faculty}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("faculty", v)}
+                />
+                <Field
+                    label="Department"
+                    value={program?.department}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("department", v)}
+                />
+                <Field
+                    label="Year of Registration"
+                    value={program?.yearOfRegistration}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("yearOfRegistration", v)}
+                />
+                <Field
+                    label="Current Year"
+                    value={program?.currentYear}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("currentYear", v)}
+                />
+                <Field
+                    label="Study Form"
+                    value={program?.studyForm}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("studyForm", v)}
+                    options={["Full-Time", "Part-Time", "Distance"]}
+                />
+                <Field
+                    label="Speciality / Profile"
+                    value={program?.speciality}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("speciality", v)}
+                />
+                <Field
+                    label="Funding Type"
+                    value={program?.fundingType}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("fundingType", v)}
+                    options={["State-Funded", "Self-Funded", "Scholarship"]}
+                />
+                <Field
+                    label="Status"
+                    value={program?.status}
+                    editing={editing}
+                    onChange={(v) => onFieldChange("status", v)}
+                    options={["Active", "Inactive", "Completed"]}
+                />
+            </div>
+
+            <div className="border-t border-border/60 bg-muted/10 px-6 py-3">
+                <AcademicProgressCard
+                    gpa={program.gpa}
+                    gpaMax={program.gpaMax}
+                    creditsEarned={program.creditsEarned}
+                    creditsRequired={program.creditsRequired}
+                />
+            </div>
+        </article>
+    );
+}
+
 export default function StudentProfilePage() {
     const { id } = useParams();
     const [contractStaff] = useState(true);
@@ -165,11 +397,9 @@ export default function StudentProfilePage() {
     const setProgramField = (i: number, k: keyof Program, v: string) =>
         setDraftPrograms((p) => p.map((pr, idx) => (idx === i ? { ...pr, [k]: v } : pr)));
 
-    const gpaPct = (studentMockData.quickStats.gpa / studentMockData.quickStats.gpaMax) * 100;
-
     return (
         <ContentLoader isLoading={isLoading} error={withError(error, data)}>
-            <div className="p-6 space-y-6 max-w-[1400px]">
+            <div className="mx-auto w-full space-y-6 p-6 xl:max-w-6xl 2xl:max-w-7xl">
                 {/* Header Card */}
                 <div className="glass-card rounded-2xl border border-border/70 p-6">
                     <div className="flex flex-col lg:flex-row gap-8">
@@ -177,7 +407,7 @@ export default function StudentProfilePage() {
                         <div className="flex flex-col items-center gap-3 shrink-0 lg:w-40">
                             <div className="relative group">
                                 <Avatar className="h-24 w-24 ring-2 ring-border">
-                                    <AvatarImage src={studentMockData.avatar} alt={identity.fullName} />
+                                    <AvatarImage src={studentMockData.avatar} alt={data?.student?.firstname + " " + data?.student?.lastname} />
                                     <AvatarFallback className="bg-muted text-muted-foreground">EM</AvatarFallback>
                                 </Avatar>
                                 {editMode && (
@@ -215,12 +445,12 @@ export default function StudentProfilePage() {
 
                         {/* Identity */}
                         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                            <Field label="Full Name" value={current.fullName} editing={editMode} onChange={(v) => setIdField("fullName", v)} />
-                            <Field label="Student ID" value={current.studentId} editing={editMode} onChange={(v) => setIdField("studentId", v)} />
+                            <Field label="Full Name" value={data?.student?.firstname + " " + data?.student?.lastname} editing={editMode} onChange={(v) => setIdField("fullName", v)} />
+                            <Field label="Student ID" value={data?.student?.id_number ?? ""} editing={editMode} onChange={(v) => setIdField("studentId", v)} />
                             <Field label="Date of Birth" value={current.dateOfBirth} editing={editMode} onChange={(v) => setIdField("dateOfBirth", v)} />
                             <Field label="Gender" value={current.gender} editing={editMode} onChange={(v) => setIdField("gender", v)} options={["Male", "Female", "Other"]} />
                             <Field label="Nationality" value={current.nationality} editing={editMode} onChange={(v) => setIdField("nationality", v)} />
-                            <Field label="Email" value={current.email} editing={editMode} onChange={(v) => setIdField("email", v)} />
+                            <Field label="Email" value={data?.student?.email ?? ""} editing={editMode} onChange={(v) => setIdField("email", v)} />
                             <Field label="Phone" value={current.phone} editing={editMode} onChange={(v) => setIdField("phone", v)} />
                             <Field label="Enrollment Status" value={current.enrollmentStatus} editing={editMode} onChange={(v) => setIdField("enrollmentStatus", v)} options={["Enrolled", "On Leave", "Graduated", "Withdrawn"]} />
                         </div>
@@ -242,102 +472,82 @@ export default function StudentProfilePage() {
                                 <span className="font-medium">Program:</span>
                                 <span className="text-muted-foreground">{studentMockData.quickStats.program}</span>
                             </div>
-                            <div className="w-full lg:w-64 mt-2 px-4 py-3 rounded-xl bg-gradient-to-br from-primary/10 to-card border border-primary/20">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">GPA</span>
-                                    <span className="text-sm font-semibold text-primary">
-                                        {studentMockData.quickStats.gpa.toFixed(2)} / {studentMockData.quickStats.gpaMax.toFixed(2)}
-                                    </span>
-                                </div>
-                                <div className="h-1.5 rounded-full bg-primary/20 overflow-hidden">
-                                    <div
-                                        className="h-full bg-primary rounded-full transition-all duration-500"
-                                        style={{ width: `${gpaPct}%` }}
-                                    />
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <Tabs defaultValue="information" className="w-full">
-                    <div className="border-b border-border overflow-x-auto">
-                        <TabsList className="bg-transparent p-0 h-auto gap-1 rounded-none justify-start">
-                            {[
-                                { v: "information", l: "Information", i: ClipboardList },
-                                { v: "addresses", l: "Addresses", i: MapPin },
-                                { v: "academic", l: "Academic Info", i: BookOpen },
-                                { v: "documents", l: "Documents", i: FileText },
-                                { v: "timetable", l: "Timetable", i: Clock },
-                                { v: "grades", l: "Grades", i: Award },
-                                { v: "finance", l: "Finance Records", i: Wallet },
-                            ].map((t) => (
-                                <TabsTrigger
-                                    key={t.v}
-                                    value={t.v}
-                                    className="px-4 py-3 rounded-none bg-transparent text-muted-foreground data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary transition-all duration-200 whitespace-nowrap"
-                                >
-                                    {t.l}
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
-                    </div>
-
-                    <TabsContent value="information" className="mt-6 space-y-6">
-                        <div>
-                            <h2 className="text-base font-semibold text-foreground border-b border-border pb-2 mb-4">
-                                Study Programs
-                            </h2>
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                                {currentPrograms.map((p, i) => (
-                                    <div
-                                        key={i}
-                                        className="glass-card rounded-xl border border-border/70 p-5 relative"
+                <Tabs defaultValue="information" className="w-full space-y-5">
+                    <nav
+                        aria-label="Student profile sections"
+                        className="glass-card flex h-12 w-full items-center justify-start overflow-hidden rounded-2xl border border-border/70 px-2 py-2"
+                    >
+                        <div className="w-full overflow-x-auto overflow-y-hidden overscroll-x-contain overscroll-y-none [-webkit-overflow-scrolling:touch]">
+                            <TabsList className="flex h-9 w-max flex-nowrap items-center justify-start gap-1 overflow-hidden rounded-xl bg-muted/40 p-1">
+                                {profileTabs.map((tab) => (
+                                    <TabsTrigger
+                                        key={tab.value}
+                                        value={tab.value}
+                                        className="inline-flex h-8 shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground shadow-none after:hidden transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                                     >
-                                        <Badge
-                                            className={
-                                                p.type === "Primary"
-                                                    ? "absolute top-4 right-4 bg-primary/10 text-primary hover:bg-primary/10 border-0"
-                                                    : "absolute top-4 right-4 bg-secondary text-secondary-foreground hover:bg-secondary border-0"
-                                            }
-                                        >
-                                            {p.type}
-                                        </Badge>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mt-2">
-                                            <Field label="Program Name" value={p.programName} editing={editMode} onChange={(v) => setProgramField(i, "programName", v)} />
-                                            <Field label="Faculty" value={p.faculty} editing={editMode} onChange={(v) => setProgramField(i, "faculty", v)} />
-                                            <Field label="Department" value={p.department} editing={editMode} onChange={(v) => setProgramField(i, "department", v)} />
-                                            <Field label="Year of Registration" value={p.yearOfRegistration} editing={editMode} onChange={(v) => setProgramField(i, "yearOfRegistration", v)} />
-                                            <Field label="Current Year" value={p.currentYear} editing={editMode} onChange={(v) => setProgramField(i, "currentYear", v)} />
-                                            <Field label="Study Form" value={p.studyForm} editing={editMode} onChange={(v) => setProgramField(i, "studyForm", v)} options={["Full-Time", "Part-Time", "Distance"]} />
-                                            <Field label="Speciality / Profile" value={p.speciality} editing={editMode} onChange={(v) => setProgramField(i, "speciality", v)} />
-                                            <Field label="Funding Type" value={p.fundingType} editing={editMode} onChange={(v) => setProgramField(i, "fundingType", v)} options={["State-Funded", "Self-Funded", "Scholarship"]} />
-                                            <div className="md:col-span-2">
-                                                <Field label="Status" value={p.status} editing={editMode} onChange={(v) => setProgramField(i, "status", v)} options={["Active", "Inactive", "Completed"]} />
-                                            </div>
-                                        </div>
-                                    </div>
+                                        <tab.icon className="size-4 shrink-0 opacity-80" aria-hidden />
+                                        <span className="whitespace-nowrap">{tab.label}</span>
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </div>
+                    </nav>
+
+                    <TabsContent value="information" className="mt-0 focus-visible:outline-none">
+                        <section className="w-full space-y-5">
+                            <div className="space-y-1">
+                                <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                                    Study Programs
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Enrolled programs, faculty assignment, and academic standing.
+                                </p>
+                            </div>
+                            <div className="flex w-full flex-col gap-5">
+                                {data?.student?.programs?.map((p, i) => (
+                                    <ProgramCard
+                                        key={`${p.study_program.name}-${i}`}
+                                        program={p.study_program as any}
+                                        editing={editMode}
+                                        onFieldChange={(key, value) => setProgramField(i, key, value)}
+                                    />
+                                ))}
+                                {currentPrograms.map((p, i) => (
+                                    <ProgramCard
+                                        key={`${p.programName}-${i}`}
+                                        program={p}
+                                        editing={editMode}
+                                        onFieldChange={(key, value) => setProgramField(i, key, value)}
+                                    />
                                 ))}
                             </div>
-                        </div>
+                        </section>
                     </TabsContent>
 
-                    {[
-                        { v: "addresses", i: MapPin },
-                        { v: "academic", i: BookOpen },
-                        { v: "documents", i: FileText },
-                        { v: "timetable", i: Clock },
-                        { v: "grades", i: Award },
-                        { v: "finance", i: Wallet },
-                    ].map(({ v, i: Icon }) => (
-                        <TabsContent key={v} value={v} className="mt-6">
-                            <div className="glass-card flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-24 gap-3">
-                                <Icon className="h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
-                                <p className="text-sm text-muted-foreground">Tab content coming soon</p>
-                            </div>
-                        </TabsContent>
-                    ))}
+                    {profileTabs
+                        .filter((tab) => tab.value !== "information")
+                        .map((tab) => (
+                            <TabsContent
+                                key={tab.value}
+                                value={tab.value}
+                                className="mt-0 focus-visible:outline-none"
+                            >
+                                <div className="glass-card flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border/80 px-6 py-20 text-center">
+                                    <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/60">
+                                        <tab.icon className="size-7 text-muted-foreground/50" strokeWidth={1.5} aria-hidden />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-foreground">{tab.label}</p>
+                                        <p className="text-sm text-muted-foreground">This section is coming soon.</p>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                        ))}
                 </Tabs>
             </div>
         </ContentLoader>

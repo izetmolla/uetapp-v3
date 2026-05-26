@@ -1,5 +1,17 @@
 import ApiService, { withAPI } from "@workspace/flowtrove/lib/network";
 
+type StudyProgram = {
+    id: string;
+    name: string;
+    code: string;
+}
+
+type Program = {
+    id: string;
+    name: string;
+    code: string;
+    study_program: StudyProgram;
+}
 type student = {
     id: string;
     firstname: string;
@@ -9,6 +21,7 @@ type student = {
     pasport_number: string;
     status: string;
     user_id: string;
+    programs: Program[];
 }
 
 interface StudentDetailResponse {
