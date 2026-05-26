@@ -60,7 +60,10 @@ const StudentsPage = () => {
     const programLabel = data?.study_level?.name ?? "";
 
 
-    const stydyLevels = data?.study_level_group?.study_levels?.map((s) => s.name).join(", ");
+    const stydyLevels = data?.study_level_group?.study_levels?.map((s) => s?.study_level?.name).join(", ");
+
+
+    console.log(data?.study_level_group.study_levels);
 
     return (
         <PageShell>

@@ -150,7 +150,7 @@ const FoldersPage = () => {
       <SyncStudentsDialog
         isOpen={isAddStudentToScanDialogOpen}
         onClose={() => setIsAddStudentToScanDialogOpen(false)}
-        withParams={{ CUSTOM_URL: `/apppp`, folder_id: folder?.id, creat_user: true }}
+        withParams={{ CUSTOM_URL: `/contracts/scandocuments/students/add-student-to-scan`, folder_id: folder?.id, creat_user: true }}
       />
     </PageShell>
   );

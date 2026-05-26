@@ -12,6 +12,7 @@ export type StudyLevel = {
     group: string
     icon: string;
     accent: string;
+    study_level?: StudyLevel;
 };
 
 export type StudyLevelGroup = {

@@ -15,7 +15,7 @@ type StudentScanLevelGroup struct {
 	AcademicYear                AcademicYear                  `json:"academic_year" gorm:"foreignKey:AcademicYearID;references:ID"`
 	FacultyID                   int64                         `json:"faculty_id" gorm:"type:bigint;not null;index"`
 	Faculty                     Faculty                       `json:"faculty" gorm:"foreignKey:FacultyID;references:ID"`
-	StudentScanLevelGroupLevels []StudentScanLevelGroupLevels `json:"student_scan_level_group_levels" gorm:"foreignKey:StudentScanLevelGroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	StudentScanLevelGroupLevels []StudentScanLevelGroupLevels `json:"study_levels" gorm:"foreignKey:StudentScanLevelGroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

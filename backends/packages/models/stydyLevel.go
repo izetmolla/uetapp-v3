@@ -31,7 +31,7 @@ type StudyLevel struct {
 	Folders                     []StudentScanFolder           `json:"folders" gorm:"foreignKey:StudyLevelID;references:ID"`
 	Faculties                   []FacultyStudyLevel           `json:"faculties" gorm:"foreignKey:StudyLevelID;references:ID"`
 	Programs                    []StudentStudyProgram         `json:"programs" gorm:"foreignKey:StudyLevelID;references:ID"`
-	StudentScanLevelGroupLevels []StudentScanLevelGroupLevels `json:"student_scan_level_group_levels" gorm:"foreignKey:StudyLevelID;references:ID"`
+	StudentScanLevelGroupLevels []StudentScanLevelGroupLevels `json:"study_levels" gorm:"foreignKey:StudyLevelID;references:ID"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

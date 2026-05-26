@@ -116,7 +116,7 @@ func (c *Controller) getStudyLevelGroup(ctx context.Context, groupID string) (*m
 	studyLevelGroup, err := gorm.G[models.StudentScanLevelGroup](db).
 		Where("id = ?", groupID).
 		Preload("StudentScanLevelGroupLevels", func(pb gorm.PreloadBuilder) error {
-			pb.Select("study_level_id")
+			pb.Select("student_scan_level_group_id", "study_level_id")
 			return nil
 		}).
 		Preload("StudentScanLevelGroupLevels.StudyLevel", func(pb gorm.PreloadBuilder) error {

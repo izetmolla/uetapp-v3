@@ -19,6 +19,8 @@ func SetupApiRoutes(apiGroup fiber.Router, appClients *config.AppClients) {
 	api.Get("/list", controller.GetListDataApi)
 	api.Get("/search", controller.SearchStudents)
 	api.Post("/", controller.CreateFolder)
+	api.Post("/add-student-to-scan", controller.AddStudentToScanAPI)
+	api.Get("/work-students-list", controller.WorkStudentsListAPI)
 }
 
 func SetupWebRoutes(app fiber.Router, appClients *config.AppClients) {
