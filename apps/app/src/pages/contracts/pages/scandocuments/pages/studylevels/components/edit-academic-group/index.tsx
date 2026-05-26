@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, type FC } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FolderPlus, Loader2 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import {type QueryKey, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -26,6 +26,7 @@ import { ReactSelect } from "@workspace/ui/components/reactselect";
 import {
     getApiErrorMessageFromBody,
     isApiErrorBody,
+    queryClient,
 } from "@workspace/flowtrove/lib/network";
 import { editAcademicGroup, editStudyLevelGroupSchema, type EditStudyLevelGroupSchema } from "./api";
 import useStudyLevelGroupStore from "../../store";
@@ -39,8 +40,9 @@ type StudyLevelOption = { label: string; value: string };
 
 interface EditStudyLevelGroupDialogProps {
     study_levels: StudyLevel[];
+    queryKey: QueryKey;
 }
-const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ study_levels }) => {
+const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ study_levels, queryKey }) => {
     const { year = "", faculty_slug = "" } = useParams();
     const {
         studyLevelGroup,
@@ -96,6 +98,7 @@ const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ study_l
                 return;
             }
             toast.success(res?.message ?? "Study level group edited successfully", { richColors: true });
+            queryClient.invalidateQueries({ queryKey: queryKey });
             onClose();
         },
         onError: (error: { response?: { data?: { message?: string } }; message?: string }) => {

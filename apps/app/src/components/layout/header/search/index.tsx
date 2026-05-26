@@ -314,7 +314,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
             setQuery("");
             navigate(href);
         },
-        [closeSearch, navigate]
+        [closeSearch, setQuery, navigate]
     );
 
     const contextValue: SearchContextValue = {
@@ -400,21 +400,20 @@ function initialsFromName(name: string) {
 function SearchResultRow({
     name,
     subtitle,
-    onSelect,
     url
 }: {
     name: string;
     subtitle: string;
-    onSelect?: () => void;
     url: string;
 }) {
     const navigate = useNavigate();
-
+    const { closeSearch, setQuery } = useSearch();
 
     const handleNavigate = useCallback(() => {
+        closeSearch();
+        setQuery("");
         navigate(url);
-        onSelect?.();
-    }, [navigate]);
+    }, [closeSearch, setQuery, navigate, url]);
 
     return (
         <li>
@@ -436,7 +435,7 @@ function SearchResultRow({
 }
 
 function SearchDataGroups() {
-    const { searchGroups, isSearchLoading, hasSearchKeyword, setQuery } = useSearch();
+    const { searchGroups, isSearchLoading, hasSearchKeyword } = useSearch();
 
     if (!hasSearchKeyword) return null;
 
@@ -472,8 +471,7 @@ function SearchDataGroups() {
                                     key={student.id}
                                     name={student.full_name}
                                     subtitle={studentSearchSubtitle(student)}
-                                    onSelect={() => setQuery(student.full_name)}
-                                    url={`/contracts/students/${student.id}`}
+                                    url={student?.url ?? "#"}
                                 />
                             ))}
                         {isEmployeesGroup(group) &&
@@ -482,7 +480,6 @@ function SearchDataGroups() {
                                     key={employee.id}
                                     name={employee.full_name}
                                     subtitle={[employee.email, employee.department].filter(Boolean).join(" · ")}
-                                    onSelect={() => setQuery(employee.full_name)}
                                     url={`/hr/employees/${employee.id}`}
                                 />
                             ))}

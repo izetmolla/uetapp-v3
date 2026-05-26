@@ -49,7 +49,8 @@ func replaceGroupLevels(ctx context.Context, tx *gorm.DB, groupID int64, levelID
 		return gorm.ErrRecordNotFound
 	}
 
-	if err := tx.WithContext(ctx).
+	// Hard-delete links so soft-deleted rows do not block re-insert (unique per group+level).
+	if err := tx.WithContext(ctx).Unscoped().
 		Where("student_scan_level_group_id = ?", groupID).
 		Delete(&models.StudentScanLevelGroupLevels{}).Error; err != nil {
 		return err

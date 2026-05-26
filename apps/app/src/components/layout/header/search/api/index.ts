@@ -39,6 +39,7 @@ export type Student = {
     city: string;
     address: string;
     lastsyncdate: string;
+    url: string;
 };
 export type Students = Student[];
 export type Employee = {
