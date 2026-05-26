@@ -133,7 +133,7 @@ func (c *Controller) getStudentScanLevelGroups(ctx context.Context, facultyID, a
 			AcademicYearID: academicYearID,
 		}).
 		Preload("StudentScanLevelGroupLevels", func(pb gorm.PreloadBuilder) error {
-			pb.Select("id", "study_level_id", "study_level")
+			pb.Select("student_scan_level_group_id", "study_level_id")
 			return nil
 		}).
 		Preload("StudentScanLevelGroupLevels.StudyLevel", func(pb gorm.PreloadBuilder) error {
@@ -145,8 +145,25 @@ func (c *Controller) getStudentScanLevelGroups(ctx context.Context, facultyID, a
 		return nil, err
 	}
 	for _, studentScanLevelGroup := range studentScanLevelGroups {
+		levels := make([]map[string]any, 0, len(studentScanLevelGroup.StudentScanLevelGroupLevels))
+		for _, link := range studentScanLevelGroup.StudentScanLevelGroupLevels {
+			sl := link.StudyLevel
+			levels = append(levels, map[string]any{
+				"id":          int(sl.ID),
+				"slug":        sl.Slug,
+				"name":        sl.Name,
+				"description": sl.Description,
+				"duration":    sl.Duration,
+				"students":    0,
+				"group":       sl.Group,
+				"icon":        sl.Icon,
+				"accent":      sl.Accent,
+			})
+		}
 		res = append(res, map[string]any{
-			"id": int(studentScanLevelGroup.ID),
+			"id":           int(studentScanLevelGroup.ID),
+			"name":         studentScanLevelGroup.Name,
+			"study_levels": levels,
 		})
 	}
 	return res, nil

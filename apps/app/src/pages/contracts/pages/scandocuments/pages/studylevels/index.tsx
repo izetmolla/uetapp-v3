@@ -98,7 +98,7 @@ const StudyLevelsPage = () => {
           <GridView grouped={grouped} />
         )}
         <Suspense fallback={null}>
-          <EditStudyLevelGroupDialog studyLevels={studyLevels} />
+          <EditStudyLevelGroupDialog study_levels={studyLevels} />
         </Suspense>
       </ContentLoader>
     </PageShell>

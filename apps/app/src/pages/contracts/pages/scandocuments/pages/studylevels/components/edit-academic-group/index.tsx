@@ -30,6 +30,7 @@ import {
 import { editAcademicGroup, editStudyLevelGroupSchema, type EditStudyLevelGroupSchema } from "./api";
 import useStudyLevelGroupStore from "../../store";
 import type { StudyLevel } from "../../api";
+import { useParams } from "react-router";
 
 const FORM_ID = "edit-study-level-group-form";
 
@@ -37,10 +38,10 @@ type StudyLevelOption = { label: string; value: string };
 
 
 interface EditStudyLevelGroupDialogProps {
-    studyLevels: StudyLevel[];
+    study_levels: StudyLevel[];
 }
-const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ studyLevels }) => {
-
+const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ study_levels }) => {
+    const { year = "", faculty_slug = "" } = useParams();
     const {
         studyLevelGroup,
         setStudyLevelGroup,
@@ -50,11 +51,11 @@ const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ studyLe
 
     const studyLevelOptions = useMemo<StudyLevelOption[]>(
         () =>
-            studyLevels.map((studyLevel) => ({
+            study_levels.map((studyLevel) => ({
                 label: studyLevel.name,
                 value: String(studyLevel.id),
             })),
-        [studyLevels],
+        [study_levels],
     );
 
     const form = useForm<EditStudyLevelGroupSchema>({
@@ -62,8 +63,9 @@ const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ studyLe
         defaultValues: {
             id: studyLevelGroup?.id != null ? String(studyLevelGroup.id) : "",
             name: studyLevelGroup?.name ?? "",
-            studyLevels:
-                studyLevelGroup?.study_levels?.map((level) => String(level.id)) ?? [],
+            study_levels: studyLevelGroup?.study_levels?.map((level) => String(level.id)) ?? [],
+            year,
+            faculty:faculty_slug,
         },
     });
 
@@ -73,8 +75,9 @@ const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ studyLe
         form.reset({
             id: studyLevelGroup?.id != null ? String(studyLevelGroup.id) : "",
             name: studyLevelGroup?.name ?? "",
-            studyLevels:
-                studyLevelGroup?.study_levels?.map((level) => String(level.id)) ?? [],
+            study_levels: studyLevelGroup?.study_levels?.map((level) => String(level.id)) ?? [],
+            year,
+            faculty:faculty_slug,
         });
     }, [form, studyLevelGroup, isEditStudyLevelGroupDialogOpen]);
 
@@ -142,7 +145,7 @@ const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ studyLe
                             />
                             <FormField
                                 control={form.control}
-                                name="studyLevels"
+                                name="study_levels"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Study levels</FormLabel>
@@ -152,7 +155,7 @@ const EditStudyLevelGroupDialog: FC<EditStudyLevelGroupDialogProps> = ({ studyLe
                                                 wrapOptionText
                                                 options={studyLevelOptions}
                                                 placeholder="Select study levels"
-                                                invalid={!!form.formState.errors.studyLevels}
+                                                invalid={!!form.formState.errors.study_levels}
                                                 value={field.value ?? []}
                                                 onValueChange={(values) => field.onChange(values)}
                                                 onBlur={field.onBlur}

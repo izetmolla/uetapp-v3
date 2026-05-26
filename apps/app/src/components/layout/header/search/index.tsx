@@ -29,7 +29,6 @@ import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
 import { cn } from "@workspace/ui/lib/utils";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@workspace/ui/hooks/use-debounce";
-import { navItems } from "../../sidebar/nav-main";
 import { useNavigate } from "react-router";
 import {
     isEmployeesGroup,
@@ -85,13 +84,15 @@ const searchInputClass = (open: boolean, inDropdown?: boolean) =>
         inDropdown
             ? "border-input/80 shadow-none"
             : open
-              ? "border-border/80 shadow-sm ring-1 ring-ring/20"
-              : "border-input/80 shadow-none hover:border-input"
+                ? "border-border/80 shadow-sm ring-1 ring-ring/20"
+                : "border-input/80 shadow-none hover:border-input"
     );
 
 const searchDropdownClass =
     "bg-popover text-popover-foreground flex flex-col overflow-hidden rounded-xl border border-border/60 shadow-md ring-1 ring-foreground/5 dark:border-border/50 dark:ring-foreground/10";
 
+
+const navItems: any = []
 function flattenNavItems(): FlatNavItem[] {
     const result: FlatNavItem[] = [];
 
@@ -548,38 +549,38 @@ function SearchDropdownContent() {
                     )}
 
                     {!hasSearchKeyword && (
-                    <section>
-                        <p className="text-muted-foreground mb-1 px-1 text-xs font-medium">Suggestions</p>
-                        {filteredSuggestions.length === 0 ? (
-                            <p className="text-muted-foreground px-2 py-6 text-center text-sm">No results found.</p>
-                        ) : (
-                            <ul className="space-y-0.5">
-                                {filteredSuggestions.map((item) => {
-                                    const Icon = item.icon ?? CalendarIcon;
+                        <section>
+                            <p className="text-muted-foreground mb-1 px-1 text-xs font-medium">Suggestions</p>
+                            {filteredSuggestions.length === 0 ? (
+                                <p className="text-muted-foreground px-2 py-6 text-center text-sm">No results found.</p>
+                            ) : (
+                                <ul className="space-y-0.5">
+                                    {filteredSuggestions.map((item) => {
+                                        const Icon = item.icon ?? CalendarIcon;
 
-                                    return (
-                                        <li key={`${item.href}-${item.title}`}>
-                                            <button
-                                                type="button"
-                                                className="hover:bg-muted flex w-full items-start gap-3 rounded-md px-2 py-2 text-left transition-colors"
-                                                onMouseDown={(e) => e.preventDefault()}
-                                                onClick={() => handleNavigate(item.href)}>
-                                                <span className="bg-muted text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md">
-                                                    <Icon className="size-4" />
-                                                </span>
-                                                <span className="min-w-0 flex-1">
-                                                    <span className="line-clamp-1 text-sm font-medium">{item.title}</span>
-                                                    <span className="text-muted-foreground line-clamp-1 text-xs">
-                                                        {item.group}
+                                        return (
+                                            <li key={`${item.href}-${item.title}`}>
+                                                <button
+                                                    type="button"
+                                                    className="hover:bg-muted flex w-full items-start gap-3 rounded-md px-2 py-2 text-left transition-colors"
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => handleNavigate(item.href)}>
+                                                    <span className="bg-muted text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md">
+                                                        <Icon className="size-4" />
                                                     </span>
-                                                </span>
-                                            </button>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        )}
-                    </section>
+                                                    <span className="min-w-0 flex-1">
+                                                        <span className="line-clamp-1 text-sm font-medium">{item.title}</span>
+                                                        <span className="text-muted-foreground line-clamp-1 text-xs">
+                                                            {item.group}
+                                                        </span>
+                                                    </span>
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </section>
                     )}
                 </div>
             </div>

@@ -11,9 +11,9 @@ type StudentScanLevelGroup struct {
 	ID   int64  `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name string `json:"name" gorm:"size:255;"`
 
-	AcademicYearID              int64                         `json:"academic_year_id" gorm:"type:bigint;not null;uniqueIndex:idx_student_scan_level_group"`
+	AcademicYearID              int64                         `json:"academic_year_id" gorm:"type:bigint;not null;index"`
 	AcademicYear                AcademicYear                  `json:"academic_year" gorm:"foreignKey:AcademicYearID;references:ID"`
-	FacultyID                   int64                         `json:"faculty_id" gorm:"type:bigint;not null;uniqueIndex:idx_student_scan_level_group"`
+	FacultyID                   int64                         `json:"faculty_id" gorm:"type:bigint;not null;index"`
 	Faculty                     Faculty                       `json:"faculty" gorm:"foreignKey:FacultyID;references:ID"`
 	StudentScanLevelGroupLevels []StudentScanLevelGroupLevels `json:"student_scan_level_group_levels" gorm:"foreignKey:StudentScanLevelGroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 
