@@ -14,6 +14,7 @@ import (
 )
 
 type ImportStudentsRequest struct {
+	StudentID           int64    `json:"student_id" default:"0"`
 	Students            []string `json:"students"`
 	StudentScanFolderID int64    `json:"folder_id" default:"0"`
 }
@@ -65,7 +66,18 @@ func (cc *Controller) ImportStudents(c fiber.Ctx) error {
 		return cc.app.Api(c, r.WithError(err))
 	}
 
-	students, err := cc.loadStudentsFromAthena(c.Context(), req.Students)
+	personID := ""
+	if req.StudentID > 0 {
+		student, err := gorm.G[models.Student](cc.app.Postgres()).
+			Where("id = ?", req.StudentID).
+			First(c.Context())
+		if err != nil {
+			return cc.app.Api(c, r.WithError(err))
+		}
+		personID = student.IdNumber
+	}
+
+	students, err := cc.loadStudentsFromAthena(c.Context(), personID, req.Students)
 	if err != nil {
 		return cc.app.Api(c, r.WithError(err))
 	}
@@ -158,7 +170,7 @@ func studentScanFolderDocName(student AthenaUser) string {
 }
 
 // Finctions for updating the students and their study programs
-func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, students []string) ([]AthenaUser, error) {
+func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, documentID string, students []string) ([]AthenaUser, error) {
 	db := cc.app.Postgres()
 	resource, err := gorm.G[models.Resource](db).
 		Select("id", "config").
@@ -176,8 +188,9 @@ func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, students []
 			"Authorization": "Bearer " + resource.Config["authorization"].(string),
 		},
 		Params: map[string]any{
-			"action": "getStudentsBySPids",
-			"ids":    string(ids),
+			"action":      "getStudentsBySPids",
+			"ids":         string(ids),
+			"document_id": documentID,
 		},
 	}))
 	if err != nil {

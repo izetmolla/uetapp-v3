@@ -53,10 +53,10 @@ export function getStudentDetail(params: Record<string, unknown>) {
 }
 
 
-export function syncStudent(params: Record<string, unknown>) {
+export function syncStudent(data: Record<string, unknown>) {
     return ApiService.fetchData<StudentDetailResponse>({
-        url: withAPI(`/contracts/students/single/sync`),
+        url: withAPI(`/contracts/sync/import-students`),
         method: "post",
-        params,
+        data,
     });
 }

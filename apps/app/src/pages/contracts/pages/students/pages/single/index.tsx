@@ -366,7 +366,7 @@ export default function StudentProfilePage() {
     const setIdField = (k: keyof Identity, v: string) => setDraftIdentity((p) => ({ ...p, [k]: v }));
 
     const handleSync = () => {
-        mutation.mutate({ id });
+        mutation.mutate({ student_id: Number(id), students: [] });
     };
 
     const fullName = data?.student?.firstname + " " + data?.student?.lastname;
