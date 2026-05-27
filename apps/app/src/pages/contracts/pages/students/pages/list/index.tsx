@@ -14,6 +14,7 @@ import DisableStudentDialog from "./components/disable-student-dialog";
 import EnableStudentDialog from "./components/enable-student-dialog";
 import SyncStudentsDialog from "@/pages/contracts/components/syncstudents";
 import useStudentsListStore from "./store";
+import { queryClient } from "@workspace/flowtrove/lib/network";
 
 const breadcrumb: BreadcrumbItem[] = [
     { label: "Contracts", to: "/contracts" },
@@ -21,9 +22,11 @@ const breadcrumb: BreadcrumbItem[] = [
 
 const StudentsListPage = () => {
     const { isSyncStudentsDialogOpen, setSyncStudentsDialogOpen } = useStudentsListStore();
+    const queryKey = [STUDENTS_FETCH_PERSISTANT, "students"];
+
     const { columns, isLoading: columnsLoading, error, columnVisibility } = useBackendColumns<Student>({
         fetchColumns: async () => getStudentsColumns(),
-        queryKey: [STUDENTS_FETCH_PERSISTANT, "columns"],
+        queryKey: queryKey,
         appendColumns: getActionsColumn(),
         overrideColumns: getColumnOverrides(),
     });
@@ -65,8 +68,22 @@ const StudentsListPage = () => {
             <DisableStudentDialog />
             <EnableStudentDialog />
             <SyncStudentsDialog
+                // onSuccess={() => {
+                //     // void queryClient.invalidateQueries({ queryKey });
+
+                //     setSyncStudentsDialogOpen(false);
+                // }}
+                // onError={(error) => {
+                //     toast.error(error.message);
+                // }}
                 isOpen={isSyncStudentsDialogOpen}
-                onClose={() => setSyncStudentsDialogOpen(false)}
+                onClose={() => {
+                    setSyncStudentsDialogOpen(false)
+                    void queryClient.invalidateQueries({ queryKey });
+                }}
+                withParams={{
+                    CUSTOM_URL: "/contracts/students/import",
+                }}
             />
         </ContentLoader>
     );

@@ -11,7 +11,7 @@ import { useImportDialogPortalContainer } from "../portal-container-context";
 import { ConfirmAlertDialog } from "./alert-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useStudentListStore } from "@/pages/contracts/pages/scandocuments/pages/students/store";
+import { useDocumentListStore } from "@/pages/contracts/pages/scandocuments/pages/documents/store";
 
 // import { exportTableToCSV } from "@/lib/export";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
@@ -35,7 +35,7 @@ type ActionConfig = {
     confirmVariant?: "default" | "destructive";
 }
 export function ImportStudentsActions({ table, withParams = {}, onSuccess, onError }: ImportStudentsActionsProps) {
-    const setIsImportUsersDialogOpen = useStudentListStore((s) => s.setIsImportUsersDialogOpen);
+    const setIsImportDocumentsDialogOpen = useDocumentListStore((s) => s.setIsImportDocumentsDialogOpen);
     const rows = table.getFilteredSelectedRowModel().rows;
     const mutateImportStudents = useMutation({
         mutationFn: importStudents,
@@ -47,7 +47,7 @@ export function ImportStudentsActions({ table, withParams = {}, onSuccess, onErr
                     toast.success(data.message);
                 }
                 table.resetRowSelection();
-                setIsImportUsersDialogOpen(false);
+                setIsImportDocumentsDialogOpen(false);
             } else {
                 if(onError) {
                     onError(new Error(data.message));

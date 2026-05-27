@@ -6,67 +6,115 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/flowtrove/packages/models"
+	"gorm.io/gorm"
 )
 
 var importProgramSuffixParen = regexp.MustCompile(`\s*\([^)]*\)$`)
 
-// normalizeImportName trims leading/trailing whitespace from reference labels.
 func normalizeImportName(name string) string {
 	return strings.TrimSpace(name)
 }
 
-// normalizeProgramImportName strips a trailing parenthetical suffix then trims.
+func normalizeDocumentID(documentID string) string {
+	return strings.TrimSpace(documentID)
+}
+
+func isValidDocumentID(documentID string) bool {
+	documentID = normalizeDocumentID(documentID)
+	return documentID != "" && documentIDRegex.MatchString(documentID)
+}
+
+// findStudentByDocumentID matches students by trimmed document_id (case insensitive).
+func findStudentByDocumentID(db *gorm.DB, documentID string, dest *models.Student) error {
+	documentID = normalizeDocumentID(documentID)
+	if documentID == "" {
+		return gorm.ErrRecordNotFound
+	}
+	return db.Unscoped().
+		Where("LOWER(TRIM(document_id)) = LOWER(?)", documentID).
+		First(dest).Error
+}
+
 func normalizeProgramImportName(name string) string {
+	name = normalizeImportName(name)
 	return normalizeImportName(importProgramSuffixParen.ReplaceAllString(name, ""))
 }
 
-type UniversityOrgUnitType struct {
-	ProgramOldId     string `json:"program_old_id"`
-	Program          string `json:"program"`
-	Profile          string `json:"profile"`
-	Faculty          string `json:"faculty"`
-	StudyLevel       string `json:"study_level"`
-	ProgramID        string `json:"program_id"`
-	ProgramName      string `json:"program_name"`
-	ProgramSpecialty string `json:"program_specialty"`
+// findEntityByImportName matches existing rows by normalized name (trim + case insensitive).
+// Unscoped includes soft-deleted rows so imports reuse the same reference instead of inserting duplicates.
+func findEntityByImportName(db *gorm.DB, name string, dest any) error {
+	name = normalizeImportName(name)
+	if name == "" {
+		return gorm.ErrRecordNotFound
+	}
+	return db.Unscoped().
+		Where("LOWER(TRIM(name)) = LOWER(?)", name).
+		First(dest).Error
 }
 
-// Helpers Functions
-func parseUniversityOrgUnit(body map[string]any) ([]UniversityOrgUnitType, error) {
-	rows, err := extractHttpBodyRows(body)
-	if err != nil {
-		return nil, err
+func optionalString(v any) string {
+	if v == nil {
+		return ""
 	}
-	if len(rows) == 0 {
-		return nil, nil
-	}
-
-	out := make([]UniversityOrgUnitType, 0, len(rows))
-	for i, row := range rows {
-		record, ok := row.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("data[%d] is not an object", i)
+	switch val := v.(type) {
+	case string:
+		return val
+	case float64:
+		if val == float64(int64(val)) {
+			return strconv.FormatInt(int64(val), 10)
 		}
-		out = append(out, orgUnitFromRecord(record))
+		return strconv.FormatFloat(val, 'f', -1, 64)
+	case int:
+		return strconv.Itoa(val)
+	case int64:
+		return strconv.FormatInt(val, 10)
+	default:
+		return fmt.Sprint(val)
 	}
-	return out, nil
 }
 
-// extractOrgUnitRows supports the upstream shapes we have seen:
-//   - { "error": "..."}
-//   - { "data": [ ... ] }                          (getOrgUnits HTTP body)
-//   - { "response": { "data": [ ... ] } }          (wrapped client payloads)
-//   - { "response": "[{\"faculty\":...}, ...]" }   (JSON string response)
+func optionalStringPtr(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
+}
+
+func stringPtrChanged(current, next *string) bool {
+	if next == nil {
+		return false
+	}
+	if current == nil {
+		return true
+	}
+	return *current != *next
+}
+
+func isUniqueConstraintError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "duplicate") ||
+		strings.Contains(msg, "unique constraint") ||
+		strings.Contains(msg, "unique index") ||
+		strings.Contains(msg, "23505")
+}
+
+// extractHttpBodyRows supports upstream shapes:
+//   - { "error": "..." }
+//   - { "data": [ ... ] }
+//   - { "response": { "data": [ ... ] } }
+//   - { "response": "[{...}, ...]" } (JSON string)
 func extractHttpBodyRows(body map[string]any) ([]any, error) {
-	// Support direct array
 	if data, ok := body["data"].([]any); ok {
 		return data, nil
 	}
-	// Support direct error
 	if errorMsg, ok := body["error"].(string); ok {
 		return nil, fmt.Errorf("error: %s", errorMsg)
 	}
-	// Sometimes, Moodle returns students as a map[int|string]map[string]any instead of []any.
 	if dataMap, ok := body["data"].(map[string]any); ok && len(dataMap) > 0 {
 		out := make([]any, 0, len(dataMap))
 		for _, v := range dataMap {
@@ -81,7 +129,7 @@ func extractHttpBodyRows(body map[string]any) ([]any, error) {
 		}
 		return out, nil
 	}
-	// Look for nested response shapes
+
 	response := body["response"]
 	if response == nil {
 		return nil, nil
@@ -119,36 +167,22 @@ func extractHttpBodyRows(body map[string]any) ([]any, error) {
 	}
 }
 
-func orgUnitFromRecord(record map[string]any) UniversityOrgUnitType {
-	return UniversityOrgUnitType{
-		ProgramOldId:     optionalString(record["program_old_id"]),
-		Program:          normalizeProgramImportName(optionalString(record["program"])),
-		Profile:          normalizeImportName(optionalString(record["profile"])),
-		Faculty:          normalizeImportName(optionalString(record["faculty"])),
-		StudyLevel:       normalizeImportName(optionalString(record["study_level"])),
-		ProgramID:        optionalString(record["program_id"]),
-		ProgramName:      normalizeProgramImportName(optionalString(record["program_name"])),
-		ProgramSpecialty: normalizeProgramImportName(optionalString(record["program_specialty"])),
+func parseBodyRecords[T any](body map[string]any, mapRecord func(map[string]any) T) ([]T, error) {
+	rows, err := extractHttpBodyRows(body)
+	if err != nil {
+		return nil, err
 	}
-}
+	if len(rows) == 0 {
+		return nil, nil
+	}
 
-func optionalString(v any) string {
-	if v == nil {
-		return ""
-	}
-	switch val := v.(type) {
-	case string:
-		return val
-	case float64:
-		if val == float64(int64(val)) {
-			return strconv.FormatInt(int64(val), 10)
+	out := make([]T, 0, len(rows))
+	for i, row := range rows {
+		record, ok := row.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("data[%d] is not an object", i)
 		}
-		return strconv.FormatFloat(val, 'f', -1, 64)
-	case int:
-		return strconv.Itoa(val)
-	case int64:
-		return strconv.FormatInt(val, 10)
-	default:
-		return fmt.Sprint(val)
+		out = append(out, mapRecord(record))
 	}
+	return out, nil
 }

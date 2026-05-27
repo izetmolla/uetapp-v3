@@ -6,7 +6,7 @@ export const EMPTY_STUDENT: Student = {
     firstname: "",
     lastname: "",
     email: "",
-    id_number: "",
+    document_id: "",
     pasport_number: "",
     status: "active",
     user_id: "",

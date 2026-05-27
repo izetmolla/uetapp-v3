@@ -70,7 +70,7 @@ func (c *Controller) DownloadFolder(ctx fiber.Ctx) error {
 	if err := db.WithContext(ctxPtr).
 		Where("student_scan_folder_id = ?", folder.ID).
 		Preload("Student", func(tx *gorm.DB) *gorm.DB {
-			return tx.Select("id", "firstname", "lastname", "email", "id_number", "pasport_number")
+			return tx.Select("id", "firstname", "lastname", "email", "document_id")
 		}).
 		Find(&docs).Error; err != nil {
 		return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
@@ -84,7 +84,7 @@ func (c *Controller) DownloadFolder(ctx fiber.Ctx) error {
 		"student_firstname",
 		"student_lastname",
 		"student_email",
-		"student_id_number",
+		"student_document_id",
 		"student_passport_number",
 	})
 	for _, doc := range docs {
@@ -93,13 +93,16 @@ func (c *Controller) DownloadFolder(ctx fiber.Ctx) error {
 			completed = "yes"
 		}
 		_ = w.Write([]string{
-			doc.Name,
 			completed,
 			doc.Student.Firstname,
 			doc.Student.Lastname,
 			doc.Student.Email,
-			doc.Student.IdNumber,
-			doc.Student.PasportNumber,
+			doc.Student.DocumentId,
+			doc.Student.Phone,
+			doc.Student.Mobile,
+			doc.Student.Birthdate,
+			doc.Student.Gender,
+			doc.Student.Nationality,
 		})
 	}
 	w.Flush()

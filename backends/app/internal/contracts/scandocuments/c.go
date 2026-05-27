@@ -8,7 +8,7 @@ import (
 	"github.com/uetedu/app/internal/contracts/scandocuments/folders"
 
 	// importstudents "github.com/uetedu/app/internal/contracts/scandocuments/import"
-	"github.com/uetedu/app/internal/contracts/scandocuments/students"
+	students "github.com/uetedu/app/internal/contracts/scandocuments/documents"
 	"github.com/uetedu/app/internal/contracts/scandocuments/studylevels"
 )
 

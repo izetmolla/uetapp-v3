@@ -27,7 +27,7 @@ func (c *Controller) getStudentsFromFolder(ctx context.Context, folderID string)
 	docs, err := gorm.G[models.StudentScanFolderDoc](db).
 		Where("student_scan_folder_id = ?", folderID).
 		Preload("Student", func(pb gorm.PreloadBuilder) error {
-			pb.Select("id", "firstname", "lastname", "email", "id_number")
+			pb.Select("id", "firstname", "lastname", "email", "document_id")
 			return nil
 		}).
 		Find(ctx)
@@ -39,12 +39,12 @@ func (c *Controller) getStudentsFromFolder(ctx context.Context, folderID string)
 	for _, doc := range docs {
 		if doc.Student.ID != 0 {
 			res = append(res, map[string]any{
-				"id":        doc.Student.ID,
-				"fullname":  doc.Student.Firstname + " " + doc.Student.Lastname,
-				"firstname": doc.Student.Firstname,
-				"lastname":  doc.Student.Lastname,
-				"email":     doc.Student.Email,
-				"id_number": doc.Student.IdNumber,
+				"id":          doc.Student.ID,
+				"fullname":    doc.Student.Firstname + " " + doc.Student.Lastname,
+				"firstname":   doc.Student.Firstname,
+				"lastname":    doc.Student.Lastname,
+				"email":       doc.Student.Email,
+				"document_id": doc.Student.DocumentId,
 			})
 		}
 	}

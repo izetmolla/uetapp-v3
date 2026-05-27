@@ -1,4 +1,4 @@
-package students
+package documents
 
 import (
 	"strings"
@@ -43,7 +43,7 @@ func (c *Controller) SearchStudents(ctx fiber.Ctx) error {
 		db = db.Where(
 			"(LOWER(students.firstname) LIKE ? OR LOWER(students.lastname) LIKE ? OR "+
 				"LOWER(CONCAT(students.firstname, ' ', students.lastname)) LIKE ? OR "+
-				"LOWER(students.email) LIKE ? OR LOWER(students.id_number) LIKE ?)",
+				"LOWER(students.email) LIKE ? OR LOWER(students.document_id) LIKE ?)",
 			pattern, pattern, pattern, pattern, pattern,
 		)
 	}

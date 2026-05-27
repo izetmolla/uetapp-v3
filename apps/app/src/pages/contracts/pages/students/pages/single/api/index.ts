@@ -33,8 +33,7 @@ type student = {
     firstname: string;
     lastname: string;
     email: string;
-    id_number: string;
-    pasport_number: string;
+    document_id: string;
     status: string;
     user_id: string;
     programs: Program[];

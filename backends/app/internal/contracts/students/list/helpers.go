@@ -41,29 +41,32 @@ func studentToDetailResponse(s models.Student) fiber.Map {
 		userID = s.UserID
 	}
 	return fiber.Map{
-		"id":             s.ID,
-		"firstname":      s.Firstname,
-		"lastname":       s.Lastname,
-		"email":          s.Email,
-		"id_number":      s.IdNumber,
-		"pasport_number": s.PasportNumber,
-		"status":         normalizeStudentStatus(s.Status),
-		"user_id":        userID,
-		"created_at":     s.CreatedAt,
-		"updated_at":     s.UpdatedAt,
+		"id":          s.ID,
+		"firstname":   s.Firstname,
+		"lastname":    s.Lastname,
+		"email":       s.Email,
+		"document_id": s.DocumentId,
+		"phone":       s.Phone,
+		"mobile":      s.Mobile,
+		"birthdate":   s.Birthdate,
+		"gender":      s.Gender,
+		"nationality": s.Nationality,
+		"status":      normalizeStudentStatus(s.Status),
+		"user_id":     userID,
+		"created_at":  s.CreatedAt,
+		"updated_at":  s.UpdatedAt,
 	}
 }
 
 func emptyStudentDetailResponse() fiber.Map {
 	return fiber.Map{
-		"id":             0,
-		"firstname":      "",
-		"lastname":       "",
-		"email":          "",
-		"id_number":      "",
-		"pasport_number": "",
-		"status":         "active",
-		"user_id":        "",
+		"id":          0,
+		"firstname":   "",
+		"lastname":    "",
+		"email":       "",
+		"document_id": "",
+		"status":      "active",
+		"user_id":     "",
 	}
 }
 
@@ -110,13 +113,17 @@ func parseStudentIDs(ids []int64) ([]int64, error) {
 }
 
 type studentPayload struct {
-	Firstname     string `json:"firstname"`
-	Lastname      string `json:"lastname"`
-	Email         string `json:"email"`
-	IdNumber      string `json:"id_number"`
-	PasportNumber string `json:"pasport_number"`
-	Status        string `json:"status"`
-	UserID        string `json:"user_id"`
+	Firstname   string `json:"firstname"`
+	Lastname    string `json:"lastname"`
+	Email       string `json:"email"`
+	DocumentId  string `json:"document_id"`
+	Phone       string `json:"phone"`
+	Mobile      string `json:"mobile"`
+	Birthdate   string `json:"birthdate"`
+	Gender      string `json:"gender"`
+	Nationality string `json:"nationality"`
+	Status      string `json:"status"`
+	UserID      string `json:"user_id"`
 }
 
 func (p studentPayload) toModel() (*models.Student, error) {
@@ -140,13 +147,17 @@ func (p studentPayload) toModel() (*models.Student, error) {
 	}
 
 	return &models.Student{
-		Firstname:     firstname,
-		Lastname:      lastname,
-		Email:         email,
-		IdNumber:      strings.TrimSpace(p.IdNumber),
-		PasportNumber: strings.TrimSpace(p.PasportNumber),
-		Status:        status,
-		UserID:        userID,
+		Firstname:   firstname,
+		Lastname:    lastname,
+		Email:       email,
+		DocumentId:  strings.TrimSpace(p.DocumentId),
+		Phone:       strings.TrimSpace(p.Phone),
+		Mobile:      strings.TrimSpace(p.Mobile),
+		Birthdate:   strings.TrimSpace(p.Birthdate),
+		Gender:      strings.TrimSpace(p.Gender),
+		Nationality: strings.TrimSpace(p.Nationality),
+		Status:      status,
+		UserID:      userID,
 	}, nil
 }
 
@@ -156,12 +167,16 @@ func (p studentPayload) toUpdates() (map[string]any, error) {
 		return nil, err
 	}
 	return map[string]any{
-		"firstname":      student.Firstname,
-		"lastname":       student.Lastname,
-		"email":          student.Email,
-		"id_number":      student.IdNumber,
-		"pasport_number": student.PasportNumber,
-		"status":         student.Status,
-		"user_id":        student.UserID,
+		"firstname":   student.Firstname,
+		"lastname":    student.Lastname,
+		"email":       student.Email,
+		"document_id": student.DocumentId,
+		"phone":       student.Phone,
+		"mobile":      student.Mobile,
+		"birthdate":   student.Birthdate,
+		"gender":      student.Gender,
+		"nationality": student.Nationality,
+		"status":      student.Status,
+		"user_id":     student.UserID,
 	}, nil
 }

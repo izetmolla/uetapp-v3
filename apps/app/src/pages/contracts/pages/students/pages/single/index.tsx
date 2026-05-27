@@ -431,7 +431,7 @@ export default function StudentProfilePage() {
                         {/* Identity */}
                         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                             <Field label="Full Name" value={data?.student?.firstname + " " + data?.student?.lastname} editing={editMode} onChange={(v) => setIdField("fullName", v)} />
-                            <Field label="Student ID" value={data?.student?.id_number ?? ""} editing={editMode} onChange={(v) => setIdField("studentId", v)} />
+                            <Field label="Student ID" value={data?.student?.document_id ?? ""} editing={editMode} onChange={(v) => setIdField("studentId", v)} />
                             <Field label="Date of Birth" value={current.dateOfBirth} editing={editMode} onChange={(v) => setIdField("dateOfBirth", v)} />
                             <Field label="Gender" value={current.gender} editing={editMode} onChange={(v) => setIdField("gender", v)} options={["Male", "Female", "Other"]} />
                             <Field label="Nationality" value={current.nationality} editing={editMode} onChange={(v) => setIdField("nationality", v)} />

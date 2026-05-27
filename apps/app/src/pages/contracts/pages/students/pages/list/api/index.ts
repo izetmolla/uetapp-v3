@@ -10,7 +10,7 @@ export interface Student {
     firstname: string;
     lastname: string;
     email?: string;
-    id_number?: string;
+    document_id?: string;
     pasport_number?: string;
     status?: string;
     user_id?: string;

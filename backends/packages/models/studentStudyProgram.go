@@ -30,6 +30,8 @@ type StudentStudyProgram struct {
 	UMSUserID     *string `json:"ums_user_id" gorm:"type:varchar(255)"`
 	AcademicEmail *string `json:"academic_email" gorm:"type:varchar(255)"`
 
+	Docs []StudentScanFolderDoc `json:"docs" gorm:"foreignKey:StudentStudyProgramID;references:ID"`
+
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`

@@ -16,46 +16,45 @@ import { GridSkeleton, TableSkeleton } from "../../components/skeleton-page";
 import { ViewToggle } from "../../components/view-toggle";
 import { Link, useParams } from "react-router";
 import { queryClient, withError, withInitialData } from "@workspace/flowtrove/lib/network";
-import { getStudents, type GetStudentsResponse } from "./api";
+import { getDocuments, type GetDocumentsResponse, type Document } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
-import { useStudentListStore } from "./store";
+import { useDocumentListStore } from "./store";
 import SyncStudentsDialog from "@/pages/contracts/components/syncstudents";
 
-const PER_PAGE = 10;
+const PER_PAGE = 100;
 
-type Student = GetStudentsResponse["students"][number];
 
-const StudentsPage = () => {
-    const { year = "", faculty_slug = "", group_id = "", folder_id } = useParams();
-    const setIsImportUsersDialogOpen = useStudentListStore((s) => s.setIsImportUsersDialogOpen);
-    const isImportUsersDialogOpen = useStudentListStore((s) => s.isImportUsersDialogOpen);
+const DocumentsPage = () => {
+    const { year = "", faculty_slug = "", group_id = "", folder_id = "" } = useParams();
+    const setIsImportDocumentsDialogOpen = useDocumentListStore((s) => s.setIsImportDocumentsDialogOpen);
+    const isImportDocumentsDialogOpen = useDocumentListStore((s) => s.isImportDocumentsDialogOpen);
     const [list, setList] = useState(true);
     const [q, setQ] = useState("");
     const [page, setPage] = useState(1);
 
-    const queryKey = ["students", year, faculty_slug, group_id, folder_id];
+    const queryKey = ["documents", folder_id];
     const { data, isLoading, error } = useQuery({
-        queryFn: () => getStudents({ year, faculty_slug, group_id, folder_id }),
+        queryFn: () => getDocuments({ folder_id }),
         queryKey: queryKey,
-        ...withInitialData<GetStudentsResponse>(),
+        ...withInitialData<GetDocumentsResponse>(),
     });
 
-    const filteredStudents = useMemo(() => {
-        const students = data?.students ?? [];
+    const filteredDocuments = useMemo(() => {
+        const documents = data?.documents ?? [];
         const term = q.trim().toLowerCase();
-        if (!term) return students;
-        return students.filter(
-            (s) =>
-                s.name.toLowerCase().includes(term) ||
-                String(s.id).toLowerCase().includes(term),
+        if (!term) return documents;
+        return documents.filter(
+            (d) =>
+                d.name.toLowerCase().includes(term) ||
+                String(d.id).toLowerCase().includes(term),
         );
-    }, [data?.students, q]);
+    }, [data?.documents, q]);
 
-    const totalPages = Math.max(1, Math.ceil(filteredStudents.length / PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(filteredDocuments.length / PER_PAGE));
     const safePage = Math.min(page, totalPages);
     const start = (safePage - 1) * PER_PAGE;
-    const pageStudents = filteredStudents.slice(start, start + PER_PAGE);
+    const pageDocuments = filteredDocuments.slice(start, start + PER_PAGE);
 
     const basePath = "/contracts/scandocuments";
     const programLabel = data?.study_level?.name ?? "";
@@ -81,7 +80,7 @@ const StudentsPage = () => {
                 subtitle={stydyLevels}
                 right={
                     <div className="flex w-full flex-col gap-1 sm:flex-row sm:items-center sm:justify-end sm:gap-1.5">
-                        <ViewToggle list={list} onChange={setList} id="students-view" />
+                        <ViewToggle list={list} onChange={setList} id="documents-view" />
                         <div className="relative w-full sm:w-44 md:w-48">
                             <Search
                                 className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
@@ -96,7 +95,7 @@ const StudentsPage = () => {
                                     setPage(1);
                                 }}
                                 className="h-8 w-full pl-8 text-sm"
-                                aria-label="Search students"
+                                aria-label="Search documents"
                             />
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
@@ -104,7 +103,7 @@ const StudentsPage = () => {
                                 type="button"
                                 size="sm"
                                 className="gap-1"
-                                onClick={() => setIsImportUsersDialogOpen(true)}
+                                onClick={() => setIsImportDocumentsDialogOpen(true)}
                             >
                                 <Plus className="size-4" aria-hidden />
                                 Add
@@ -123,85 +122,85 @@ const StudentsPage = () => {
                 forMeta
                 customLoader={list ? <TableSkeleton /> : <GridSkeleton />}
             >
-                {pageStudents.length === 0 ? (
+                {pageDocuments.length === 0 ? (
                     <div className="glass-card rounded-2xl py-10 text-center text-muted-foreground">
-                        No students match your search.
+                        No documents match your search.
                     </div>
                 ) : list ? (
-                    <StudentsListView students={pageStudents} programLabel={programLabel} />
+                    <DocumentsListView documents={pageDocuments} programLabel={programLabel} />
                 ) : (
-                    <StudentsGridView students={pageStudents} programLabel={programLabel} />
+                    <DocumentsGridView documents={pageDocuments} programLabel={programLabel} />
                 )}
 
                 <PaginationBar
                     page={safePage}
                     setPage={setPage}
                     totalPages={totalPages}
-                    total={filteredStudents.length}
+                    total={filteredDocuments.length}
                     start={start}
                     perPage={PER_PAGE}
-                    label="students"
+                    label="documents"
                 />
             </ContentLoader>
             {/* <ImportUsersDialog /> */}
             <SyncStudentsDialog
                 onSuccess={() => {
                     void queryClient.invalidateQueries({ queryKey });
-                    setIsImportUsersDialogOpen(false)
+                    setIsImportDocumentsDialogOpen(false)
                 }}
                 withParams={{ folder_id: Number(folder_id) }}
-                isOpen={isImportUsersDialogOpen}
-                onClose={() => setIsImportUsersDialogOpen(false)}
+                isOpen={isImportDocumentsDialogOpen}
+                onClose={() => setIsImportDocumentsDialogOpen(false)}
             />
         </PageShell>
     );
 };
 
-function StudentsGridView({
-    students,
+function DocumentsGridView({
+    documents,
     programLabel,
 }: {
-    students: Student[];
+    documents: Document[];
     programLabel: string;
 }) {
     return (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {students.map((s) => (
+            {documents.map((d) => (
                 <Link
-                    key={s.id}
-                    to={`${s.id}`}
+                    key={d.id}
+                    to={`${d.id}`}
                     className="glass-card glow-hover rounded-2xl p-5"
                     style={{
-                        background: `radial-gradient(100% 60% at 50% 0%, ${s.color}22, transparent 70%), var(--card)`,
+                        background: `radial-gradient(100% 60% at 50% 0%, ${d.color}22, transparent 70%), var(--card)`,
                     }}
                 >
                     <div className="mb-4 flex items-start justify-between gap-3">
                         <div
                             className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-sm font-semibold text-white"
-                            style={{ background: `linear-gradient(135deg, ${s.color}, ${s.color}99)` }}
+                            style={{ background: `linear-gradient(135deg, ${d.color}, ${d.color}99)` }}
                         >
-                            {s.initials}
+                            {d.initials}
                         </div>
-                        <StudentStatus status={s.status} />
+                        <DocumentStatus status={d.status} />
                     </div>
-                    <h3 className="font-display mb-0.5 truncate text-base font-semibold">{s.name}</h3>
-                    <p className="mb-3 font-mono text-xs text-muted-foreground">#{s.id}</p>
+                    <h3 className="font-display mb-0.5 truncate text-base font-semibold">{d.name}</h3>
+                    <p className="mb-3 font-mono text-xs text-muted-foreground">#{d.id}</p>
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                         <Badge variant="secondary">{programLabel}</Badge>
-                        <Badge variant="outline">{s.docs} docs</Badge>
+                        <Badge variant="outline">{d.docs} docs</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">Scanned {s.scannedDate}</p>
+                    <p className="text-xs text-muted-foreground">Scanned {d.scannedDate}</p>
                 </Link>
             ))}
         </div>
     );
 }
 
-function StudentsListView({
-    students,
+function DocumentsListView({
+    documents,
     programLabel,
 }: {
-    students: Student[];
+    documents: Document[];
     programLabel: string;
 }) {
     return (
@@ -220,30 +219,30 @@ function StudentsListView({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {students.map((s) => (
-                        <TableRow key={s.id} className="transition-colors hover:bg-secondary/30">
+                    {documents.map((d) => (
+                        <TableRow key={d.id} className="transition-colors hover:bg-secondary/30">
                             <TableCell>
                                 <div
                                     className="grid h-9 w-9 place-items-center rounded-full text-xs font-semibold text-white"
-                                    style={{ background: `linear-gradient(135deg, ${s.color}, ${s.color}99)` }}
+                                    style={{ background: `linear-gradient(135deg, ${d.color}, ${d.color}99)` }}
                                 >
-                                    {s.initials}
+                                    {d.initials}
                                 </div>
                             </TableCell>
-                            <TableCell className="font-mono text-xs">{s.id}</TableCell>
-                            <TableCell className="font-medium">{s.name}</TableCell>
+                            <TableCell className="font-mono text-xs">{d.id}</TableCell>
+                            <TableCell className="font-medium">{d.name}</TableCell>
                             <TableCell>
                                 <Badge variant="secondary">{programLabel}</Badge>
                             </TableCell>
-                            <TableCell>{s.docs}</TableCell>
+                            <TableCell>{d.docs}</TableCell>
                             <TableCell>
-                                <StudentStatus status={s.status} />
+                                <DocumentStatus status={d.status} />
                             </TableCell>
-                            <TableCell className="text-muted-foreground">{s.scannedDate}</TableCell>
+                            <TableCell className="text-muted-foreground">{d.scannedDate}</TableCell>
                             <TableCell className="text-right">
                                 <div className="flex justify-end gap-1">
                                     <Button asChild size="sm" variant="ghost">
-                                        <Link to={`${s.id}`}>
+                                        <Link to={`${d.id}`}>
                                             View <ArrowRight className="ml-1 h-3.5 w-3.5" />
                                         </Link>
                                     </Button>
@@ -326,7 +325,7 @@ function PaginationBar({
     );
 }
 
-function StudentStatus({ status }: { status: "Verified" | "Pending Review" | "Missing Docs" }) {
+function DocumentStatus({ status }: { status: "Verified" | "Pending Review" | "Missing Docs" }) {
     const map = {
         Verified: "border-emerald-500/40 text-emerald-400 bg-emerald-500/10",
         "Pending Review": "border-amber-500/40 text-amber-400 bg-amber-500/10",
@@ -335,4 +334,4 @@ function StudentStatus({ status }: { status: "Verified" | "Pending Review" | "Mi
     return <Badge variant="outline" className={map[status]}>{status}</Badge>;
 }
 
-export default StudentsPage;
+export default DocumentsPage;

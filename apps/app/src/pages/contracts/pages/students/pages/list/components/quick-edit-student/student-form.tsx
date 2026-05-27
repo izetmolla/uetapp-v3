@@ -39,7 +39,7 @@ function toFormValues(student: Student): StudentFormValues {
         firstname: student.firstname ?? "",
         lastname: student.lastname ?? "",
         email: student.email ?? "",
-        id_number: student.id_number ?? "",
+        document_id: student.document_id ?? "",
         pasport_number: student.pasport_number ?? "",
         status: STATUS_VALUES.includes(status as StudentFormValues["status"])
             ? (status as StudentFormValues["status"])
@@ -147,7 +147,7 @@ const StudentForm: FC<StudentFormProps> = ({
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
                         control={form.control}
-                        name="id_number"
+                        name="document_id"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>ID number</FormLabel>

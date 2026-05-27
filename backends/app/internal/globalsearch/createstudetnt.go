@@ -10,7 +10,7 @@ import (
 
 func (cc *Controller) getOrCreateStudent(ctx context.Context, std Student) (models.Student, error) {
 	db := cc.app.Postgres()
-	student, err := gorm.G[models.Student](db).Where(&models.Student{IdNumber: std.DocumentID}).First(ctx)
+	student, err := gorm.G[models.Student](db).Where(&models.Student{DocumentId: std.DocumentID}).First(ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return cc.createStudent(ctx, std)
@@ -23,10 +23,13 @@ func (cc *Controller) getOrCreateStudent(ctx context.Context, std Student) (mode
 func (cc *Controller) createStudent(ctx context.Context, student Student) (models.Student, error) {
 	db := cc.app.Postgres()
 	studentModel := &models.Student{
-		Firstname: student.Firstname,
-		Lastname:  student.Surname,
-		Email:     student.Email,
-		IdNumber:  student.DocumentID,
+		Firstname:   student.Firstname,
+		Lastname:    student.Surname,
+		Email:       student.Email,
+		DocumentId:  student.DocumentID,
+		Phone:       student.Phone,
+		Nationality: student.Nationality,
+		Mobile:      student.Mobile,
 	}
 	if err := gorm.G[models.Student](db).Create(ctx, studentModel); err != nil {
 		return models.Student{}, err

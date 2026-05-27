@@ -39,7 +39,7 @@ const scandocumentsRoutes: RouteObject[] = [
         path: ":year/:faculty_slug/:group_id/:folder_id",
         hydrateFallbackElement: <Fragment />,
         lazy: async () => {
-            const m = await import("./pages/students")
+            const m = await import("./pages/documents")
             return { Component: m.default }
         },
     },

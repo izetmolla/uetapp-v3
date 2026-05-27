@@ -8,15 +8,19 @@ import (
 
 // Server specific settings.
 type Student struct {
-	ID int64 `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID         int64  `json:"id" gorm:"primaryKey;autoIncrement"`
+	DocumentId string `json:"document_id" gorm:"size:255;uniqueIndex"`
 
-	Firstname     string `json:"firstname" gorm:"size:255;"`
-	Lastname      string `json:"lastname" gorm:"size:255;"`
-	Fathersname   string `json:"fathersname" gorm:"size:255;"`
-	Email         string `json:"email" gorm:"size:255;"`
-	IdNumber      string `json:"id_number" gorm:"size:255;"`
-	PasportNumber string `json:"pasport_number" gorm:"size:255;"`
-	Birthdate     string `json:"birthdate" gorm:"size:255;"`
+	Firstname   string `json:"firstname" gorm:"size:255;"`
+	Lastname    string `json:"lastname" gorm:"size:255;"`
+	Fathersname string `json:"fathersname" gorm:"size:255;"`
+	Email       string `json:"email" gorm:"size:255;"`
+	Phone       string `json:"phone" gorm:"size:255;"`
+	Mobile      string `json:"mobile" gorm:"size:255;"`
+
+	Birthdate   string `json:"birthdate" gorm:"size:255;"`
+	Gender      string `json:"gender" gorm:"size:255;"`
+	Nationality string `json:"nationality" gorm:"size:255;"`
 
 	Status string `json:"status" gorm:"default:active;"`
 

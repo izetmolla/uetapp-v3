@@ -169,26 +169,14 @@ func (cc *Controller) getStudentsColumns(ctx context.Context, studyLevelIds []st
 			Hidden:      true,
 		},
 		{
-			ID:          "id_number",
-			AccessorKey: "id_number",
+			ID:          "document_id",
+			AccessorKey: "document_id",
 			Header:      "ID Number",
 			// EnableSorting:      true,
 			// EnableColumnFilter: true,
 			Hidden: true,
 			Meta: &datatable.ColumnMeta{
 				Label:   "ID Number",
-				Variant: "text",
-			},
-		},
-		{
-			ID:          "pasport_number",
-			AccessorKey: "pasport_number",
-			Header:      "Passport Number",
-			// EnableSorting:      true,
-			// EnableColumnFilter: true,
-			Hidden: true,
-			Meta: &datatable.ColumnMeta{
-				Label:   "Passport Number",
 				Variant: "text",
 			},
 		},

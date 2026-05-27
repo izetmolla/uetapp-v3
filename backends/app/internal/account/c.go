@@ -50,7 +50,7 @@ func (c *Controller) AccountMiddlewareApi(ctx fiber.Ctx) error {
 	// }
 	// context := ctx.Context()
 	// ws, err := c.app.GetWSAPI(ctx,
-	// 	c.app.WithWsSelectFields("id, id_number, name"),
+	// 	c.app.WithWsSelectFields("id, document_id, name"),
 	// 	c.app.WithWsContext(context),
 	// 	c.app.WithWsName(wsName))
 	// if err != nil {
@@ -68,7 +68,7 @@ func (c *Controller) AccountMiddlewareView(ctx fiber.Ctx) error {
 	// context := ctx.Context()
 	// view := c.app.View()
 
-	// ws, err := c.app.GetWS(ctx, c.app.WithWsSelectFields("id, id_number, name"), c.app.WithWsContext(context), c.app.WithWsName(ctx.Params("ws")))
+	// ws, err := c.app.GetWS(ctx, c.app.WithWsSelectFields("id, document_id, name"), c.app.WithWsContext(context), c.app.WithWsName(ctx.Params("ws")))
 	// if err != nil {
 	// 	return c.app.RenderView(ctx,
 	// 		view.WithContext(context),

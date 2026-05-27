@@ -1,4 +1,4 @@
-package students
+package documents
 
 import (
 	"errors"

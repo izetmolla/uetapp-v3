@@ -106,16 +106,19 @@ func (c *Controller) getStudentData(ctx context.Context, id string) (map[string]
 		}
 	}
 	res["student"] = map[string]any{
-		"id":             student.ID,
-		"firstname":      student.Firstname,
-		"lastname":       student.Lastname,
-		"fathersname":    student.Fathersname,
-		"email":          student.Email,
-		"id_number":      student.IdNumber,
-		"pasport_number": student.PasportNumber,
-		"birthdate":      student.Birthdate,
-		"status":         student.Status,
-		"programs":       programs,
+		"id":          student.ID,
+		"firstname":   student.Firstname,
+		"lastname":    student.Lastname,
+		"fathersname": student.Fathersname,
+		"email":       student.Email,
+		"document_id": student.DocumentId,
+		"phone":       student.Phone,
+		"mobile":      student.Mobile,
+		"birthdate":   student.Birthdate,
+		"gender":      student.Gender,
+		"nationality": student.Nationality,
+		"status":      student.Status,
+		"programs":    programs,
 	}
 	return res, nil
 }

@@ -5,7 +5,7 @@ import type { AcademicYear } from "../../../data/mockData";
 import type { Folder } from "../../../data/mockData";
 import type { StudyLevelGroup } from "../../studylevels/api";
 
-type Student = {
+export type Document = {
     id: number;
     name: string;
     initials: string;
@@ -15,8 +15,8 @@ type Student = {
     scannedDate: string;
     color: string;
 }
-export interface GetStudentsResponse {
-    students: Student[];
+export interface GetDocumentsResponse {
+    documents: Document[];
     faculty: Faculty;
     study_level: StudyLevel;
     study_level_group: StudyLevelGroup;
@@ -24,9 +24,9 @@ export interface GetStudentsResponse {
     folder: Folder;
 }
 
-export async function getStudents(params: unknown) {
-    return ApiService.fetchData<GetStudentsResponse>({
-        url: withAPI("/contracts/scandocuments/students/list"),
+export async function getDocuments(params: unknown) {
+    return ApiService.fetchData<GetDocumentsResponse>({
+        url: withAPI("/contracts/scandocuments/documents/list"),
         method: "get",
         params,
     });

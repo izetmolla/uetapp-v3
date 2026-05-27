@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/flowtrove/packages/drivers/httprequest"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/uetedu/app/pkg/syncstudents"
 	"gorm.io/gorm"
 )
 
@@ -66,6 +66,35 @@ func (cc *Controller) ImportStudents(c fiber.Ctx) error {
 		return cc.app.Api(c, r.WithError(err))
 	}
 
+	resData := syncstudents.ImportStudentsRequest{
+		Students: req.Students,
+	}
+
+	if req.StudentID > 0 {
+		student, err := gorm.G[models.Student](cc.app.Postgres()).
+			Where("id = ?", req.StudentID).
+			First(c.Context())
+		if err != nil {
+			return cc.app.Api(c, r.WithError(err))
+		}
+		resData.DocumentID = student.DocumentId
+	}
+
+	result, err := syncstudents.New(cc.app).ImportStudents(c.Context(), resData)
+	if err != nil {
+		return cc.app.Api(c, r.WithError(err))
+	}
+	return cc.app.Api(c, r.WithData(result))
+}
+
+func (cc *Controller) ImportStudents1(c fiber.Ctx) error {
+	r := cc.app.Render()
+
+	var req ImportStudentsRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		return cc.app.Api(c, r.WithError(err))
+	}
+
 	personID := ""
 	if req.StudentID > 0 {
 		student, err := gorm.G[models.Student](cc.app.Postgres()).
@@ -74,7 +103,7 @@ func (cc *Controller) ImportStudents(c fiber.Ctx) error {
 		if err != nil {
 			return cc.app.Api(c, r.WithError(err))
 		}
-		personID = student.IdNumber
+		personID = student.DocumentId
 	}
 
 	students, err := cc.loadStudentsFromAthena(c.Context(), personID, req.Students)
@@ -139,7 +168,7 @@ func (cc *Controller) ImportStudents(c fiber.Ctx) error {
 	}))
 }
 
-func (cc *Controller) ensureStudentScanFolderDoc(reqCtx context.Context, folderID, studentID int64, name string, log *importLog) {
+func (cc *Controller) ensureStudentScanFolderDoc(reqCtx context.Context, folderID, studentID int64, log *importLog) {
 	if folderID <= 0 || studentID <= 0 {
 		return
 	}
@@ -159,14 +188,9 @@ func (cc *Controller) ensureStudentScanFolderDoc(reqCtx context.Context, folderI
 	if err := db.Create(&models.StudentScanFolderDoc{
 		StudentScanFolderID: folderID,
 		StudentID:           studentID,
-		Name:                strings.TrimSpace(name),
 	}).Error; err != nil {
 		log.fail("student_scan_folder_doc.create", err)
 	}
-}
-
-func studentScanFolderDocName(student AthenaUser) string {
-	return strings.TrimSpace(strings.Join([]string{student.Firstname, student.Surname}, " "))
 }
 
 // Finctions for updating the students and their study programs
@@ -213,7 +237,7 @@ func (cc *Controller) insertOrUpdateStudents(reqCtx context.Context, student *At
 	}
 	studentModel, err := gorm.G[models.Student](db).
 		Select("id").
-		Where("id_number = ?", student.DocumentID).
+		Where("document_id = ?", student.DocumentID).
 		First(reqCtx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -233,10 +257,10 @@ func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, 
 	db := cc.app.Postgres()
 
 	studentModel := &models.Student{
-		Firstname: student.Firstname,
-		Lastname:  student.Surname,
-		Email:     student.Email,
-		IdNumber:  student.DocumentID,
+		Firstname:  student.Firstname,
+		Lastname:   student.Surname,
+		Email:      student.Email,
+		DocumentId: student.DocumentID,
 	}
 
 	if err := gorm.G[models.Student](db).Create(reqCtx, studentModel); err != nil {
@@ -245,7 +269,7 @@ func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, 
 	}
 	cc.ensureStudentStudyProgram(reqCtx, studentModel.ID, student, refCache, log)
 	if folderID > 0 {
-		cc.ensureStudentScanFolderDoc(reqCtx, folderID, studentModel.ID, studentScanFolderDocName(student), log)
+		cc.ensureStudentScanFolderDoc(reqCtx, folderID, studentModel.ID, log)
 	}
 
 	return *studentModel, log.all()
@@ -255,10 +279,10 @@ func (cc *Controller) updateStudent(reqCtx context.Context, id int64, student At
 	db := cc.app.Postgres()
 
 	if _, err := gorm.G[models.Student](db).Where("id = ?", id).Updates(reqCtx, models.Student{
-		Firstname: student.Firstname,
-		Lastname:  student.Surname,
-		Email:     student.Email,
-		IdNumber:  student.DocumentID,
+		Firstname:  student.Firstname,
+		Lastname:   student.Surname,
+		Email:      student.Email,
+		DocumentId: student.DocumentID,
 	}); err != nil {
 		log.fail("student.update", err)
 		return
@@ -266,7 +290,7 @@ func (cc *Controller) updateStudent(reqCtx context.Context, id int64, student At
 
 	cc.ensureStudentStudyProgram(reqCtx, id, student, refCache, log)
 	if folderID > 0 {
-		cc.ensureStudentScanFolderDoc(reqCtx, folderID, id, studentScanFolderDocName(student), log)
+		cc.ensureStudentScanFolderDoc(reqCtx, folderID, id, log)
 	}
 }
 
