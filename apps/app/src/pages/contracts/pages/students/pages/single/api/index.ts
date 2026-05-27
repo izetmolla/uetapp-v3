@@ -11,6 +11,22 @@ type Program = {
     name: string;
     code: string;
     study_program: StudyProgram;
+    faculty: {
+        id: string;
+        name: string;
+    };
+    reg_year: {
+        id: string;
+        year: string;
+    };
+    study_level: {
+        id: string;
+        name: string;
+    };
+    speciality: {
+        id: string;
+        name: string;
+    };
 }
 type student = {
     id: string;
@@ -32,6 +48,15 @@ export function getStudentDetail(params: Record<string, unknown>) {
     return ApiService.fetchData<StudentDetailResponse>({
         url: withAPI(`/contracts/students/single`),
         method: "get",
+        params,
+    });
+}
+
+
+export function syncStudent(params: Record<string, unknown>) {
+    return ApiService.fetchData<StudentDetailResponse>({
+        url: withAPI(`/contracts/students/single/sync`),
+        method: "post",
         params,
     });
 }

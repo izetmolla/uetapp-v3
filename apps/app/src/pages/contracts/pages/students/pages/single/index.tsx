@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@workspace/ui/components/tabs";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -27,13 +27,16 @@ import {
     Award,
     Wallet,
     type LucideIcon,
+    CloudSync,
+    Loader2,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getStudentDetail } from "./api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getStudentDetail, syncStudent } from "./api";
 import { useParams } from "react-router";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
-import { withError } from "@workspace/flowtrove/lib/network";
-import { cn } from "@workspace/ui/lib/utils";
+import { queryClient, withError } from "@workspace/flowtrove/lib/network";
+import { cn, generateAvatarFallback } from "@workspace/ui/lib/utils";
+import { toast } from "@workspace/ui/components/sonner";
 
 
 const studentMockData = {
@@ -56,38 +59,7 @@ const studentMockData = {
         program: "BSc Computer Science",
     },
     programs: [
-        {
-            type: "Primary",
-            programName: "BSc in Computer Science",
-            faculty: "Faculty of Engineering and Architecture",
-            department: "Department of Computer Engineering",
-            yearOfRegistration: "2022",
-            currentYear: "Year 3 of 4",
-            studyForm: "Full-Time",
-            speciality: "Software Engineering",
-            fundingType: "State-Funded",
-            status: "Active",
-            gpa: 3.72,
-            gpaMax: 4.0,
-            creditsEarned: 156,
-            creditsRequired: 240,
-        },
-        {
-            type: "Minor",
-            programName: "Minor in Data Science",
-            faculty: "Faculty of Natural Sciences",
-            department: "Department of Mathematics & Informatics",
-            yearOfRegistration: "2023",
-            currentYear: "Year 2 of 2",
-            studyForm: "Part-Time",
-            speciality: "",
-            fundingType: "Self-Funded",
-            status: "Active",
-            gpa: 3.85,
-            gpaMax: 4.0,
-            creditsEarned: 42,
-            creditsRequired: 60,
-        },
+
     ],
 };
 
@@ -234,11 +206,11 @@ function AcademicProgressCard({
 function ProgramCard({
     program,
     editing,
-    onFieldChange,
+    // onFieldChange,
 }: {
     program: any;
     editing: boolean;
-    onFieldChange: (key: keyof Program, value: string) => void;
+    // onFieldChange: (key: keyof Program, value: string) => void;
 }) {
     const isPrimary = program?.type === "Primary";
 
@@ -281,7 +253,7 @@ function ProgramCard({
                             </Badge>
                         </div>
                         <h3 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
-                         {program?.study_level?.name} - {program?.study_program?.name}
+                            {program?.study_level?.name} - {program?.study_program?.name}
                         </h3>
                         <p className="text-sm text-muted-foreground">{program?.faculty?.name}</p>
                     </div>
@@ -294,61 +266,47 @@ function ProgramCard({
             <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 <Field
                     label="Program Name"
-                    value={program?.name}
+                    value={program?.study_program?.name}
                     editing={editing}
-                    onChange={(v) => onFieldChange("programName", v)}
                 />
                 <Field
                     label="Faculty"
                     value={program?.faculty?.name}
                     editing={editing}
-                    onChange={(v) => onFieldChange("faculty", v)}
                 />
                 <Field
                     label="Department"
                     value={program?.department}
                     editing={editing}
-                    onChange={(v) => onFieldChange("department", v)}
                 />
                 <Field
                     label="Year of Registration"
                     value={program?.reg_year?.year}
                     editing={editing}
-                    onChange={(v) => onFieldChange("yearOfRegistration", v)}
-                />
-                <Field
-                    label="Current Year"
-                    value={program?.currentYear}
-                    editing={editing}
-                    onChange={(v) => onFieldChange("currentYear", v)}
-                />
-                <Field
-                    label="Study Form"
-                    value={program?.studyForm}
-                    editing={editing}
-                    onChange={(v) => onFieldChange("studyForm", v)}
-                    options={["Full-Time", "Part-Time", "Distance"]}
-                />
-                <Field
-                    label="Speciality / Profile"
-                    value={program?.speciality}
-                    editing={editing}
-                    onChange={(v) => onFieldChange("speciality", v)}
-                />
-                <Field
-                    label="Funding Type"
-                    value={program?.fundingType}
-                    editing={editing}
-                    onChange={(v) => onFieldChange("fundingType", v)}
-                    options={["State-Funded", "Self-Funded", "Scholarship"]}
                 />
                 <Field
                     label="Status"
                     value={program?.student_status?.name}
                     editing={editing}
-                    onChange={(v) => onFieldChange("status", v)}
                     options={["Active", "Inactive", "Completed"]}
                 />
+                <Field
+                    label="Study Level"
+                    value={program?.study_level?.name}
+                    editing={editing}
+                />
+                <Field
+                    label="Speciality / Profile"
+                    value={program?.study_profile?.name}
+                    editing={editing}
+                />
+                <Field
+                    label="Funding Type"
+                    value={program?.fundingType}
+                    editing={editing}
+                    options={["State-Funded", "Self-Funded", "Scholarship"]}
+                />
+
             </div>
 
             <div className="border-t border-border/60 bg-muted/10 px-6 py-3">
@@ -372,9 +330,23 @@ export default function StudentProfilePage() {
     const [draftIdentity, setDraftIdentity] = useState<Identity>(identity);
     const [draftPrograms, setDraftPrograms] = useState<Program[]>(programs);
 
+    const queryKey = ["student", id];
     const { data, isLoading, error } = useQuery({
-        queryKey: ["student", id],
+        queryKey: queryKey,
         queryFn: () => getStudentDetail({ id }),
+    });
+
+
+    const mutation = useMutation({
+        mutationFn: syncStudent,
+        onSuccess: (data) => {
+            console.log(data);
+            queryClient.invalidateQueries({ queryKey: queryKey });
+        },
+        onError: (error: any) => {
+            console.log(error);
+            toast.error(error?.message ?? "Failed to sync student");
+        },
     });
 
     const startEdit = () => {
@@ -390,12 +362,21 @@ export default function StudentProfilePage() {
     };
 
     const current = editMode ? draftIdentity : identity;
-    const currentPrograms = editMode ? draftPrograms : programs;
 
-    const setIdField = (k: keyof Identity, v: string) =>
-        setDraftIdentity((p) => ({ ...p, [k]: v }));
-    const setProgramField = (i: number, k: keyof Program, v: string) =>
-        setDraftPrograms((p) => p.map((pr, idx) => (idx === i ? { ...pr, [k]: v } : pr)));
+    const setIdField = (k: keyof Identity, v: string) => setDraftIdentity((p) => ({ ...p, [k]: v }));
+
+    const handleSync = () => {
+        mutation.mutate({ id });
+    };
+
+    const fullName = data?.student?.firstname + " " + data?.student?.lastname;
+
+
+
+    const lsp = useMemo(() => {
+        if (!data?.student?.programs || data?.student?.programs?.length === 0) return null;
+        return data?.student?.programs?.sort((a: any, b: any) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())[0];
+    }, [data?.student?.programs]);
 
     return (
         <ContentLoader isLoading={isLoading} error={withError(error, data)}>
@@ -407,8 +388,8 @@ export default function StudentProfilePage() {
                         <div className="flex flex-col items-center gap-3 shrink-0 lg:w-40">
                             <div className="relative group">
                                 <Avatar className="h-24 w-24 ring-2 ring-border">
-                                    <AvatarImage src={studentMockData.avatar} alt={data?.student?.firstname + " " + data?.student?.lastname} />
-                                    <AvatarFallback className="bg-muted text-muted-foreground">EM</AvatarFallback>
+                                    <AvatarImage src={"#"} alt={fullName} />
+                                    <AvatarFallback className="bg-muted text-muted-foreground">{generateAvatarFallback(fullName)}</AvatarFallback>
                                 </Avatar>
                                 {editMode && (
                                     <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer">
@@ -423,7 +404,7 @@ export default function StudentProfilePage() {
                             {contractStaff && (
                                 <div className="flex w-full flex-col gap-2 pt-1">
                                     {!editMode ? (
-                                        <Button variant="outline" size="sm" className="w-full" onClick={startEdit}>
+                                        <Button variant="outline" size="sm" className="w-full" onClick={startEdit} disabled>
                                             <Pencil className="h-3.5 w-3.5 mr-1.5" />
                                             Edit profile
                                         </Button>
@@ -439,6 +420,10 @@ export default function StudentProfilePage() {
                                             </Button>
                                         </>
                                     )}
+                                    <Button variant="outline" size="sm" className="w-full" onClick={handleSync} disabled={mutation.isPending}>
+                                        {mutation.isPending ? <Loader2 className="h-3.5 w-3.5 mr-1.5" /> : <CloudSync className="h-3.5 w-3.5 mr-1.5" />}
+                                        {mutation.isPending ? "Syncing..." : "Sync"}
+                                    </Button>
                                 </div>
                             )}
                         </div>
@@ -460,17 +445,17 @@ export default function StudentProfilePage() {
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border border-border text-xs text-foreground">
                                 <GraduationCap className="h-3.5 w-3.5 text-primary shrink-0" />
                                 <span className="font-medium">Faculty:</span>
-                                <span className="text-muted-foreground">{studentMockData.quickStats.faculty}</span>
+                                <span className="text-muted-foreground">{lsp?.faculty?.name}</span>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border border-border text-xs text-foreground">
                                 <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
                                 <span className="font-medium">Academic Year:</span>
-                                <span className="text-muted-foreground">{studentMockData.quickStats.academicYear}</span>
+                                <span className="text-muted-foreground">{lsp?.reg_year?.year}</span>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border border-border text-xs text-foreground">
                                 <ClipboardList className="h-3.5 w-3.5 text-primary shrink-0" />
                                 <span className="font-medium">Program:</span>
-                                <span className="text-muted-foreground">{studentMockData.quickStats.program}</span>
+                                <span className="text-muted-foreground">{lsp?.study_program?.name}</span>
                             </div>
                         </div>
                     </div>
@@ -514,15 +499,7 @@ export default function StudentProfilePage() {
                                         key={`${i}`}
                                         program={p as any}
                                         editing={editMode}
-                                        onFieldChange={(key, value) => setProgramField(i, key, value)}
-                                    />
-                                ))}
-                                {currentPrograms.map((p, i) => (
-                                    <ProgramCard
-                                        key={`${p.programName}-${i}`}
-                                        program={p}
-                                        editing={editMode}
-                                        onFieldChange={(key, value) => setProgramField(i, key, value)}
+                                    // onFieldChange={(key, value) => setProgramField(i, key, value)}
                                     />
                                 ))}
                             </div>
