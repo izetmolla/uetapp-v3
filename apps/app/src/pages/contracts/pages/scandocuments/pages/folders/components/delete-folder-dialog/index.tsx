@@ -1,7 +1,6 @@
 import { useCallback, type FC } from "react";
 import { Loader2, Trash2 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { useParams } from "react-router";
+import { type QueryKey, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
     getApiErrorMessageFromBody,
@@ -21,16 +20,13 @@ import {
 import useFoldersStore from "../../store";
 import { deleteFolder } from "./api";
 
-const DeleteFolderDialog: FC = () => {
-    const { year = "", faculty_slug = "", level = "" } = useParams();
+const DeleteFolderDialog: FC<{ queryKey: QueryKey }> = ({ queryKey }) => {
     const {
         folder,
         setFolder,
         isDeleteFolderDialogOpen,
         setIsDeleteFolderDialogOpen,
     } = useFoldersStore();
-
-    const listQueryKey = ["folders", year, faculty_slug, level] as const;
 
     const onClose = useCallback(() => {
         setFolder(null);
@@ -47,7 +43,7 @@ const DeleteFolderDialog: FC = () => {
                 return;
             }
             toast.success(res.message ?? "Folder deleted successfully", { richColors: true });
-            void queryClient.invalidateQueries({ queryKey: listQueryKey });
+            void queryClient.invalidateQueries({ queryKey });
             onClose();
         },
         onError: (err: { response?: { data?: { message?: string } }; message?: string }) => {

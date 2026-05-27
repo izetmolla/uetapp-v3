@@ -3,12 +3,25 @@ package globalsearch
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/flowtrove/packages/models"
-	"gorm.io/gorm"
 )
+
+var studentDocumentIDShapeRegex = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]*[A-Za-z]$`)
+
+func isValidStudentDocumentID(documentID string) bool {
+	if !studentDocumentIDShapeRegex.MatchString(documentID) {
+		return false
+	}
+	digits := 0
+	for _, r := range documentID {
+		if r >= '0' && r <= '9' {
+			digits++
+		}
+	}
+	return digits >= 6
+}
 
 // SearchStudentItem is the JSON shape returned to the frontend global search API.
 type SearchStudentItem struct {
@@ -35,9 +48,9 @@ func (cc *Controller) formatStudentsForSearch(ctx context.Context, students []St
 			ID:       studentSearchID(s),
 			FullName: studentFullName(s),
 			Student:  s,
-			URL:      fmt.Sprintf("/contracts/students/%s", s.SPID),
+			URL:      "#",
 		}
-		if s.DocumentID != "" {
+		if s.DocumentID != "" && isValidStudentDocumentID(s.DocumentID) {
 			student, err := cc.getOrCreateStudent(ctx, s)
 			if err != nil {
 				return nil, err
@@ -217,18 +230,4 @@ func optionalInt(v any) int {
 	default:
 		return 0
 	}
-}
-
-func studentDocumentIds(students []Student) []string {
-	ids := make([]string, 0, len(students))
-	for _, s := range students {
-		ids = append(ids, s.DocumentID)
-	}
-	return ids
-}
-func (cc *Controller) getStudentsFromDB(ctx context.Context, documentIds []string) ([]models.Student, error) {
-	db := cc.app.Postgres()
-	return gorm.G[models.Student](db).Where("document_id IN (?)", documentIds).
-		Select("id", "document_id").
-		Find(ctx)
 }

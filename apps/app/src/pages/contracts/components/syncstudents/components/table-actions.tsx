@@ -22,6 +22,8 @@ import { useStudentListStore } from "@/pages/contracts/pages/scandocuments/pages
 interface ImportStudentsActionsProps {
     table: Table<Student>;
     withParams?: Record<string, unknown>;
+    onSuccess?: (data?: unknown) => void;
+    onError?: (error: Error) => void;
 }
 
 type ActionConfig = {
@@ -32,22 +34,34 @@ type ActionConfig = {
     confirmLabel?: string;
     confirmVariant?: "default" | "destructive";
 }
-export function ImportStudentsActions({ table, withParams = {} }: ImportStudentsActionsProps) {
+export function ImportStudentsActions({ table, withParams = {}, onSuccess, onError }: ImportStudentsActionsProps) {
     const setIsImportUsersDialogOpen = useStudentListStore((s) => s.setIsImportUsersDialogOpen);
     const rows = table.getFilteredSelectedRowModel().rows;
     const mutateImportStudents = useMutation({
         mutationFn: importStudents,
         onSuccess: (data) => {
             if (data.success) {
-                toast.success(data.message);
+                if(onSuccess) {
+                    onSuccess(data);
+                } else {
+                    toast.success(data.message);
+                }
                 table.resetRowSelection();
                 setIsImportUsersDialogOpen(false);
             } else {
-                toast.error(data.message);
+                if(onError) {
+                    onError(new Error(data.message));
+                } else {
+                    toast.error(data.message);
+                }
             }
         },
         onError: (error) => {
-            toast.error(error.message);
+            if(onError) {
+                onError(error);
+            } else {
+                toast.error(error.message);
+            }
         },
     });
     const portalContainer = useImportDialogPortalContainer();

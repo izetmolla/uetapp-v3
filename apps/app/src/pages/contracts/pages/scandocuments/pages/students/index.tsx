@@ -15,7 +15,7 @@ import { PageHeader, PageShell } from "../../components/page-shell";
 import { GridSkeleton, TableSkeleton } from "../../components/skeleton-page";
 import { ViewToggle } from "../../components/view-toggle";
 import { Link, useParams } from "react-router";
-import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
+import { queryClient, withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { getStudents, type GetStudentsResponse } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
@@ -34,9 +34,10 @@ const StudentsPage = () => {
     const [q, setQ] = useState("");
     const [page, setPage] = useState(1);
 
+    const queryKey = ["students", year, faculty_slug, group_id, folder_id];
     const { data, isLoading, error } = useQuery({
         queryFn: () => getStudents({ year, faculty_slug, group_id, folder_id }),
-        queryKey: ["students", year, faculty_slug, group_id, folder_id],
+        queryKey: queryKey,
         ...withInitialData<GetStudentsResponse>(),
     });
 
@@ -63,7 +64,6 @@ const StudentsPage = () => {
     const stydyLevels = data?.study_level_group?.study_levels?.map((s) => s?.study_level?.name).join(", ");
 
 
-    console.log(data?.study_level_group.study_levels);
 
     return (
         <PageShell>
@@ -145,6 +145,10 @@ const StudentsPage = () => {
             </ContentLoader>
             {/* <ImportUsersDialog /> */}
             <SyncStudentsDialog
+                onSuccess={() => {
+                    void queryClient.invalidateQueries({ queryKey });
+                    setIsImportUsersDialogOpen(false)
+                }}
                 withParams={{ folder_id: Number(folder_id) }}
                 isOpen={isImportUsersDialogOpen}
                 onClose={() => setIsImportUsersDialogOpen(false)}

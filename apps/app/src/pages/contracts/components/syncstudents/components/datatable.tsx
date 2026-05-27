@@ -15,8 +15,14 @@ import { ImportStudentsActions } from "./table-actions";
 
 interface ImportStudentsDatatableProps {
     withParams?: Record<string, unknown>;
+    onSuccess?: (data?: unknown) => void;
+    onError?: (error: Error) => void;
 }
-const ImportStudentsDatatable: FC<ImportStudentsDatatableProps> = ({ withParams = {} }) => {
+const ImportStudentsDatatable: FC<ImportStudentsDatatableProps> = ({
+    withParams = {},
+    onSuccess,
+    onError,
+}) => {
     const { columns, isLoading: columnsLoading, error, columnVisibility } = useBackendColumns<Student>({
         fetchColumns: async (filters) => getImportStudentsColumns(filters),
         queryKey: [SYNC_STUDENTS_FETCH_PERSISTANT, "columns"],
@@ -60,7 +66,14 @@ const ImportStudentsDatatable: FC<ImportStudentsDatatableProps> = ({ withParams 
                         rowIdKey="sp_id"
                         enableRowSelection
                         disableParamPersistence={true}
-                        actionBar={(table) => <ImportStudentsActions table={table} withParams={withParams} />}
+                        actionBar={(table) => (
+                            <ImportStudentsActions
+                                table={table}
+                                withParams={withParams}
+                                onSuccess={onSuccess}
+                                onError={onError}
+                            />
+                        )}
                     />
                 </div>
             </ContentLoader>

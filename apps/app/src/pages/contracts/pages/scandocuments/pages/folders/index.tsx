@@ -17,7 +17,7 @@ import { GridSkeleton, TableSkeleton } from "../../components/skeleton-page";
 import { ViewToggle } from "../../components/view-toggle";
 import { Link, useParams, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { withError, withInitialData } from "@workspace/flowtrove/lib/network";
+import { queryClient, withError, withInitialData } from "@workspace/flowtrove/lib/network";
 import { getFolders, type Folder, type GetFoldersResponse } from "./api";
 import ContentLoader from "@workspace/flowtrove/components/content-loader";
 import SaveFolderDialog from "./components/save-folder-dialog";
@@ -26,6 +26,7 @@ import DownloadFolderDialog from "./components/download-folder-dialog";
 import FolderAction from "./components/folder-action";
 import useFoldersStore from "./store";
 import SyncStudentsDialog from "@/pages/contracts/components/syncstudents";
+import { toast } from "sonner";
 
 const PER_PAGE = 10;
 
@@ -145,9 +146,14 @@ const FoldersPage = () => {
         />
       </ContentLoader>
       <SaveFolderDialog queryKey={queryKey} />
-      <DeleteFolderDialog />
+      <DeleteFolderDialog queryKey={queryKey} />
       <DownloadFolderDialog />
       <SyncStudentsDialog
+        onSuccess={() => {
+          void queryClient.invalidateQueries({ queryKey });
+          setIsAddStudentToScanDialogOpen(false)
+          toast.success("Students added to scan successfully");
+        }}
         isOpen={isAddStudentToScanDialogOpen}
         onClose={() => setIsAddStudentToScanDialogOpen(false)}
         withParams={{ CUSTOM_URL: `/contracts/scandocuments/students/add-student-to-scan`, folder_id: folder?.id, creat_user: true }}

@@ -27,7 +27,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
 import { cn } from "@workspace/ui/lib/utils";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@workspace/ui/hooks/use-debounce";
 import { useNavigate } from "react-router";
 import {
@@ -270,11 +270,12 @@ export function SearchProvider({ children }: { children: ReactNode }) {
 
     const hasSearchKeyword = debouncedKeyword.length > 0;
 
-    const { data: searchResult, isLoading: isSearchLoading } = useQuery({
+    const { data: searchResult, isFetching: isSearchLoading } = useQuery({
         queryKey: ["globalsearch", "search", debouncedKeyword],
         queryFn: () => searchServices({ keyword: debouncedKeyword }),
         enabled: open && hasSearchKeyword,
-        placeholderData: keepPreviousData,
+        staleTime: 0,
+        gcTime: 0,
     });
 
     const searchGroups = searchResult?.data ?? [];
@@ -385,7 +386,7 @@ function SearchInputField({
 }
 
 function studentSearchSubtitle(student: Student) {
-    return [student.email, student.faculty, student.program, student.study_level]
+    return [student.document_id, student.program, student.email, student.faculty, student.study_level]
         .filter(Boolean)
         .join(" · ");
 }
@@ -469,7 +470,7 @@ function SearchDataGroups() {
                             group.data.map((student: Student) => (
                                 <SearchResultRow
                                     key={student.id}
-                                    name={student.full_name}
+                                    name={`${student.full_name} (${student.reg_year}${(student.reg_year ? `-${Number(student.reg_year) + 1}` : "")})`}
                                     subtitle={studentSearchSubtitle(student)}
                                     url={student?.url ?? "#"}
                                 />

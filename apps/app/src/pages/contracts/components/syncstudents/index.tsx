@@ -13,12 +13,14 @@ import { ImportDialogPortalContext } from "./portal-container-context";
 const ImportStudentsDatatable = lazy(() => import("./components/datatable"));
 
 
-interface SyncStudentsDialogProps {
+interface SyncStudentsDialogProps<T = unknown> {
+    onSuccess?: (data?: T) => void;
+    onError?: (error: Error) => void;
     isOpen: boolean;
     onClose: () => void;
     withParams?: Record<string, unknown>;
 }
-const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose, withParams = {} }) => {
+const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose, withParams = {}, onSuccess, onError }) => {
     const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
     const setPortalRef = useCallback((node: HTMLDivElement | null) => {
@@ -49,7 +51,7 @@ const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose, with
                                     </div>
                                 }
                             >
-                                <ImportStudentsDatatable withParams={withParams} />
+                                <ImportStudentsDatatable withParams={withParams} onSuccess={onSuccess} onError={onError} />
                             </Suspense>
                         </div>
                     </ImportDialogPortalContext.Provider>
