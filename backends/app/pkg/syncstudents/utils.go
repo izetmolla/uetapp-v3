@@ -70,6 +70,44 @@ func wrapAthenaResponseError(err error) error {
 	return err
 }
 
+func dedupeAthenaUsersBySPID(users []AthenaUser) []AthenaUser {
+	if len(users) <= 1 {
+		return users
+	}
+	seen := make(map[string]struct{}, len(users))
+	out := make([]AthenaUser, 0, len(users))
+	for _, user := range users {
+		key := normalizeImportName(user.SPID)
+		if key == "" {
+			out = append(out, user)
+			continue
+		}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, user)
+	}
+	return out
+}
+
+func uniqueDocumentIDsFromUsers(users []AthenaUser) []string {
+	seen := make(map[string]struct{})
+	out := make([]string, 0)
+	for _, user := range users {
+		documentID := normalizeDocumentID(user.DocumentID)
+		if !isValidDocumentID(documentID) {
+			continue
+		}
+		if _, ok := seen[documentID]; ok {
+			continue
+		}
+		seen[documentID] = struct{}{}
+		out = append(out, documentID)
+	}
+	return out
+}
+
 // findStudentByDocumentID matches students by trimmed document_id (case insensitive).
 func findStudentByDocumentID(db *gorm.DB, documentID string, dest *models.Student) error {
 	documentID = normalizeDocumentID(documentID)

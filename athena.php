@@ -54,26 +54,58 @@ switch ($action) {
     case 'getStudentsBySPids':
         echo json_encode(getStudentsBySPids());
         break;
+
+    case 'getStudentsByDocumentIds':
+        echo json_encode(getStudentsByDocumentIds());
+        break;
     default:
         echo json_encode(['error' => 'Invalid action', "message" => "Action is not valid"]);
         break;
 }
 
 
+function getStudentsByDocumentIds()
+{
+    global $DB;
+    $documentids = optional_param('ids', '[]', PARAM_RAW);
+    $documentids = json_decode($documentids, true);
+    if (empty($documentids) || !is_array($documentids)) {
+        return ['error' => 'Document IDs are required', "message" => "Document IDs are not provided"];
+    }
+
+    list($insql, $params) = $DB->get_in_or_equal($documentids, SQL_PARAMS_QM);
+    $students = $DB->get_records_sql("SELECT * FROM athena_users WHERE DOCUMENT_ID $insql", $params);
+
+    return ['data' => array_values($students)];
+}
 
 
 function getStudentsBySPids()
 {
     global $DB;
     $spids = optional_param('ids', '[]', PARAM_RAW);
+    $document_id = optional_param('document_id', '', PARAM_RAW);
     $spids = json_decode($spids, true);
-    if (empty($spids)) {
+
+    if ($document_id && $document_id !== '') {
+        $students = $DB->get_records_sql("SELECT * FROM athena_users WHERE DOCUMENT_ID = ?", [$document_id]);
+        return [
+            "data" => $students,
+            "total_rows" => count($students),
+        ];
+    }
+
+    if ($spids && !empty($spids)) {
+        $placeholders = implode(',', array_fill(0, count($spids), '?'));
+        $students = $DB->get_records_sql("SELECT * FROM athena_users WHERE SP_ID IN ($placeholders)", $spids);
+
+        return [
+            "data" => $students,
+            "total_rows" => count($students),
+        ];
+    } else {
         return ['error' => 'SP IDs are required', "message" => "SP IDs are not provided"];
     }
-    return ['data' => $spids, "message" => "SP IDs are provided"];
-
-    $students = $DB->get_records_sql("SELECT * FROM athena_users WHERE SP_ID IN (" . implode(',', $spids) . ")");
-    return $students;
 }
 
 
@@ -301,8 +333,8 @@ function parseDatatablePagination()
         }
     }
 
-    $page =  $page > 0 ? $page : 1;
-    $perPage =  $perPage > 0 ? $perPage : 10;
+    $page = $page > 0 ? $page : 1;
+    $perPage = $perPage > 0 ? $perPage : 10;
 
     return [$page, $perPage];
 }

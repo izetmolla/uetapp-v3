@@ -79,6 +79,45 @@ func TestGroupAthenaUsersByDocumentID(t *testing.T) {
 	}
 }
 
+func TestStudentStudyProgramCompositeKey(t *testing.T) {
+	profileID := int64(5)
+	a := models.StudentStudyProgram{
+		StudyProgramID:  1,
+		StudentStatusID: 2,
+		FacultyID:       3,
+		StudyLevelID:    4,
+		RegYearId:       6,
+		StudyProfileID:  &profileID,
+	}
+	b := a
+	if studentStudyProgramCompositeKey(a) != studentStudyProgramCompositeKey(b) {
+		t.Fatal("same enrollment should produce same key")
+	}
+	b.StudyProgramID = 99
+	if studentStudyProgramCompositeKey(a) == studentStudyProgramCompositeKey(b) {
+		t.Fatal("different enrollment should produce different key")
+	}
+}
+
+func TestStudentStudyProgramSyncKeyUsesSPID(t *testing.T) {
+	spid := "SP-99"
+	p := models.StudentStudyProgram{AuthenaUserID: &spid}
+	if studentStudyProgramSyncKey(p) != "sp:SP-99" {
+		t.Fatalf("got %q", studentStudyProgramSyncKey(p))
+	}
+}
+
+func TestDedupeAthenaUsersBySPID(t *testing.T) {
+	users := dedupeAthenaUsersBySPID([]AthenaUser{
+		{SPID: "a", Program: "1"},
+		{SPID: "a", Program: "2"},
+		{SPID: "b", Program: "3"},
+	})
+	if len(users) != 2 {
+		t.Fatalf("len = %d", len(users))
+	}
+}
+
 func TestBuildStudentStudyProgramSetsAuthenaUserID(t *testing.T) {
 	row := AthenaUser{SPID: "  SP-42  ", Program: "Informatics", Faculty: "F", StudyLevel: "B", Status: "Active", RegYear: "2020"}
 	row.SPID = normalizeImportName(row.SPID)

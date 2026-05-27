@@ -1,4 +1,5 @@
 import ApiService, { withAPI } from "@workspace/flowtrove/lib/network";
+import type { ImportStudentsMutationResponse } from "@/pages/contracts/components/syncstudents/api";
 
 type StudyProgram = {
     id: string;
@@ -53,7 +54,7 @@ export function getStudentDetail(params: Record<string, unknown>) {
 
 
 export function syncStudent(data: Record<string, unknown>) {
-    return ApiService.fetchData<StudentDetailResponse>({
+    return ApiService.fetchData<ImportStudentsMutationResponse>({
         url: withAPI(`/contracts/sync/import-students`),
         method: "post",
         data,

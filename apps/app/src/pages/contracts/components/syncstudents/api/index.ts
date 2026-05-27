@@ -40,7 +40,17 @@ export interface ImportStudentsMutationResponse extends ResponseWithError {
     success?: boolean;
     message?: string;
     students?: Student[];
+    created?: number;
     updated?: number;
+    student_ids?: number[];
+    created_ids?: number[];
+    updated_ids?: number[];
+    errors?: Array<{
+        identifier: string;
+        sp_id?: string;
+        document_id?: string;
+        message: string;
+    }>;
 }
 
 

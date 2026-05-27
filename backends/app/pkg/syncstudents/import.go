@@ -39,10 +39,15 @@ type ImportStudentsRequest struct {
 }
 
 type ImportStudentsResult struct {
-	Success  bool             `json:"success"`
-	Message  string           `json:"message"`
-	Errors   []ImportLogError `json:"errors"`
-	Students []models.Student `json:"students"`
+	Success    bool             `json:"success"`
+	Message    string           `json:"message"`
+	Errors     []ImportLogError `json:"errors"`
+	Students   []models.Student `json:"students"`
+	Created    int              `json:"created"`
+	Updated    int              `json:"updated"`
+	StudentIDs []int64          `json:"student_ids,omitempty"`
+	CreatedIDs []int64          `json:"created_ids,omitempty"`
+	UpdatedIDs []int64          `json:"updated_ids,omitempty"`
 }
 
 type ImportLogError struct {
@@ -94,10 +99,9 @@ func (cc *Controller) ImportStudents(ctx context.Context, req ImportStudentsRequ
 	}
 	if len(users) == 0 {
 		return ImportStudentsResult{
-			Success:  true,
-			Message:  "Students imported successfully",
-			Students: []models.Student{},
-			Errors:   []ImportLogError{},
+			Success: false,
+			Message: "No students found in Athena for the given document_id or SP IDs",
+			Errors:  []ImportLogError{},
 		}, nil
 	}
 
@@ -110,8 +114,7 @@ func (cc *Controller) ImportStudents(ctx context.Context, req ImportStudentsRequ
 	for range importWorkerCount {
 		go func() {
 			for batch := range studentCh {
-				model, errs := cc.insertOrUpdateStudents(ctx, batch, refCache)
-				resultCh <- importWorkerResult{student: model, errors: errs}
+				resultCh <- cc.insertOrUpdateStudents(ctx, batch, refCache)
 			}
 		}()
 	}
@@ -125,35 +128,50 @@ func (cc *Controller) ImportStudents(ctx context.Context, req ImportStudentsRequ
 
 	var students []models.Student
 	var importErrors []ImportLogError
+	var createdIDs, updatedIDs, studentIDs []int64
 	for range batches {
 		res := <-resultCh
 		if res.student.ID > 0 {
 			students = append(students, res.student)
+			studentIDs = append(studentIDs, res.student.ID)
+			if res.created {
+				createdIDs = append(createdIDs, res.student.ID)
+			} else {
+				updatedIDs = append(updatedIDs, res.student.ID)
+			}
 		}
 		if len(res.errors) > 0 {
 			importErrors = append(importErrors, res.errors...)
 		}
 	}
 
-	if len(importErrors) > 0 {
-		return ImportStudentsResult{
-			Success:  false,
-			Message:  fmt.Sprintf("%d import step(s) failed", len(importErrors)),
-			Errors:   importErrors,
-			Students: students,
-		}, nil
+	result := ImportStudentsResult{
+		Students:   students,
+		Created:    len(createdIDs),
+		Updated:    len(updatedIDs),
+		StudentIDs: studentIDs,
+		CreatedIDs: createdIDs,
+		UpdatedIDs: updatedIDs,
+		Errors:     importErrors,
 	}
 
-	return ImportStudentsResult{
-		Success:  true,
-		Message:  "Students imported successfully",
-		Students: students,
-		Errors:   []ImportLogError{},
-	}, nil
+	if len(importErrors) > 0 {
+		result.Success = false
+		result.Message = fmt.Sprintf("%d import step(s) failed", len(importErrors))
+		return result, nil
+	}
+
+	result.Success = true
+	result.Message = "Students imported successfully"
+	if len(result.Errors) == 0 {
+		result.Errors = []ImportLogError{}
+	}
+	return result, nil
 }
 
 type importWorkerResult struct {
 	student models.Student
+	created bool
 	errors  []ImportLogError
 }
 
@@ -230,9 +248,7 @@ func athenaUserFromRecord(record map[string]any) AthenaUser {
 }
 
 func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, documentID string, students []string) ([]AthenaUser, error) {
-	if len(students) == 0 {
-		return nil, nil
-	}
+	documentID = normalizeDocumentID(documentID)
 
 	db := cc.app.Postgres()
 	resource, err := gorm.G[models.Resource](db).
@@ -243,7 +259,17 @@ func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, documentID 
 		return nil, err
 	}
 
-	documentID = normalizeDocumentID(documentID)
+	if len(students) == 0 {
+		if !isValidDocumentID(documentID) {
+			return nil, errors.New("students or document_id is required")
+		}
+		users, err := cc.fetchAthenaStudentsByDocumentIDs(reqCtx, resource, []string{documentID})
+		if err != nil {
+			return nil, err
+		}
+		return dedupeAthenaUsersBySPID(users), nil
+	}
+
 	all := make([]AthenaUser, 0, len(students))
 	for _, batch := range chunkStrings(students, athenaSPIDBatchSize) {
 		users, err := cc.fetchAthenaStudentsBySPIDs(reqCtx, resource, documentID, batch)
@@ -252,7 +278,32 @@ func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, documentID 
 		}
 		all = append(all, users...)
 	}
-	return all, nil
+	return cc.expandAthenaUsersByDocumentID(reqCtx, resource, all)
+}
+
+func (cc *Controller) expandAthenaUsersByDocumentID(reqCtx context.Context, resource models.Resource, users []AthenaUser) ([]AthenaUser, error) {
+	documentIDs := uniqueDocumentIDsFromUsers(users)
+	if len(documentIDs) == 0 {
+		return dedupeAthenaUsersBySPID(users), nil
+	}
+
+	expanded := make([]AthenaUser, 0, len(users))
+	for _, batch := range chunkStrings(documentIDs, athenaSPIDBatchSize) {
+		rows, err := cc.fetchAthenaStudentsByDocumentIDs(reqCtx, resource, batch)
+		if err != nil {
+			return nil, err
+		}
+		expanded = append(expanded, rows...)
+	}
+	return dedupeAthenaUsersBySPID(append(users, expanded...)), nil
+}
+
+func (cc *Controller) fetchAthenaStudentsByDocumentIDs(reqCtx context.Context, resource models.Resource, documentIDs []string) ([]AthenaUser, error) {
+	idsJSON, err := json.Marshal(documentIDs)
+	if err != nil {
+		return nil, err
+	}
+	return cc.fetchAthena(reqCtx, resource, "getStudentsByDocumentIds", string(idsJSON), "")
 }
 
 func (cc *Controller) fetchAthenaStudentsBySPIDs(reqCtx context.Context, resource models.Resource, documentID string, spIDs []string) ([]AthenaUser, error) {
@@ -260,11 +311,16 @@ func (cc *Controller) fetchAthenaStudentsBySPIDs(reqCtx context.Context, resourc
 	if err != nil {
 		return nil, err
 	}
+	return cc.fetchAthena(reqCtx, resource, "getStudentsBySPids", string(idsJSON), normalizeDocumentID(documentID))
+}
 
+func (cc *Controller) fetchAthena(reqCtx context.Context, resource models.Resource, action, idsJSON, documentID string) ([]AthenaUser, error) {
 	payload := map[string]any{
-		"action":      "getStudentsBySPids",
-		"ids":         string(idsJSON),
-		"document_id": documentID,
+		"action": action,
+		"ids":    idsJSON,
+	}
+	if documentID != "" {
+		payload["document_id"] = documentID
 	}
 
 	method := strings.ToUpper(strings.TrimSpace(resource.Config["method"].(string)))
@@ -317,15 +373,15 @@ type athenaStudentImport struct {
 	Records    []AthenaUser
 }
 
-func (cc *Controller) insertOrUpdateStudents(reqCtx context.Context, batch athenaStudentImport, refCache *importRefCache) (models.Student, []ImportLogError) {
+func (cc *Controller) insertOrUpdateStudents(reqCtx context.Context, batch athenaStudentImport, refCache *importRefCache) importWorkerResult {
 	if len(batch.Records) == 0 {
-		return models.Student{}, nil
+		return importWorkerResult{}
 	}
 	primary := mergeAthenaUserRecords(batch.Records)
 	log := newImportLog(primary)
 	if !isValidDocumentID(batch.DocumentID) {
 		log.fail("student.validate", errors.New("document ID must be at least 7 alphanumeric characters"))
-		return models.Student{}, log.all()
+		return importWorkerResult{errors: log.all()}
 	}
 
 	v, err, _ := refCache.studentSF.Do(batch.DocumentID, func() (any, error) {
@@ -333,21 +389,27 @@ func (cc *Controller) insertOrUpdateStudents(reqCtx context.Context, batch athen
 	})
 	if err != nil {
 		log.fail("student.upsert", err)
-		return models.Student{}, log.all()
+		return importWorkerResult{errors: log.all()}
 	}
 	res := v.(studentUpsertResult)
 	if len(res.errors) > 0 {
 		log.errors = append(log.errors, res.errors...)
 	}
-	return res.student, log.all()
+	return importWorkerResult{
+		student: res.student,
+		created: res.created,
+		errors:  log.all(),
+	}
 }
 
 type studentUpsertResult struct {
 	student models.Student
+	created bool
 	errors  []ImportLogError
 }
 
 func (cc *Controller) upsertStudentByDocumentID(reqCtx context.Context, records []AthenaUser, refCache *importRefCache) (studentUpsertResult, error) {
+	records = dedupeAthenaUsersBySPID(records)
 	primary := mergeAthenaUserRecords(records)
 	log := newImportLog(primary)
 	db := cc.app.Postgres().WithContext(reqCtx)
@@ -356,7 +418,10 @@ func (cc *Controller) upsertStudentByDocumentID(reqCtx context.Context, records 
 	err := findStudentByDocumentID(db, primary.DocumentID, &existing)
 	if err == nil {
 		cc.updateStudent(reqCtx, existing.ID, primary, records, refCache, log)
-		return studentUpsertResult{student: existing, errors: log.all()}, nil
+		if err := db.Where("id = ?", existing.ID).First(&existing).Error; err != nil {
+			log.fail("student.reload", err)
+		}
+		return studentUpsertResult{student: existing, created: false, errors: log.all()}, nil
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.fail("student.find", err)
@@ -371,14 +436,17 @@ func (cc *Controller) upsertStudentByDocumentID(reqCtx context.Context, records 
 				return studentUpsertResult{}, err
 			}
 			cc.updateStudent(reqCtx, existing.ID, primary, records, refCache, log)
-			return studentUpsertResult{student: existing, errors: log.all()}, nil
+			if err := db.Where("id = ?", existing.ID).First(&existing).Error; err != nil {
+				log.fail("student.reload", err)
+			}
+			return studentUpsertResult{student: existing, created: false, errors: log.all()}, nil
 		}
 		log.fail("student.create", err)
-		return studentUpsertResult{student: models.Student{}, errors: log.all()}, nil
+		return studentUpsertResult{student: models.Student{}, created: false, errors: log.all()}, nil
 	}
 
-	cc.ensureAllStudentStudyPrograms(reqCtx, studentModel.ID, records, refCache, log)
-	return studentUpsertResult{student: studentModel, errors: log.all()}, nil
+	cc.syncStudentStudyPrograms(reqCtx, studentModel.ID, records, refCache, log)
+	return studentUpsertResult{student: studentModel, created: true, errors: log.all()}, nil
 }
 
 func groupAthenaUsersByDocumentID(users []AthenaUser) []athenaStudentImport {
@@ -453,13 +521,61 @@ func (cc *Controller) updateStudent(reqCtx context.Context, id int64, primary At
 		log.fail("student.update", err)
 		return
 	}
-	cc.ensureAllStudentStudyPrograms(reqCtx, id, records, refCache, log)
+	cc.syncStudentStudyPrograms(reqCtx, id, records, refCache, log)
 }
 
-func (cc *Controller) ensureAllStudentStudyPrograms(reqCtx context.Context, studentID int64, records []AthenaUser, refCache *importRefCache, log *importLog) {
+func (cc *Controller) syncStudentStudyPrograms(reqCtx context.Context, studentID int64, records []AthenaUser, refCache *importRefCache, log *importLog) {
+	db := cc.app.Postgres().WithContext(reqCtx)
+	records = dedupeAthenaUsersBySPID(records)
+
+	incoming := make(map[string]models.StudentStudyProgram, len(records))
 	for _, row := range records {
-		cc.ensureStudentStudyProgram(reqCtx, studentID, row, refCache, log)
+		program, ok := cc.buildStudentStudyProgram(reqCtx, studentID, row, refCache, log)
+		if !ok {
+			continue
+		}
+		incoming[studentStudyProgramSyncKey(program)] = program
+		cc.upsertStudentStudyProgram(db, program, log)
 	}
+
+	var existing []models.StudentStudyProgram
+	if err := db.Where("student_id = ?", studentID).Find(&existing).Error; err != nil {
+		log.fail("student_study_program.list", err)
+		return
+	}
+
+	for _, program := range existing {
+		if _, keep := incoming[studentStudyProgramSyncKey(program)]; keep {
+			continue
+		}
+		if err := db.Delete(&program).Error; err != nil {
+			log.fail("student_study_program.delete", err)
+		}
+	}
+}
+
+func studentStudyProgramSyncKey(program models.StudentStudyProgram) string {
+	if program.AuthenaUserID != nil {
+		if spid := normalizeImportName(*program.AuthenaUserID); spid != "" {
+			return "sp:" + spid
+		}
+	}
+	return "comp:" + studentStudyProgramCompositeKey(program)
+}
+
+func studentStudyProgramCompositeKey(program models.StudentStudyProgram) string {
+	profileID := int64(0)
+	if program.StudyProfileID != nil {
+		profileID = *program.StudyProfileID
+	}
+	return fmt.Sprintf("%d:%d:%d:%d:%d:%d",
+		program.StudyProgramID,
+		program.StudentStatusID,
+		program.FacultyID,
+		program.StudyLevelID,
+		program.RegYearId,
+		profileID,
+	)
 }
 
 // --- study program ---
@@ -482,23 +598,27 @@ func studentStudyProgramScope(program models.StudentStudyProgram) func(*gorm.DB)
 	}
 }
 
-func (cc *Controller) ensureStudentStudyProgram(reqCtx context.Context, studentID int64, student AthenaUser, refCache *importRefCache, log *importLog) {
-	program, ok := cc.buildStudentStudyProgram(reqCtx, studentID, student, refCache, log)
-	if !ok {
-		return
+func (cc *Controller) upsertStudentStudyProgram(db *gorm.DB, program models.StudentStudyProgram, log *importLog) {
+	var existing models.StudentStudyProgram
+	var err error
+
+	if program.AuthenaUserID != nil && normalizeImportName(*program.AuthenaUserID) != "" {
+		err = db.Where(
+			"student_id = ? AND authena_user_id = ?",
+			program.StudentID,
+			normalizeImportName(*program.AuthenaUserID),
+		).First(&existing).Error
+	}
+	if err != nil {
+		err = db.Model(&models.StudentStudyProgram{}).Scopes(studentStudyProgramScope(program)).First(&existing).Error
 	}
 
-	db := cc.app.Postgres().WithContext(reqCtx)
-	scope := studentStudyProgramScope(program)
-
-	var existing models.StudentStudyProgram
-	err := db.Model(&models.StudentStudyProgram{}).Scopes(scope).First(&existing).Error
 	if err == nil {
 		updates := studentStudyProgramImportChanges(existing, program)
 		if len(updates) == 0 {
 			return
 		}
-		if err := db.Model(&models.StudentStudyProgram{}).Scopes(scope).Updates(updates).Error; err != nil {
+		if err := db.Model(&existing).Updates(updates).Error; err != nil {
 			log.fail("student_study_program.update", err)
 		}
 		return
@@ -508,6 +628,28 @@ func (cc *Controller) ensureStudentStudyProgram(reqCtx context.Context, studentI
 		return
 	}
 	if err := db.Create(&program).Error; err != nil {
+		if isUniqueConstraintError(err) {
+			if program.AuthenaUserID != nil && normalizeImportName(*program.AuthenaUserID) != "" {
+				err = db.Where(
+					"student_id = ? AND authena_user_id = ?",
+					program.StudentID,
+					normalizeImportName(*program.AuthenaUserID),
+				).First(&existing).Error
+			} else {
+				err = db.Model(&models.StudentStudyProgram{}).Scopes(studentStudyProgramScope(program)).First(&existing).Error
+			}
+			if err != nil {
+				log.fail("student_study_program.find", err)
+				return
+			}
+			updates := studentStudyProgramImportChanges(existing, program)
+			if len(updates) > 0 {
+				if err := db.Model(&existing).Updates(updates).Error; err != nil {
+					log.fail("student_study_program.update", err)
+				}
+			}
+			return
+		}
 		log.fail("student_study_program.create", err)
 	}
 }

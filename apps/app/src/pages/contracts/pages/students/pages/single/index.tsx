@@ -339,12 +339,16 @@ export default function StudentProfilePage() {
 
     const mutation = useMutation({
         mutationFn: syncStudent,
-        onSuccess: (data) => {
-            console.log(data);
-            queryClient.invalidateQueries({ queryKey: queryKey });
+        onSuccess: (result) => {
+            if (result.success) {
+                toast.success(result.message ?? "Student synced successfully");
+                queryClient.invalidateQueries({ queryKey: queryKey });
+                return;
+            }
+            const detail = result.errors?.[0]?.message;
+            toast.error(detail ? `${result.message}: ${detail}` : (result.message ?? "Sync failed"));
         },
-        onError: (error: any) => {
-            console.log(error);
+        onError: (error: Error) => {
             toast.error(error?.message ?? "Failed to sync student");
         },
     });
