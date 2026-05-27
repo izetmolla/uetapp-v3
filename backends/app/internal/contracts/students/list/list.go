@@ -10,6 +10,39 @@ import (
 	"github.com/uetedu/app/pkg/tablequery"
 )
 
+// sqlLatestEnrollmentScalar returns a correlated subquery for the latest student_study_programs row.
+func sqlLatestEnrollmentScalar(selectExpr, joins string) string {
+	return `(SELECT ` + selectExpr + `
+	FROM student_study_programs ssp` + joins + `
+	WHERE ssp.student_id = students.id AND ssp.deleted_at IS NULL
+	ORDER BY ssp.created_at DESC, ssp.id DESC
+	LIMIT 1)`
+}
+
+var (
+	sqlLatestStudentProgramName = sqlLatestEnrollmentScalar(
+		"sp.name",
+		`
+	INNER JOIN study_programs sp ON sp.id = ssp.study_program_id AND sp.deleted_at IS NULL`,
+	)
+	sqlLatestStudentFacultyName = sqlLatestEnrollmentScalar(
+		"f.name",
+		`
+	INNER JOIN faculties f ON f.id = ssp.faculty_id AND f.deleted_at IS NULL`,
+	)
+	sqlLatestStudentStudyLevelName = sqlLatestEnrollmentScalar(
+		"sl.name",
+		`
+	INNER JOIN study_levels sl ON sl.id = ssp.study_level_id AND sl.deleted_at IS NULL`,
+	)
+	// Start year only (e.g. "2020" from "2020-2021") for list UI formatting.
+	sqlLatestStudentRegYear = sqlLatestEnrollmentScalar(
+		"SPLIT_PART(ay.year, '-', 1)",
+		`
+	INNER JOIN academic_years ay ON ay.id = ssp.reg_year_id AND ay.deleted_at IS NULL`,
+	)
+)
+
 func (cc *Controller) GetStudentsListAPI(c fiber.Ctx) error {
 	db := cc.app.Postgres()
 	r := cc.app.Render()
@@ -134,9 +167,36 @@ func (cc *Controller) getStudentsColumns(_ context.Context) ([]datatable.Column,
 		{
 			ID:                 "program",
 			AccessorKey:        "program",
+			SQLColumn:          sqlLatestStudentProgramName,
 			Header:             "Program",
 			EnableSorting:      true,
 			EnableColumnFilter: false,
+		},
+		{
+			ID:                 "faculty",
+			AccessorKey:        "faculty",
+			SQLColumn:          sqlLatestStudentFacultyName,
+			Header:             "Faculty",
+			EnableSorting:      true,
+			EnableColumnFilter: false,
+			Hidden:             true,
+		},
+		{
+			ID:                 "study_level",
+			AccessorKey:        "study_level",
+			SQLColumn:          sqlLatestStudentStudyLevelName,
+			Header:             "Study Level",
+			EnableSorting:      true,
+			EnableColumnFilter: false,
+		},
+		{
+			ID:                 "year",
+			AccessorKey:        "year",
+			SQLColumn:          sqlLatestStudentRegYear,
+			Header:             "Reg. Year",
+			EnableSorting:      true,
+			EnableColumnFilter: false,
+			Hidden:             true,
 		},
 
 		{

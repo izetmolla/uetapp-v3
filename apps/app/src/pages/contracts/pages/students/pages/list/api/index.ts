@@ -11,6 +11,7 @@ export interface Student {
     year: string;
     program: string;
     faculty: string;
+    study_level?: string;
     firstname: string;
     lastname: string;
     email?: string;
