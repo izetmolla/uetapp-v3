@@ -85,7 +85,6 @@ func (cc *Controller) ImportStudents(c fiber.Ctx) error {
 		return cc.app.Api(c, r.WithError(err))
 	}
 
-	fmt.Println("result: ", result)
 	return cc.app.Api(c, r.WithData(result))
 }
 

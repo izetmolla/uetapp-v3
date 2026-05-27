@@ -165,6 +165,14 @@ func (cc *Controller) getStudentsColumns(_ context.Context) ([]datatable.Column,
 		},
 
 		{
+			ID:                 "year",
+			AccessorKey:        "year",
+			Header:             "Year",
+			SQLColumn:          sqlLatestStudentRegYear,
+			EnableSorting:      true,
+			EnableColumnFilter: false,
+		},
+		{
 			ID:                 "program",
 			AccessorKey:        "program",
 			SQLColumn:          sqlLatestStudentProgramName,

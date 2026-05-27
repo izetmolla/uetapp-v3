@@ -142,13 +142,15 @@ const DocumentsPage = () => {
                     label="documents"
                 />
             </ContentLoader>
-            {/* <ImportUsersDialog /> */}
             <SyncStudentsDialog
                 onSuccess={() => {
                     void queryClient.invalidateQueries({ queryKey });
                     setIsImportDocumentsDialogOpen(false)
                 }}
-                withParams={{ folder_id: Number(folder_id) }}
+                withParams={{
+                    folder_id: Number(folder_id),
+                    CUSTOM_URL: "/contracts/scandocuments/documents/add-students",
+                }}
                 isOpen={isImportDocumentsDialogOpen}
                 onClose={() => setIsImportDocumentsDialogOpen(false)}
             />

@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Ellipsis, UserCheck, UserCog, UserX } from "lucide-react";
+import { Ellipsis,  UserCheck, UserCog, UserX } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -14,6 +14,7 @@ import useStudentsListStore from "../store";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
 import LongText from "@workspace/ui/components/long-text";
+import { Link } from "react-router";
 
 function statusVariant(status: string | undefined): "default" | "secondary" | "outline" {
     if (status === "active" || !status) return "default";
@@ -76,21 +77,23 @@ export function getColumnOverrides(): Array<{ id: string } & Partial<ColumnDef<S
                 const year = row.original?.year ? `(${row.original?.year}-${Number(row.original?.year) + 1})` : "-";
                 return (
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2">
-                            <Avatar>
-                                <AvatarImage src={"#"} alt={row.getValue("fullname") ?? "-"} />
-                                <AvatarFallback>{generateAvatarFallback(row.getValue("fullname") ?? "-")}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <div className="flex items-center gap-1">
-                                    <LongText className='max-w-50'>
-                                        <strong>{row.getValue("fullname") || "-"}</strong>
-                                    </LongText>
-                                    {year}
+                        <Link to={`/contracts/students/${row.original.id}`}>
+                            <div className="flex items-center gap-2">
+                                <Avatar>
+                                    <AvatarImage src={"#"} alt={row.getValue("fullname") ?? "-"} />
+                                    <AvatarFallback>{generateAvatarFallback(row.getValue("fullname") ?? "-")}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <div className="flex items-center gap-1">
+                                        <LongText className='max-w-50'>
+                                            <strong>{row.getValue("fullname") || "-"}</strong>
+                                        </LongText>
+                                        {year}
+                                    </div>
+                                    <small className="font-semibold">{row.original?.program ?? "-"}</small> - <small>{row.original?.faculty ?? "-"}</small>
                                 </div>
-                                <small className="font-semibold">{row.original?.program ?? "-"}</small> - <small>{row.original?.faculty ?? "-"}</small>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 )
             },
