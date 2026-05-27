@@ -242,7 +242,7 @@ function ProgramCard({
 }) {
     const isPrimary = program?.type === "Primary";
 
-    console.log(program);
+
 
     return (
         <article
@@ -277,13 +277,13 @@ function ProgramCard({
                                 variant="outline"
                                 className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
                             >
-                                {program?.status}
+                                {program?.student_status?.name}
                             </Badge>
                         </div>
                         <h3 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
-                            {program?.programName}
+                         {program?.study_level?.name} - {program?.study_program?.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground">{program?.faculty}</p>
+                        <p className="text-sm text-muted-foreground">{program?.faculty?.name}</p>
                     </div>
                 </div>
                 <p className="text-xs text-muted-foreground sm:text-right">
@@ -300,7 +300,7 @@ function ProgramCard({
                 />
                 <Field
                     label="Faculty"
-                    value={program?.faculty}
+                    value={program?.faculty?.name}
                     editing={editing}
                     onChange={(v) => onFieldChange("faculty", v)}
                 />
@@ -312,7 +312,7 @@ function ProgramCard({
                 />
                 <Field
                     label="Year of Registration"
-                    value={program?.yearOfRegistration}
+                    value={program?.reg_year?.year}
                     editing={editing}
                     onChange={(v) => onFieldChange("yearOfRegistration", v)}
                 />
@@ -344,7 +344,7 @@ function ProgramCard({
                 />
                 <Field
                     label="Status"
-                    value={program?.status}
+                    value={program?.student_status?.name}
                     editing={editing}
                     onChange={(v) => onFieldChange("status", v)}
                     options={["Active", "Inactive", "Completed"]}
@@ -511,8 +511,8 @@ export default function StudentProfilePage() {
                             <div className="flex w-full flex-col gap-5">
                                 {data?.student?.programs?.map((p, i) => (
                                     <ProgramCard
-                                        key={`${p.study_program.name}-${i}`}
-                                        program={p.study_program as any}
+                                        key={`${i}`}
+                                        program={p as any}
                                         editing={editMode}
                                         onFieldChange={(key, value) => setProgramField(i, key, value)}
                                     />
