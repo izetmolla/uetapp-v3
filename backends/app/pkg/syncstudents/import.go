@@ -230,6 +230,10 @@ func athenaUserFromRecord(record map[string]any) AthenaUser {
 }
 
 func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, documentID string, students []string) ([]AthenaUser, error) {
+	if len(students) == 0 {
+		return nil, nil
+	}
+
 	db := cc.app.Postgres()
 	resource, err := gorm.G[models.Resource](db).
 		Select("id", "config").
@@ -239,22 +243,54 @@ func (cc *Controller) loadStudentsFromAthena(reqCtx context.Context, documentID 
 		return nil, err
 	}
 
-	ids, _ := json.Marshal(students)
-	res, err := httprequest.Execute[map[string]any](httprequest.New(&httprequest.HttpRequestDriver{
+	documentID = normalizeDocumentID(documentID)
+	all := make([]AthenaUser, 0, len(students))
+	for _, batch := range chunkStrings(students, athenaSPIDBatchSize) {
+		users, err := cc.fetchAthenaStudentsBySPIDs(reqCtx, resource, documentID, batch)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, users...)
+	}
+	return all, nil
+}
+
+func (cc *Controller) fetchAthenaStudentsBySPIDs(reqCtx context.Context, resource models.Resource, documentID string, spIDs []string) ([]AthenaUser, error) {
+	idsJSON, err := json.Marshal(spIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := map[string]any{
+		"action":      "getStudentsBySPids",
+		"ids":         string(idsJSON),
+		"document_id": documentID,
+	}
+
+	method := strings.ToUpper(strings.TrimSpace(resource.Config["method"].(string)))
+	driver := &httprequest.HttpRequestDriver{
 		Url:    resource.Config["url"].(string),
-		Method: resource.Config["method"].(string),
+		Method: method,
 		Headers: map[string]string{
 			"Content-Type":  "application/json",
 			"Authorization": "Bearer " + resource.Config["authorization"].(string),
 		},
-		Params: map[string]any{
-			"action":      "getStudentsBySPids",
-			"ids":         string(ids),
-			"document_id": normalizeDocumentID(documentID),
-		},
-	}))
+	}
+	if method == "POST" {
+		driver.Body = payload
+	} else {
+		driver.Params = payload
+	}
+
+	res, err := httprequest.Execute[map[string]any](httprequest.New(driver).WithContext(reqCtx))
 	if err != nil {
-		return nil, err
+		return nil, wrapAthenaResponseError(err)
+	}
+	if res.StatusCode >= 400 {
+		return nil, fmt.Errorf("athena HTTP %d: %s", res.StatusCode, athenaErrorFromBody(res.Body))
+	}
+	if errMsg := athenaErrorFromBody(res.Body); errMsg != "" {
+		return nil, fmt.Errorf("athena: %s", errMsg)
 	}
 	return parseAthenaUsers(res.Body)
 }

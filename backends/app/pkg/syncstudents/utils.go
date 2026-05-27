@@ -13,6 +13,8 @@ import (
 
 var importProgramSuffixParen = regexp.MustCompile(`\s*\([^)]*\)$`)
 
+const athenaSPIDBatchSize = 50
+
 func normalizeImportName(name string) string {
 	return strings.TrimSpace(name)
 }
@@ -24,6 +26,48 @@ func normalizeDocumentID(documentID string) string {
 func isValidDocumentID(documentID string) bool {
 	documentID = normalizeDocumentID(documentID)
 	return documentID != "" && documentIDRegex.MatchString(documentID)
+}
+
+func chunkStrings(items []string, size int) [][]string {
+	if size <= 0 || len(items) == 0 {
+		return nil
+	}
+	chunks := make([][]string, 0, (len(items)+size-1)/size)
+	for i := 0; i < len(items); i += size {
+		end := i + size
+		if end > len(items) {
+			end = len(items)
+		}
+		chunks = append(chunks, items[i:end])
+	}
+	return chunks
+}
+
+func athenaErrorFromBody(body map[string]any) string {
+	if body == nil {
+		return ""
+	}
+	if msg, ok := body["message"].(string); ok && msg != "" {
+		if errVal, ok := body["error"].(string); ok && errVal != "" {
+			return errVal + ": " + msg
+		}
+		return msg
+	}
+	if errVal, ok := body["error"].(string); ok {
+		return errVal
+	}
+	return ""
+}
+
+func wrapAthenaResponseError(err error) error {
+	if err == nil {
+		return nil
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "invalid character") && strings.Contains(msg, "'<'") {
+		return fmt.Errorf("%w (upstream returned HTML instead of JSON — often caused by a request that is too large; import uses batches of %d SP IDs)", err, athenaSPIDBatchSize)
+	}
+	return err
 }
 
 // findStudentByDocumentID matches students by trimmed document_id (case insensitive).

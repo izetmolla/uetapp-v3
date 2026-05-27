@@ -7,6 +7,10 @@ export const STUDENTS_LIST_BASE = "/contracts/students/list";
 
 export interface Student {
     id: number;
+    fullname: string;
+    year: string;
+    program: string;
+    faculty: string;
     firstname: string;
     lastname: string;
     email?: string;

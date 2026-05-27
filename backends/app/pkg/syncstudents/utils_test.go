@@ -55,6 +55,13 @@ func TestIsValidDocumentID(t *testing.T) {
 	}
 }
 
+func TestChunkStrings(t *testing.T) {
+	chunks := chunkStrings([]string{"a", "b", "c", "d", "e"}, 2)
+	if len(chunks) != 3 || len(chunks[2]) != 1 {
+		t.Fatalf("chunks = %#v", chunks)
+	}
+}
+
 func TestGroupAthenaUsersByDocumentID(t *testing.T) {
 	batches := groupAthenaUsersByDocumentID([]AthenaUser{
 		{DocumentID: "  ID1 ", SPID: "sp1", Program: "A"},
