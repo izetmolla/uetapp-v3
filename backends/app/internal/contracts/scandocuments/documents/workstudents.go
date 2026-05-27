@@ -49,6 +49,7 @@ func (c *Controller) AddStudentToScanAPI(ctx fiber.Ctx) error {
 		}); err != nil {
 			return c.app.Api(ctx, r.WithError(err), r.WithStatus(fiber.StatusInternalServerError), r.WithCode("INTERNAL_SERVER_ERROR"))
 		}
+
 	}
 
 	return c.app.Api(ctx, r.WithData(fiber.Map{

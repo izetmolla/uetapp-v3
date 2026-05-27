@@ -14,13 +14,23 @@ const ImportStudentsDatatable = lazy(() => import("./components/datatable"));
 
 
 interface SyncStudentsDialogProps<T = unknown> {
+    title?: string;
+    description?: string;
     onSuccess?: (data?: T) => void;
     onError?: (error: Error) => void;
     isOpen: boolean;
     onClose: () => void;
     withParams?: Record<string, unknown>;
 }
-const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose, withParams = {}, onSuccess, onError }) => {
+const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({
+    title="Import Students",
+    description,
+    isOpen,
+    onClose,
+    withParams = {},
+    onSuccess,
+    onError,
+}) => {
     const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
     const setPortalRef = useCallback((node: HTMLDivElement | null) => {
@@ -34,9 +44,9 @@ const SyncStudentsDialog: FC<SyncStudentsDialogProps> = ({ isOpen, onClose, with
                     <div className="shrink-0 border-b px-5 py-3.5">
                         <DialogHeader className="gap-1 text-left sm:text-left">
                             <DialogTitle className="text-base font-semibold leading-tight">
-                                Import Users
+                                {title}
                             </DialogTitle>
-                            <DialogDescription className="hidden">Import students from a CSV file.</DialogDescription>
+                            <DialogDescription className={`${!description ? "hidden" : ""}`}>{description}</DialogDescription>
                         </DialogHeader>
                     </div>
                     <ImportDialogPortalContext.Provider value={portalContainer}>

@@ -86,4 +86,4 @@ spec:
     - name: api
       port: 9000
       targetPort: 9000
-      # nodePort: 30014
+      nodePort: 30016

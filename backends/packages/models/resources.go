@@ -24,6 +24,8 @@ type Resource struct {
 	Config     JSONBAny   `json:"config" gorm:"type:jsonb;default:'{}';"`
 	ConfigForm JSONBArray `json:"config_form" gorm:"type:jsonb;default:'[]';"`
 
+	StudentScanFolderDocFiles []StudentScanFolderDocFile `json:"student_scan_folder_doc_files" gorm:"foreignKey:ResourceID;references:ID"`
+
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`

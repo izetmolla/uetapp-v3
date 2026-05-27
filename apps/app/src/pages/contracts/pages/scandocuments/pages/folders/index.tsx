@@ -149,6 +149,8 @@ const FoldersPage = () => {
       <DeleteFolderDialog queryKey={queryKey} />
       <DownloadFolderDialog />
       <SyncStudentsDialog
+        title="Add Students to Scan Documents"
+        description="This action will add students to the scan documents list for this folder."
         onSuccess={() => {
           void queryClient.invalidateQueries({ queryKey });
           setIsAddStudentToScanDialogOpen(false)
@@ -156,7 +158,11 @@ const FoldersPage = () => {
         }}
         isOpen={isAddStudentToScanDialogOpen}
         onClose={() => setIsAddStudentToScanDialogOpen(false)}
-        withParams={{ CUSTOM_URL: `/contracts/scandocuments/students/add-student-to-scan`, folder_id: folder?.id, creat_user: true }}
+        withParams={{
+          CUSTOM_URL: `/contracts/scandocuments/students/add-student-to-scan`,
+          folder_id: folder?.id,
+          creat_user: true
+        }}
       />
     </PageShell>
   );
