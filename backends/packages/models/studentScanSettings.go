@@ -12,6 +12,7 @@ type StudentScanSettings struct {
 
 	Option string   `json:"option" gorm:"type:varchar(255);default:null"`
 	Config JSONBAny `json:"config" gorm:"type:jsonb;default:'{}';"`
+	Value  string   `json:"value" gorm:"type:text;default:null"`
 
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
@@ -19,16 +20,9 @@ type StudentScanSettings struct {
 }
 
 func (b *StudentScanSettings) BeforeCreate(_ *gorm.DB) (err error) {
-	if b.Config == nil {
-		b.Config = JSONBAny(StudentScanSettingsDefaultConfig)
-	}
 	return
 }
 
 func (b StudentScanSettings) TableName() string {
 	return "student_scan_settings"
-}
-
-var StudentScanSettingsDefaultConfig JSONBAny = JSONBAny{
-	"contract_storage_location": "minio",
 }
