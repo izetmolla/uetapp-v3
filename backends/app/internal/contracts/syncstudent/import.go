@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/flowtrove/packages/drivers/httprequest"
 	"github.com/flowtrove/packages/models"
@@ -258,10 +259,11 @@ func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, 
 	db := cc.app.Postgres()
 
 	studentModel := &models.Student{
-		Firstname:  student.Firstname,
-		Lastname:   student.Surname,
-		Email:      student.Email,
-		DocumentId: student.DocumentID,
+		Firstname:     student.Firstname,
+		Lastname:      student.Surname,
+		Email:         student.Email,
+		AcademicEmail: strings.TrimSpace(student.EmailUET),
+		DocumentId:    student.DocumentID,
 	}
 
 	if err := gorm.G[models.Student](db).Create(reqCtx, studentModel); err != nil {
@@ -269,6 +271,7 @@ func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, 
 		return models.Student{}, log.all()
 	}
 	cc.ensureStudentStudyProgram(reqCtx, studentModel.ID, student, refCache, log)
+	cc.syncStudentAcademicEmail(reqCtx, studentModel.ID, student, log)
 	if folderID > 0 {
 		cc.ensureStudentScanFolderDoc(reqCtx, folderID, studentModel.ID, log)
 	}
@@ -279,17 +282,22 @@ func (cc *Controller) createStudent(reqCtx context.Context, student AthenaUser, 
 func (cc *Controller) updateStudent(reqCtx context.Context, id int64, student AthenaUser, folderID int64, refCache *importRefCache, log *importLog) {
 	db := cc.app.Postgres()
 
-	if _, err := gorm.G[models.Student](db).Where("id = ?", id).Updates(reqCtx, models.Student{
+	updates := models.Student{
 		Firstname:  student.Firstname,
 		Lastname:   student.Surname,
 		Email:      student.Email,
 		DocumentId: student.DocumentID,
-	}); err != nil {
+	}
+	if email := strings.TrimSpace(student.EmailUET); email != "" {
+		updates.AcademicEmail = email
+	}
+	if _, err := gorm.G[models.Student](db).Where("id = ?", id).Updates(reqCtx, updates); err != nil {
 		log.fail("student.update", err)
 		return
 	}
 
 	cc.ensureStudentStudyProgram(reqCtx, id, student, refCache, log)
+	cc.syncStudentAcademicEmail(reqCtx, id, student, log)
 	if folderID > 0 {
 		cc.ensureStudentScanFolderDoc(reqCtx, folderID, id, log)
 	}
@@ -343,6 +351,37 @@ func (cc *Controller) ensureStudentStudyProgram(reqCtx context.Context, studentI
 
 	if err := db.Create(&program).Error; err != nil {
 		log.fail("student_study_program.create", err)
+	}
+}
+
+func (cc *Controller) syncStudentAcademicEmail(reqCtx context.Context, studentID int64, student AthenaUser, log *importLog) {
+	email := ""
+	db := cc.app.Postgres().WithContext(reqCtx)
+	var program models.StudentStudyProgram
+	err := db.Where("student_id = ?", studentID).Order("id DESC").First(&program).Error
+	if err == nil && program.AcademicEmail != nil {
+		email = strings.TrimSpace(*program.AcademicEmail)
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.fail("student_study_program.latest", err)
+		return
+	}
+	if email == "" {
+		email = strings.TrimSpace(student.EmailUET)
+	}
+	if email == "" {
+		return
+	}
+
+	var existing models.Student
+	if err := db.Select("id", "academic_email").Where("id = ?", studentID).First(&existing).Error; err != nil {
+		log.fail("student.academic_email.find", err)
+		return
+	}
+	if existing.AcademicEmail == email {
+		return
+	}
+	if err := db.Model(&existing).Update("academic_email", email).Error; err != nil {
+		log.fail("student.academic_email.update", err)
 	}
 }
 

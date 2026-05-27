@@ -164,6 +164,20 @@ func optionalStringPtr(value string) *string {
 	return &value
 }
 
+func academicEmailFromAthena(user AthenaUser) string {
+	return strings.TrimSpace(user.EmailUET)
+}
+
+// academicEmailFromAthenaRecords returns the last non-empty email_uet in the batch.
+func academicEmailFromAthenaRecords(records []AthenaUser) string {
+	for i := len(records) - 1; i >= 0; i-- {
+		if email := academicEmailFromAthena(records[i]); email != "" {
+			return email
+		}
+	}
+	return ""
+}
+
 func stringPtrChanged(current, next *string) bool {
 	if next == nil {
 		return false

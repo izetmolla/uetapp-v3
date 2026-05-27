@@ -13,6 +13,8 @@ interface FoldersStore {
     setIsDownloadDialogOpen: (isDownloadDialogOpen: boolean) => void;
     isDeleteFolderDialogOpen: boolean;
     setIsDeleteFolderDialogOpen: (isDeleteFolderDialogOpen: boolean) => void;
+    isManageStudentsOfScanningDialogOpen: boolean;
+    setIsManageStudentsOfScanningDialogOpen: (isManageStudentsOfScanningDialogOpen: boolean) => void;
 }
 
 const useFoldersStore = create<FoldersStore>((set) => ({
@@ -26,6 +28,8 @@ const useFoldersStore = create<FoldersStore>((set) => ({
     setIsDeleteFolderDialogOpen: (isDeleteFolderDialogOpen) => set({ isDeleteFolderDialogOpen }),
     isDownloadDialogOpen: false,
     setIsDownloadDialogOpen: (isDownloadDialogOpen) => set({ isDownloadDialogOpen }),
+    isManageStudentsOfScanningDialogOpen: false,
+    setIsManageStudentsOfScanningDialogOpen: (isManageStudentsOfScanningDialogOpen) => set({ isManageStudentsOfScanningDialogOpen }),
 }));
 
 export default useFoldersStore;

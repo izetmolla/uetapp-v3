@@ -118,6 +118,27 @@ func TestDedupeAthenaUsersBySPID(t *testing.T) {
 	}
 }
 
+func TestMergeAthenaUserRecordsMergesEmailUET(t *testing.T) {
+	merged := mergeAthenaUserRecords([]AthenaUser{
+		{EmailUET: "old@uet.edu.al"},
+		{EmailUET: "new@uet.edu.al"},
+	})
+	if merged.EmailUET != "new@uet.edu.al" {
+		t.Fatalf("EmailUET = %q, want new@uet.edu.al", merged.EmailUET)
+	}
+}
+
+func TestAcademicEmailFromAthenaRecordsUsesLastNonEmpty(t *testing.T) {
+	email := academicEmailFromAthenaRecords([]AthenaUser{
+		{EmailUET: ""},
+		{EmailUET: "first@uet.edu.al"},
+		{EmailUET: "last@uet.edu.al"},
+	})
+	if email != "last@uet.edu.al" {
+		t.Fatalf("got %q", email)
+	}
+}
+
 func TestBuildStudentStudyProgramSetsAuthenaUserID(t *testing.T) {
 	row := AthenaUser{SPID: "  SP-42  ", Program: "Informatics", Faculty: "F", StudyLevel: "B", Status: "Active", RegYear: "2020"}
 	row.SPID = normalizeImportName(row.SPID)
@@ -127,5 +148,16 @@ func TestBuildStudentStudyProgramSetsAuthenaUserID(t *testing.T) {
 	}
 	if program.AuthenaUserID == nil || *program.AuthenaUserID != "SP-42" {
 		t.Fatalf("AuthenaUserID = %v, want SP-42", program.AuthenaUserID)
+	}
+}
+
+func TestBuildStudentStudyProgramSetsAcademicEmail(t *testing.T) {
+	row := AthenaUser{EmailUET: "student@uet.edu.al", SPID: "SP-1"}
+	program := models.StudentStudyProgram{}
+	for _, field := range studentStudyProgramImportFields {
+		field.apply(&program, row)
+	}
+	if program.AcademicEmail == nil || *program.AcademicEmail != "student@uet.edu.al" {
+		t.Fatalf("AcademicEmail = %v, want student@uet.edu.al", program.AcademicEmail)
 	}
 }

@@ -355,12 +355,13 @@ func (cc *Controller) fetchAthena(reqCtx context.Context, resource models.Resour
 
 func studentModelFromAthena(user AthenaUser) models.Student {
 	return models.Student{
-		Firstname:   strings.TrimSpace(user.Firstname),
-		Lastname:    strings.TrimSpace(user.Surname),
-		Fathersname: strings.TrimSpace(user.Fathersname),
-		Email:       strings.TrimSpace(user.Email),
-		DocumentId:  normalizeDocumentID(user.DocumentID),
-		Phone:       user.Phone,
+		Firstname:     strings.TrimSpace(user.Firstname),
+		Lastname:      strings.TrimSpace(user.Surname),
+		Fathersname:   strings.TrimSpace(user.Fathersname),
+		Email:         strings.TrimSpace(user.Email),
+		AcademicEmail: academicEmailFromAthena(user),
+		DocumentId:    normalizeDocumentID(user.DocumentID),
+		Phone:         user.Phone,
 		// Birthdate:   user.Birthdate,
 		Nationality: user.Nationality,
 		Mobile:      user.Mobile,
@@ -498,6 +499,9 @@ func mergeAthenaUserRecords(records []AthenaUser) AthenaUser {
 		if merged.Email == "" {
 			merged.Email = r.Email
 		}
+		if merged.EmailUET == "" {
+			merged.EmailUET = r.EmailUET
+		}
 		if merged.Phone == "" {
 			merged.Phone = r.Phone
 		}
@@ -551,6 +555,39 @@ func (cc *Controller) syncStudentStudyPrograms(reqCtx context.Context, studentID
 		if err := db.Delete(&program).Error; err != nil {
 			log.fail("student_study_program.delete", err)
 		}
+	}
+
+	cc.syncStudentAcademicEmail(reqCtx, studentID, records, log)
+}
+
+func (cc *Controller) syncStudentAcademicEmail(reqCtx context.Context, studentID int64, records []AthenaUser, log *importLog) {
+	email := ""
+	var program models.StudentStudyProgram
+	db := cc.app.Postgres().WithContext(reqCtx)
+	err := db.Where("student_id = ?", studentID).Order("id DESC").First(&program).Error
+	if err == nil && program.AcademicEmail != nil {
+		email = strings.TrimSpace(*program.AcademicEmail)
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.fail("student_study_program.latest", err)
+		return
+	}
+	if email == "" {
+		email = academicEmailFromAthenaRecords(records)
+	}
+	if email == "" {
+		return
+	}
+
+	var student models.Student
+	if err := db.Select("id", "academic_email").Where("id = ?", studentID).First(&student).Error; err != nil {
+		log.fail("student.academic_email.find", err)
+		return
+	}
+	if student.AcademicEmail == email {
+		return
+	}
+	if err := db.Model(&student).Update("academic_email", email).Error; err != nil {
+		log.fail("student.academic_email.update", err)
 	}
 }
 

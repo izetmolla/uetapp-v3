@@ -1,5 +1,6 @@
 import {
     Download,
+    Ghost,
     MoreVertical,
     Pencil,
     Trash2,
@@ -23,6 +24,7 @@ export type FolderActionProps = {
     onAddStudentToScan?: (folder: Folder) => void;
     onDownload?: (folder: Folder) => void;
     onDelete?: (folder: Folder) => void;
+    onManageStudentsOfScanning?: (folder: Folder) => void;
 };
 
 const FolderAction = ({
@@ -31,6 +33,7 @@ const FolderAction = ({
     onAddStudentToScan,
     onDownload,
     onDelete,
+    onManageStudentsOfScanning,
 }: FolderActionProps) => {
     const {
         setFolder,
@@ -65,6 +68,12 @@ const FolderAction = ({
         onAddStudentToScan?.(folder);
     }, [folder, setFolder, setIsAddStudentToScanDialogOpen]);
 
+    const handleManageStudentsOfScanning = useCallback(() => {
+        setFolder(folder);
+        setIsAddStudentToScanDialogOpen(true);
+        onManageStudentsOfScanning?.(folder);
+    }, [folder, setFolder, setIsAddStudentToScanDialogOpen]);
+
 
     return (
         <DropdownMenu>
@@ -87,6 +96,10 @@ const FolderAction = ({
                 <DropdownMenuItem onSelect={handleAddStudentToScan} className="cursor-pointer">
                     <UserPlus className="size-4 opacity-70" aria-hidden />
                     Add student to scan
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleManageStudentsOfScanning} className="cursor-pointer">
+                    <Ghost className="size-4 opacity-70" aria-hidden />
+                    Bursistet
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleDownload} className="cursor-pointer">
                     <Download className="size-4 opacity-70" aria-hidden />

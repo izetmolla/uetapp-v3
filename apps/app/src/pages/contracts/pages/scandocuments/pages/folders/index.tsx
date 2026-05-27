@@ -159,7 +159,7 @@ const FoldersPage = () => {
         isOpen={isAddStudentToScanDialogOpen}
         onClose={() => setIsAddStudentToScanDialogOpen(false)}
         withParams={{
-          CUSTOM_URL: `/contracts/scandocuments/students/add-student-to-scan`,
+          CUSTOM_URL: `/contracts/scandocuments/documents/add-student-to-scan`,
           folder_id: folder?.id,
           creat_user: true
         }}
