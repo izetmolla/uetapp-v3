@@ -11,6 +11,7 @@ import (
 	"github.com/flowtrove/packages/models"
 	"github.com/flowtrove/packages/render"
 	"github.com/gofiber/fiber/v3"
+	"github.com/minio/minio-go/v7"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -36,6 +37,7 @@ type AppClients struct {
 	postgres   *gorm.DB
 	auth       *authorization.Authorization
 	render     *render.Render
+	minio      map[int64]*minio.Client
 }
 
 var ExcludedRoutes = []string{}
@@ -78,6 +80,8 @@ func BootApplication(cfg ConfigSettings) (*AppClients, error) {
 		ServiceName:     "app",
 		WithGeneralData: app.withGeneralData(),
 	})
+
+	app.minio = map[int64]*minio.Client{}
 
 	return &app, err
 }

@@ -361,7 +361,7 @@ func studentModelFromAthena(user AthenaUser) models.Student {
 		Email:       strings.TrimSpace(user.Email),
 		DocumentId:  normalizeDocumentID(user.DocumentID),
 		Phone:       user.Phone,
-		Birthdate:   user.RegDate,
+		// Birthdate:   user.Birthdate,
 		Nationality: user.Nationality,
 		Mobile:      user.Mobile,
 	}

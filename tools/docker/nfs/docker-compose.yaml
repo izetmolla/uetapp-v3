@@ -41,6 +41,10 @@ services:
       NFS_EXPORT_16: /mnt/storages/minio-storage  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
 
 
+      NFS_EXPORT_17: /mnt/STORAGE1/storage1  192.168.5.170(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_18: /mnt/STORAGE1/storage1  192.168.5.171(rw,sync,no_subtree_check,no_root_squash)
+      NFS_EXPORT_19: /mnt/STORAGE1/storage1  192.168.5.172(rw,sync,no_subtree_check,no_root_squash)
+
       #NFS_EXPORT_0: /mnt 192.168.5.0/22(fsid=0,rw,no_root_squash,no_subtree_check) # https://github.com/izetmolla/docker-nfs-server/issues/24
       #NFS_EXPORT_1: /mnt/uetapp 192.168.5.30/32(rw,sync,no_root_squash,no_subtree_check)
       #NFS_EXPORT_2: /mnt/uetapp 192.168.11.50/32(rw,sync,no_root_squash,no_subtree_check)
@@ -50,6 +54,7 @@ services:
       SHARED_DIRECTORY: /mnt
     volumes:
       - /STORAGE1/uet-app:/mnt
+      - /mnt/STORAGE1/storage1:/mnt/STORAGE1/storage1
       - /lib/modules:/lib/modules:ro # https://github.com/izetmolla/docker-nfs-server/blob/develop/doc/feature/auto-load-kernel-modules.md
     cap_add:
       - SYS_ADMIN

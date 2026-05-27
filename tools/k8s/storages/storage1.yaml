@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storages
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage1
+  namespace: storages
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: storage1
+  template:
+    metadata:
+      labels:
+        app: storage1
+    spec:
+      containers:
+        - name: storage1
+          image: minio/minio:latest
+          args:
+            - server
+            - /data
+            - --console-address
+            - :9001
+          env:
+            - name: MINIO_ROOT_USER
+              value: imolla
+            - name: MINIO_ROOT_PASSWORD
+              value: tjhgivtrjndfigvrtfiugbvnitrfdhgnvitrjdfhgivdktjrghf
+          ports:
+            - containerPort: 9000
+              name: api
+            - containerPort: 9001
+              name: console
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: false
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: api
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: data
+          nfs:
+            server: 192.168.5.151
+            path: /mnt/STORAGE1/storage1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage1
+  namespace: storages
+spec:
+  type: NodePort
+  clusterIP: 10.100.2.202
+  selector:
+    app: storage1
+  ports:
+    - name: panel
+      port: 9001
+      targetPort: 9001
+    - name: api
+      port: 9000
+      targetPort: 9000
+      # nodePort: 30014

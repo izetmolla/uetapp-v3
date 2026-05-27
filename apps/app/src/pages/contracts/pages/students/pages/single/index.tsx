@@ -50,7 +50,7 @@ const studentMockData = {
         gender: "Male",
         nationality: "Albanian",
         email: "erjon.maleshova@uni.edu.al",
-        phone: "+355 69 234 5678",
+        phone: "-",
         enrollmentStatus: "Enrolled",
     },
     quickStats: {
@@ -365,7 +365,6 @@ export default function StudentProfilePage() {
         setEditMode(false);
     };
 
-    const current = editMode ? draftIdentity : identity;
 
     const setIdField = (k: keyof Identity, v: string) => setDraftIdentity((p) => ({ ...p, [k]: v }));
 
@@ -436,12 +435,12 @@ export default function StudentProfilePage() {
                         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                             <Field label="Full Name" value={data?.student?.firstname + " " + data?.student?.lastname} editing={editMode} onChange={(v) => setIdField("fullName", v)} />
                             <Field label="Student ID" value={data?.student?.document_id ?? ""} editing={editMode} onChange={(v) => setIdField("studentId", v)} />
-                            <Field label="Date of Birth" value={current.dateOfBirth} editing={editMode} onChange={(v) => setIdField("dateOfBirth", v)} />
-                            <Field label="Gender" value={current.gender} editing={editMode} onChange={(v) => setIdField("gender", v)} options={["Male", "Female", "Other"]} />
-                            <Field label="Nationality" value={current.nationality} editing={editMode} onChange={(v) => setIdField("nationality", v)} />
+                            <Field label="Date of Birth" value={data?.student?.birthdate ?? ""} editing={editMode} onChange={(v) => setIdField("dateOfBirth", v)} />
+                            <Field label="Gender" value={data?.student?.gender ?? ""} editing={editMode} onChange={(v) => setIdField("gender", v)} options={["Male", "Female", "Other"]} />
+                            <Field label="Nationality" value={data?.student?.nationality ?? ""} editing={editMode} onChange={(v) => setIdField("nationality", v)} />
                             <Field label="Email" value={data?.student?.email ?? ""} editing={editMode} onChange={(v) => setIdField("email", v)} />
-                            <Field label="Phone" value={current.phone} editing={editMode} onChange={(v) => setIdField("phone", v)} />
-                            <Field label="Enrollment Status" value={current.enrollmentStatus} editing={editMode} onChange={(v) => setIdField("enrollmentStatus", v)} options={["Enrolled", "On Leave", "Graduated", "Withdrawn"]} />
+                            <Field label="Mobile" value={data?.student?.mobile ?? ""} editing={editMode} onChange={(v) => setIdField("phone", v)} />
+                            <Field label="Academic Email" value={data?.student?.academic_email ?? ""} editing={editMode} onChange={(v) => setIdField("enrollmentStatus", v)} options={["Enrolled", "On Leave", "Graduated", "Withdrawn"]} />
                         </div>
 
                         {/* Quick stats */}

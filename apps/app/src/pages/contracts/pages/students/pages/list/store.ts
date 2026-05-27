@@ -3,6 +3,11 @@ import type { Student } from "./api";
 
 export const EMPTY_STUDENT: Student = {
     id: 0,
+    fullname: "",
+    year: "",
+    program: "",
+    faculty: "",
+    study_level: "",
     firstname: "",
     lastname: "",
     email: "",

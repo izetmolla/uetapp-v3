@@ -34,9 +34,15 @@ type student = {
     firstname: string;
     lastname: string;
     email: string;
+    birthdate?: string;
+    gender?: string;
+    nationality?: string;
     document_id: string;
-    status: string;
+    phone?: string;
+    status?: string;
     user_id: string;
+    academic_email?: string;
+    mobile?: string;
     programs: Program[];
 }
 

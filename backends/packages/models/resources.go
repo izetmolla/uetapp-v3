@@ -10,6 +10,7 @@ type ResourceDriver string
 
 const (
 	ResourceDriverHTTPRequest ResourceDriver = "http-request"
+	ResourceDriverMinio       ResourceDriver = "minio"
 )
 
 // Server specific settings.
@@ -48,5 +49,18 @@ var HttpRequestConfig = []map[string]any{
 		"body": map[string]any{
 			"name": "John Doe",
 		},
+	},
+}
+
+var MinioClientConfig = []map[string]any{
+	{
+		"name":        "Minio Client",
+		"description": "Minio client",
+		"endpoint":    "https://example.com",
+		"access_key":  "access_key",
+		"secret_key":  "secret_key",
+		"bucket":      "bucket",
+		"region":      "region",
+		"secure":      true,
 	},
 }
