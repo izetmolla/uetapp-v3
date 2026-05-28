@@ -37,6 +37,7 @@ func (c *Controller) getStudentData(ctx context.Context, id string) (map[string]
 	student, err := gorm.G[models.Student](db).Where("id = ?", id).
 		Preload("Programs", func(pb gorm.PreloadBuilder) error {
 			pb.Select("id", "student_id", "study_program_id", "faculty_id", "study_level_id", "status", "reg_year_id", "study_profile_id")
+			pb.Order("reg_year_id DESC")
 			return nil
 		}).
 		Preload("Programs.StudyProgram", func(pb gorm.PreloadBuilder) error {
