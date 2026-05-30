@@ -13,7 +13,11 @@ JSON-driven UI via `LayoutBuilder` + per-type renderers in `renders/`.
 - Root: `items: LayoutBuilderItem[]` passed to `<LayoutBuilder />`.
 - Each item has `type` (discriminant) and `id` (unique string).
 - Containers use `children?: LayoutBuilderItem[]`.
-- Optional `condition` hides items based on `data` prop.
+- Optional `condition` hides items based on layout `data` and/or live **form field values**.
+- Inside forms, use `condition` on child fields to show/hide based on checkbox, switch, radio, or select:
+  - `"newsletter === true"` — when checkbox/switch is checked
+  - `"form.accountType === 'business'"` — when radio/select value matches
+  - Hidden fields are excluded from validation and submit payload.
 - Designer-only: `locked` — strip before runtime if exporting clean JSON.
 
 ## Registered types (current)

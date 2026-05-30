@@ -10,6 +10,8 @@ export type RepeatableFieldDef =
         label?: string;
         placeholder?: string;
         inputType?: "text" | "email" | "number" | "password";
+        /** When true, row cell must be non-empty */
+        required?: boolean;
     }
     | {
         type: "select";
@@ -17,6 +19,8 @@ export type RepeatableFieldDef =
         label?: string;
         placeholder?: string;
         options: SelectOption[];
+        /** When true, row cell must have a selected value */
+        required?: boolean;
     };
 
 /** Repeatable list – array of objects with multiple fields per row. Output is array of items. */

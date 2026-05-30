@@ -48,6 +48,7 @@ JSON item trees rendered by `<LayoutBuilder items={...} data={...} />`. Each `ty
 | Long Text | `renders/long-text/.cursor/` |
 | Multi Select | `renders/multi-select/.cursor/` |
 | Pagination | `renders/pagination/.cursor/` |
+| Password Input | `renders/password-input/.cursor/` |
 | Popover | `renders/popover/.cursor/` |
 | Progress | `renders/progress/.cursor/` |
 | Radio Group | `renders/radio-group/.cursor/` |

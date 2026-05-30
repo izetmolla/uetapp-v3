@@ -2,9 +2,12 @@ import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-la
 
 /**
  * Form – form container
- * | Element | Item prop(s)  | Notes          |
- * |---------|---------------|----------------|
- * | Root    | className, style | BaseLayoutItem |
+ *
+ * Conditional fields: set `condition` on any child item to show/hide based on
+ * live form values or layout `data`.
+ *
+ * @example `"newsletter === true"` — when checkbox/switch is checked
+ * @example `"form.accountType === 'business'"` — when radio/select matches
  */
 export type FormItem = BaseLayoutItem & {
     type: "form";

@@ -41,6 +41,7 @@ const LAZY: Record<string, LazyRenderer> = {
     "long-text": lazyRenderer(() => import("./long-text")),
     toggle: lazyRenderer(() => import("./toggle")),
     input: lazyRenderer(() => import("./input")),
+    "password-input": lazyRenderer(() => import("./password-input")),
     textarea: lazyRenderer(() => import("./textarea")),
     checkbox: lazyRenderer(() => import("./checkbox")),
     switch: lazyRenderer(() => import("./switch")),

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { AlertDialogItem, AlertDialogTriggerItem, AlertDialogContentItem, AlertDialogHeaderItem, AlertDialogTitleItem, AlertDialogDescriptionItem, AlertDialogFooterItem } from "../renders/alert-dialog/types";
 import type { AvatarItem } from "../renders/avatar/types";
 import type { BadgeItem } from "../renders/badge/types";
@@ -9,12 +10,12 @@ import type { CardItem, CardActionItem, CardContentItem, CardDescriptionItem, Ca
 import type { CheckboxItem } from "../renders/checkbox/types";
 import type { CollapsibleItem, CollapsibleTriggerItem, CollapsibleContentItem } from "../renders/collapsible/types";
 import type { ComboboxItem } from "../renders/combobox/types";
-import type { ContentItem } from "../renders/content/types";
 import type { CommandItem } from "../renders/command/types";
+import type { ContentItem } from "../renders/content/types";
 import type { DialogItem, DialogTriggerItem, DialogContentItem, DialogHeaderItem, DialogTitleItem, DialogDescriptionItem, DialogFooterItem } from "../renders/dialog/types";
 import type { DivItem } from "../renders/div/types";
-import type { FormItem } from "../renders/form/types";
 import type { DropdownMenuItem } from "../renders/dropdown-menu/types";
+import type { FormItem } from "../renders/form/types";
 import type { IconItem } from "../renders/icon/types";
 import type { InputItem } from "../renders/input/types";
 import type { InputGroupItem } from "../renders/input-group/types";
@@ -23,6 +24,7 @@ import type { LabelItem } from "../renders/label/types";
 import type { LongTextItem } from "../renders/long-text/types";
 import type { MultiSelectItem } from "../renders/multi-select/types";
 import type { PaginationItem } from "../renders/pagination/types";
+import type { PasswordInputItem } from "../renders/password-input/types";
 import type { PopoverItem, PopoverTriggerItem, PopoverContentItem } from "../renders/popover/types";
 import type { ProgressItem } from "../renders/progress/types";
 import type { RadioGroupItem } from "../renders/radio-group/types";
@@ -82,8 +84,8 @@ export type LayoutBuilderItem =
   | DialogDescriptionItem
   | DialogFooterItem
   | DivItem
-  | FormItem
   | DropdownMenuItem
+  | FormItem
   | IconItem
   | InputItem
   | InputGroupItem
@@ -92,6 +94,7 @@ export type LayoutBuilderItem =
   | LongTextItem
   | MultiSelectItem
   | PaginationItem
+  | PasswordInputItem
   | PopoverItem
   | PopoverTriggerItem
   | PopoverContentItem
@@ -138,6 +141,7 @@ export type LayoutBuilderItem =
 /** Items that have a form field name */
 export type FormFieldItem =
     | InputItem
+    | PasswordInputItem
     | TextareaItem
     | SelectItem
     | CheckboxItem

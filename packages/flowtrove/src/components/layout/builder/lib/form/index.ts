@@ -1,9 +1,10 @@
 import z from "zod";
-import { hasChildren } from "../utils";
+import { evaluateCondition, hasChildren } from "../utils";
 import type { FormFieldItem } from "../../types/items";
 import type { LayoutBuilderChildItem } from "../../types/base-layout";
 import type { FieldValidation } from "./types";
 import type { InputItem } from "../../renders/input/types";
+import type { PasswordInputItem } from "../../renders/password-input/types";
 import type { RadioGroupItem } from "../../renders/radio-group/types";
 import type { SelectItem } from "../../renders/select/types";
 import type { RepeatableFieldDef, RepeatableItem } from "../../renders/repeatable/types";
@@ -79,6 +80,47 @@ function collectFieldItems(items: LayoutBuilderChildItem[] | undefined): FormFie
         }
     }
     return fields;
+}
+
+function passesItemCondition(
+    item: LayoutBuilderChildItem,
+    context: Record<string, unknown>,
+): boolean {
+    if (!item.condition) return true;
+    return evaluateCondition(item.condition, context);
+}
+
+/** Collect form fields whose `condition` passes for the current layout + form values. */
+function collectVisibleFieldItems(
+    items: LayoutBuilderChildItem[] | undefined,
+    context: Record<string, unknown>,
+): FormFieldItem[] {
+    if (!Array.isArray(items)) return [];
+    const fields: FormFieldItem[] = [];
+    for (const item of items) {
+        if (!passesItemCondition(item, context)) continue;
+        if (isFormFieldItem(item)) {
+            fields.push(item);
+        }
+        for (const nested of collectNestedItemLists(item)) {
+            fields.push(...collectVisibleFieldItems(nested, context));
+        }
+    }
+    return fields;
+}
+
+function getVisibleFieldsByName(
+    items: LayoutBuilderChildItem[],
+    context: Record<string, unknown>,
+): Map<string, FormFieldItem> {
+    const map = new Map<string, FormFieldItem>();
+    for (const field of collectVisibleFieldItems(items, context)) {
+        const existing = map.get(field.name);
+        if (!existing || (field.validation && !existing.validation)) {
+            map.set(field.name, field);
+        }
+    }
+    return map;
 }
 
 /** Collect all form field names from items (for server error field mapping). */
@@ -507,10 +549,23 @@ export function applyArrayValidation(
 }
 
 function zodTypeForRepeatableFieldDef(def: RepeatableFieldDef): z.ZodTypeAny {
+    const label = def.label ?? def.name;
     if (def.type === "input") {
-        return def.inputType === "number" ? z.coerce.number().optional() : z.string().optional();
+        if (def.inputType === "number") {
+            const base = z.coerce.number();
+            return def.required
+                ? base.refine((n) => !Number.isNaN(n), { message: `${label} is required` })
+                : base.optional();
+        }
+        const base = z.string();
+        return def.required
+            ? base.min(1, { message: `${label} is required` })
+            : base.optional();
     }
-    return z.string().optional();
+    const base = z.string();
+    return def.required
+        ? base.min(1, { message: `${label} is required` })
+        : base.optional();
 }
 
 function zodTypeForField(field: FormFieldItem): z.ZodTypeAny {
@@ -526,10 +581,10 @@ function zodTypeForField(field: FormFieldItem): z.ZodTypeAny {
             const base = z.string();
             return applyStringValidation(base, v, { label, name: field.name });
         }
-        // case "password_input": {
-        //     const base = z.string();
-        //     return applyStringValidation(base, v, { label, name: field.name });
-        // }
+        case "password-input": {
+            const base = z.string();
+            return applyStringValidation(base, v, { label, name: field.name });
+        }
         case "textarea": {
             const base = z.string();
             return applyStringValidation(base, v, { label, name: field.name });
@@ -673,6 +728,30 @@ export function buildFormSchema(items: LayoutBuilderChildItem[]): z.ZodObject<Re
 }
 
 /**
+ * Build a Zod schema for currently visible form fields only.
+ * Hidden fields (failed `condition`) are excluded from validation and submit payload.
+ */
+export function buildFormSchemaForContext(
+    items: LayoutBuilderChildItem[],
+    context: Record<string, unknown>,
+): z.ZodObject<Record<string, z.ZodTypeAny>> {
+    const nameToField = getVisibleFieldsByName(items, context);
+    const shape: Record<string, z.ZodTypeAny> = {};
+    for (const field of nameToField.values()) {
+        shape[field.name] = zodTypeForField(field);
+    }
+    return z.object(shape);
+}
+
+/** Field names currently visible inside a form tree. */
+export function getVisibleFormFieldNames(
+    items: LayoutBuilderChildItem[],
+    context: Record<string, unknown>,
+): string[] {
+    return [...getVisibleFieldsByName(items, context).keys()];
+}
+
+/**
  * Build default values for react-hook-form from the same items.
  * Uses the same field selection as buildFormSchema (prefer field with validation when names duplicate).
  */
@@ -704,9 +783,11 @@ export function buildDefaultValues(items: LayoutBuilderChildItem[]): Record<stri
                     inputField.defaultValue !== undefined ? inputField.defaultValue : fallback;
                 break;
             }
-            // case "password_input":
-            //     defaults[field.name] = "";
-            //     break;
+            case "password-input": {
+                const passwordField = field as PasswordInputItem;
+                defaults[field.name] = passwordField.defaultValue ?? "";
+                break;
+            }
             case "select":
             case "radio-group":
                 defaults[field.name] =

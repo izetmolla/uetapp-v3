@@ -8,8 +8,8 @@ import { Form } from "@workspace/ui/components/form";
 import type { LayoutRendererProps } from "../../types";
 import { LayoutBuilderContext, useLayoutBuilderContext } from "../../LayoutBuilderContext";
 import {
-    buildFormSchema,
-    getFormFieldNames,
+    buildFormSchemaForContext,
+    getVisibleFormFieldNames,
     resolveFormDefaultValues,
 } from "../../lib/form";
 import {
@@ -17,6 +17,7 @@ import {
     handleFormSubmitError,
     usesRequestBody,
 } from "../../lib/form-submit";
+import { buildConditionContext } from "../../lib/utils";
 import type { FormItem } from "./types";
 
 function FormRenderer({ item, renderItems, path }: LayoutRendererProps<FormItem>) {
@@ -24,7 +25,6 @@ function FormRenderer({ item, renderItems, path }: LayoutRendererProps<FormItem>
     const children = item.children ?? [];
     const [formError, setFormError] = useState<string | null>(null);
 
-    const schema = useMemo(() => buildFormSchema(children), [children]);
     const defaultValues = useMemo(
         () =>
             resolveFormDefaultValues(children, {
@@ -34,7 +34,6 @@ function FormRenderer({ item, renderItems, path }: LayoutRendererProps<FormItem>
             }),
         [children, item.value, item.source, parentContext.data],
     );
-    const fieldNames = useMemo(() => getFormFieldNames(children), [children]);
 
     const form = useForm<Record<string, unknown>>({
         defaultValues,
@@ -80,9 +79,17 @@ function FormRenderer({ item, renderItems, path }: LayoutRendererProps<FormItem>
         form.clearErrors();
         setFormError(null);
 
+        const conditionContext = buildConditionContext(
+            parentContext.data,
+            form.getValues(),
+        );
+        const schema = buildFormSchemaForContext(children, conditionContext);
+        const fieldNames = getVisibleFormFieldNames(children, conditionContext);
+
         const parsed = schema.safeParse(form.getValues());
         if (!parsed.success) {
             applyZodErrors(form, parsed.error.issues);
+            toast.error("Please fix the highlighted fields");
             return;
         }
 

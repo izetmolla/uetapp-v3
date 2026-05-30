@@ -18,4 +18,5 @@ func NewController(app *config.AppClients) *Controller {
 func SetupRoutes(api fiber.Router, appClients *config.AppClients) {
 	controller := NewController(appClients)
 	api.Get("/general", controller.GetGeneralDataApi)
+	api.Post("/save1", controller.Save1DemoApi)
 }

@@ -14,11 +14,14 @@ export {
 } from "./lib/expression-template";
 export {
     buildFormSchema,
+    buildFormSchemaForContext,
     buildDefaultValues,
     buildTypeRuleSchema,
     resolveFormDefaultValues,
     getFormFieldNames,
+    getVisibleFormFieldNames,
 } from "./lib/form";
+export { buildConditionContext, evaluateCondition } from "./lib/utils";
 export {
     applyZodErrors,
     handleFormSubmitError,

@@ -58,6 +58,7 @@ export const RENDER_MANIFEST: RenderManifestEntry[] = [
 
     // Form fields
     { folder: "input", type: "input", lazy: true, formField: true },
+    { folder: "password-input", type: "password-input", lazy: true, formField: true },
     { folder: "textarea", type: "textarea", lazy: true, formField: true },
     { folder: "checkbox", type: "checkbox", lazy: true, formField: true },
     { folder: "switch", type: "switch", lazy: true, formField: true },

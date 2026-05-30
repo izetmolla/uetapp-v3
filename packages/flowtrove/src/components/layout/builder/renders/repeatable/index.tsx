@@ -129,14 +129,19 @@ function Cell({
                 control={form.control}
                 name={baseName as never}
                 render={({ field }) => (
-                    <Input
-                        {...field}
-                        type={def.inputType ?? "text"}
-                        placeholder={def.placeholder}
-                        value={(field.value as string | number | undefined) ?? ""}
-                        onChange={field.onChange}
-                        className="h-9"
-                    />
+                    <FormItem className="space-y-1">
+                        <FormControl>
+                            <Input
+                                {...field}
+                                type={def.inputType ?? "text"}
+                                placeholder={def.placeholder}
+                                value={(field.value as string | number | undefined) ?? ""}
+                                onChange={field.onChange}
+                                className="h-9"
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
                 )}
             />
         );
@@ -155,24 +160,29 @@ function Cell({
                         })()
                         : currentValue;
                 return (
-                    <Select
-                        value={selectValue}
-                        onValueChange={(v) => field.onChange(fromSafeSelectValue(v))}
-                    >
-                        <SelectTrigger className="h-9">
-                            <SelectValue placeholder={def.placeholder ?? "Select…"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {def.options.map((opt, idx) => {
-                                const safe = safeSelectValue(opt.value, idx);
-                                return (
-                                    <SelectItem key={safe} value={safe}>
-                                        {opt.label}
-                                    </SelectItem>
-                                );
-                            })}
-                        </SelectContent>
-                    </Select>
+                    <FormItem className="space-y-1">
+                        <Select
+                            value={selectValue}
+                            onValueChange={(v) => field.onChange(fromSafeSelectValue(v))}
+                        >
+                            <FormControl>
+                                <SelectTrigger className="h-9">
+                                    <SelectValue placeholder={def.placeholder ?? "Select…"} />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {def.options.map((opt, idx) => {
+                                    const safe = safeSelectValue(opt.value, idx);
+                                    return (
+                                        <SelectItem key={safe} value={safe}>
+                                            {opt.label}
+                                        </SelectItem>
+                                    );
+                                })}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
                 );
             }}
         />

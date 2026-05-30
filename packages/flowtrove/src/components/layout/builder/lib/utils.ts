@@ -35,24 +35,61 @@ export function getDataValue(data: Record<string, unknown>, path: string): unkno
     return current;
 }
 
-/** Evaluate a simple condition expression against data */
-export function evaluateCondition(condition: string, data: Record<string, unknown>): boolean {
-    // Simple condition parser for expressions like "data.showSection === true"
-    // For security, we use a whitelist approach instead of eval
+/**
+ * Build evaluation context for `condition` expressions.
+ * Supports layout `data`, live form values, and explicit namespaces:
+ * - `data.profile.title` — layout runtime data
+ * - `form.newsletter` / `values.newsletter` — current form field values
+ * - `newsletter === true` — form field first, then layout data
+ */
+export function buildConditionContext(
+    layoutData?: Record<string, unknown>,
+    formValues?: Record<string, unknown>,
+): Record<string, unknown> {
+    return {
+        data: layoutData ?? {},
+        form: formValues ?? {},
+        values: formValues ?? {},
+    };
+}
 
-    const trimmed = condition.trim();
+/** Resolve a condition path against layout data and/or form values. */
+export function getConditionValue(context: Record<string, unknown>, path: string): unknown {
+    const trimmed = path.trim();
+    const layoutData = (context.data ?? {}) as Record<string, unknown>;
+    const formValues = (context.form ?? context.values ?? {}) as Record<string, unknown>;
 
-    // Handle simple boolean paths like "data.isVisible"
-    if (/^[\w.]+$/.test(trimmed)) {
-        return Boolean(getDataValue(data, trimmed.replace(/^data\./, "")));
+    if (trimmed.startsWith("data.")) {
+        return getDataValue(layoutData, trimmed.slice(5));
+    }
+    if (trimmed.startsWith("form.") || trimmed.startsWith("values.")) {
+        return getDataValue(formValues, trimmed.replace(/^(form|values)\./, ""));
     }
 
-    // Handle equality checks: "data.status === 'active'"
+    const formValue = getDataValue(formValues, trimmed);
+    if (formValue !== undefined) {
+        return formValue;
+    }
+    return getDataValue(layoutData, trimmed);
+}
+
+/** Evaluate a simple condition expression against layout data and form values */
+export function evaluateCondition(
+    condition: string,
+    context: Record<string, unknown>,
+): boolean {
+    const trimmed = condition.trim();
+
+    // Handle simple boolean paths like "data.isVisible" or "newsletter"
+    if (/^[\w.]+$/.test(trimmed)) {
+        return Boolean(getConditionValue(context, trimmed));
+    }
+
+    // Handle equality checks: "form.accountType === 'business'"
     const eqMatch = trimmed.match(/^([\w.]+)\s*(===|==|!==|!=)\s*(.+)$/);
     if (eqMatch) {
         const [, path, operator, rawValue] = eqMatch;
-        const dataPath = path.replace(/^data\./, "");
-        const actualValue = getDataValue(data, dataPath);
+        const actualValue = getConditionValue(context, path);
 
         // Parse the comparison value
         let compareValue: unknown;
@@ -86,8 +123,7 @@ export function evaluateCondition(condition: string, data: Record<string, unknow
     const compMatch = trimmed.match(/^([\w.]+)\s*(>=|<=|>|<)\s*(.+)$/);
     if (compMatch) {
         const [, path, operator, rawValue] = compMatch;
-        const dataPath = path.replace(/^data\./, "");
-        const actualValue = Number(getDataValue(data, dataPath));
+        const actualValue = Number(getConditionValue(context, path));
         const compareValue = Number(rawValue);
 
         switch (operator) {

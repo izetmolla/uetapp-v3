@@ -24,3 +24,31 @@ func (cc *Controller) GetGeneralDataApi(c fiber.Ctx) error {
 
 	return cc.app.Api(c, r.WithContext(reqCtx), r.WithData(generalData))
 }
+
+// Save1DemoApi accepts layout-builder demo form payloads (POST /api/save1).
+func (cc *Controller) Save1DemoApi(c fiber.Ctx) error {
+	r := cc.app.Render()
+	var body map[string]any
+	if err := c.Bind().Body(&body); err != nil {
+		return cc.app.Api(c, r.WithError(err), r.WithStatus(fiber.StatusBadRequest))
+	}
+
+	firstName, _ := body["firstName"].(string)
+	lastName, _ := body["lastName"].(string)
+	if firstName == "" || lastName == "" {
+		return cc.app.Api(c,
+			r.WithStatus(fiber.StatusBadRequest),
+			r.WithData(fiber.Map{
+				"error":   true,
+				"message": "First and last name are required",
+				"details": fiber.Map{"field": "firstName"},
+			}),
+		)
+	}
+
+	return cc.app.Api(c, r.WithData(fiber.Map{
+		"ok":      true,
+		"message": "Profile saved",
+		"saved":   body,
+	}))
+}

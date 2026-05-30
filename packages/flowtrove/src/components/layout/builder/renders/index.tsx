@@ -1,6 +1,9 @@
-import { Suspense, type FC, type ReactNode } from "react";
+"use client";
+
+import { Suspense, type FC, type ReactNode, useMemo } from "react";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useLayoutBuilderContext } from "../LayoutBuilderContext";
-import { evaluateCondition } from "../lib/utils";
+import { buildConditionContext, evaluateCondition } from "../lib/utils";
 import type { LayoutRendererProps, LayoutBuilderItem, LayoutBuilderChildItem } from "../types";
 import { getRenderer, isLazyRenderer } from "./registry";
 
@@ -20,14 +23,19 @@ function LazyRendererBoundary({ children }: { children: ReactNode }) {
     return <Suspense fallback={null}>{children}</Suspense>;
 }
 
-const LayoutBuilderItemRenderer: FC<LayoutBuilderItemRendererProps> = ({
+type InnerProps = LayoutBuilderItemRendererProps & {
+    conditionContext: Record<string, unknown>;
+};
+
+function LayoutBuilderItemRendererInner({
     item: rawItem,
     renderItems,
     path,
-}) => {
+    conditionContext,
+}: InnerProps) {
     const { data } = useLayoutBuilderContext();
 
-    if (rawItem.condition && data && !evaluateCondition(rawItem.condition, data)) {
+    if (rawItem.condition && !evaluateCondition(rawItem.condition, conditionContext)) {
         return null;
     }
 
@@ -61,6 +69,43 @@ const LayoutBuilderItemRenderer: FC<LayoutBuilderItemRendererProps> = ({
     }
 
     return node;
+}
+
+function LayoutBuilderItemRendererWithForm({
+    form,
+    ...props
+}: LayoutBuilderItemRendererProps & {
+    form: UseFormReturn<Record<string, unknown>>;
+}) {
+    const { data } = useLayoutBuilderContext();
+    const watchedValues = useWatch({ control: form.control });
+
+    const conditionContext = useMemo(
+        () =>
+            buildConditionContext(
+                data,
+                (watchedValues ?? form.getValues()) as Record<string, unknown>,
+            ),
+        [data, watchedValues, form],
+    );
+
+    return <LayoutBuilderItemRendererInner {...props} conditionContext={conditionContext} />;
+}
+
+function LayoutBuilderItemRendererWithoutForm(props: LayoutBuilderItemRendererProps) {
+    const { data } = useLayoutBuilderContext();
+    const conditionContext = useMemo(() => buildConditionContext(data), [data]);
+    return <LayoutBuilderItemRendererInner {...props} conditionContext={conditionContext} />;
+}
+
+const LayoutBuilderItemRenderer: FC<LayoutBuilderItemRendererProps> = (props) => {
+    const { form } = useLayoutBuilderContext();
+
+    if (form) {
+        return <LayoutBuilderItemRendererWithForm {...props} form={form} />;
+    }
+
+    return <LayoutBuilderItemRendererWithoutForm {...props} />;
 };
 
 export function renderChildren(
