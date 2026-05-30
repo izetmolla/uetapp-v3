@@ -49,13 +49,32 @@ export const getSortingStateParser = <TData>(
   });
 };
 
-const filterItemSchema = z.object({
-  id: z.string(),
-  value: z.union([z.string(), z.array(z.string())]),
-  variant: z.enum(dataTableConfig.filterVariants),
-  operator: z.enum(dataTableConfig.operators),
-  filterId: z.string(),
-});
+const filterItemSchema = z
+  .object({
+    id: z.string(),
+    value: z.union([z.string(), z.array(z.string())]).optional(),
+    variant: z.enum(dataTableConfig.filterVariants),
+    operator: z.enum(dataTableConfig.operators),
+    filterId: z.string(),
+  })
+  .superRefine((filter, ctx) => {
+    if (filter.operator === "isEmpty" || filter.operator === "isNotEmpty") {
+      return;
+    }
+
+    const value = filter.value;
+    const hasValue = Array.isArray(value)
+      ? value.length > 0
+      : value != null && value !== "";
+
+    if (!hasValue) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Filter value is required for this operator",
+        path: ["value"],
+      });
+    }
+  });
 
 export type FilterItemSchema = z.infer<typeof filterItemSchema>;
 

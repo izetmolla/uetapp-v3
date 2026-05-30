@@ -40,7 +40,7 @@ func FindRaw[T any](db *gorm.DB, q datatable.TableQuery, columns []datatable.Col
 		table:   table,
 		joins:   nil,
 		limit:   fmt.Sprintf("%s %s", fmt.Sprintf("LIMIT %d", q.PageSize), fmt.Sprintf("OFFSET %d", (q.Page-1)*q.PageSize)),
-		where:   datatable.ConditionsFromFiltersWithoutargs(q.Filters, q.JoinOperator, datatable.ColumnNameByID(columns)),
+		where:   datatable.ConditionsFromFiltersWithoutargs(q.Filters, q.JoinOperator, columns),
 	}
 }
 

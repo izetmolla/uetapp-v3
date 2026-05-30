@@ -31,7 +31,7 @@ func (cc *Controller) GetUsersListAPI(c fiber.Ctx) error {
 			r.WithCode("BAD_REQUEST"),
 		)
 	}
-
+	fmt.Println("q", q)
 	users, pagination, err := postgresql.FindRaw[map[string]any](db, q, columns, models.User{}.TableName()).Run()
 	if err != nil {
 		return cc.app.Api(c,
@@ -74,8 +74,6 @@ func (cc *Controller) GetUsersListView(c fiber.Ctx) error {
 			r.WithCode("BAD_REQUEST"),
 		)
 	}
-
-	fmt.Println("q", q)
 
 	users, pagination, err := postgresql.FindRaw[map[string]any](db, q, columns, models.User{}.TableName()).Run()
 	if err != nil {
@@ -173,7 +171,6 @@ func (cc *Controller) getUsersColumns(ctx context.Context) ([]datatable.Column, 
 		},
 		{
 			ID:                 "status",
-			IsJSON:             true,
 			AccessorKey:        "status",
 			Header:             "Status",
 			EnableSorting:      true,

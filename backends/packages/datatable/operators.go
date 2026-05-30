@@ -54,10 +54,12 @@ var JoinOperators = []string{JoinAnd, JoinOr}
 // ConditionsFromFiltersWithoutargs builds a PostgreSQL WHERE fragment with values inlined (raw SQL).
 // Use only when column names and filter values are trusted; otherwise prefer ConditionsFromFilters with bound args.
 // Values are escaped for PostgreSQL (strings single-quoted and escaped).
-func ConditionsFromFiltersWithoutargs(filters []Filter, joinOperator string, columnNameByID map[string]string) string {
-	if len(filters) == 0 || columnNameByID == nil {
+func ConditionsFromFiltersWithoutargs(filters []Filter, joinOperator string, columns []Column) string {
+	if len(filters) == 0 || len(columns) == 0 {
 		return ""
 	}
+	columnNameByID := ColumnNameByID(columns)
+	columnByID := ColumnByID(columns)
 	op := strings.ToLower(strings.TrimSpace(joinOperator))
 	if op != "or" {
 		op = "and"
@@ -69,7 +71,7 @@ func ConditionsFromFiltersWithoutargs(filters []Filter, joinOperator string, col
 		if !ok || col == "" {
 			continue
 		}
-		clause := conditionForFilterRaw(col, f)
+		clause := conditionForFilterRaw(col, f, columnByID[f.ID])
 		if clause == "" {
 			continue
 		}
@@ -84,10 +86,7 @@ func ConditionsFromFiltersWithoutargs(filters []Filter, joinOperator string, col
 // conditionForJSONBRoleGrants matches users whose roles JSON array includes any selected role
 // (exact grant or role:perms prefix, e.g. admin or admin:rw).
 func conditionForJSONBRoleGrants(column string, f Filter) string {
-	values := f.Values
-	if len(values) == 0 && f.Value != "" {
-		values = []string{f.Value}
-	}
+	values := FilterValues(f)
 	if len(values) == 0 {
 		return ""
 	}
@@ -108,35 +107,157 @@ func conditionForJSONBRoleGrants(column string, f Filter) string {
 	return "(" + strings.Join(parts, " OR ") + ")"
 }
 
-// escapeSQLString escapes a string for use inside PostgreSQL single-quoted literal.
-func escapeSQLString(s string) string {
-	s = strings.ReplaceAll(s, `\`, `\\`)
-	s = strings.ReplaceAll(s, `'`, `''`)
-	return `'` + s + `'`
+func conditionForJSONBArrayContains(column string, f Filter) string {
+	values := FilterValues(f)
+	if len(values) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(values))
+	for _, v := range values {
+		escaped := escapeSQLString(v)
+		parts = append(parts, "EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE("+column+"::jsonb, '[]'::jsonb)) AS elem WHERE elem = "+escaped+")")
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+	return "(" + strings.Join(parts, " OR ") + ")"
 }
 
-// conditionForFilterRaw returns one condition fragment with values inlined (raw SQL).
-func conditionForFilterRaw(column string, f Filter) string {
-	if f.ID == "roles" {
-		return conditionForJSONBRoleGrants(column, f)
-	}
+func jsonArrayIsEmptySQL(column string) string {
+	return "(COALESCE(" + column + "::jsonb, '[]'::jsonb) = '[]'::jsonb OR " + column + " IS NULL)"
+}
 
+func jsonArrayIsNotEmptySQL(column string) string {
+	return "(jsonb_array_length(COALESCE(" + column + "::jsonb, '[]'::jsonb)) > 0)"
+}
+
+func isRolesColumn(col Column) bool {
+	return col.ID == "roles" || col.AccessorKey == "roles"
+}
+
+func isExpressionColumn(column string, col Column) bool {
+	if col.IsEmptySQL != "" {
+		return true
+	}
+	if col.SQLColumn == "" {
+		return false
+	}
+	return col.SQLColumn != col.AccessorKey && col.SQLColumn != col.ID
+}
+
+func EmptyCheckSQL(column string, col Column) string {
+	return emptyCheckSQL(column, col)
+}
+
+func NotEmptyCheckSQL(column string, col Column) string {
+	return notEmptyCheckSQL(column, col)
+}
+
+func emptyCheckSQL(column string, col Column) string {
+	if col.IsEmptySQL != "" {
+		return col.IsEmptySQL
+	}
+	if isExpressionColumn(column, col) {
+		return "(NULLIF(TRIM(" + column + "), '') IS NULL)"
+	}
+	return "(" + column + " IS NULL OR " + column + " = '')"
+}
+
+func notEmptyCheckSQL(column string, col Column) string {
+	if col.IsNotEmptySQL != "" {
+		return col.IsNotEmptySQL
+	}
+	if isExpressionColumn(column, col) {
+		return "(NULLIF(TRIM(" + column + "), '') IS NOT NULL)"
+	}
+	return "(" + column + " IS NOT NULL AND " + column + " <> '')"
+}
+
+func isUnaryFilterOperator(op string) bool {
+	switch op {
+	case "isempty", "isnotempty", "isbetween", "isrelativetotoday":
+		return true
+	default:
+		return false
+	}
+}
+
+func isJSONMultiSelectColumn(col Column) bool {
+	if !col.IsJSON {
+		return false
+	}
+	if col.Meta != nil && strings.EqualFold(col.Meta.Variant, VariantMultiSelect) {
+		return true
+	}
+	return isRolesColumn(col)
+}
+
+func NormalizeFilterOperator(f Filter) string {
+	return normalizeFilterOperator(f)
+}
+
+func normalizeFilterOperator(f Filter) string {
 	op := strings.ToLower(strings.TrimSpace(f.Operator))
+	if isUnaryFilterOperator(op) {
+		return op
+	}
 	if op == "" {
 		switch {
-		case len(f.Values) == 0 && f.Value != "":
-			op = "eq"
-		case len(f.Values) == 1:
-			op = "eq"
-		case len(f.Values) > 1:
-			op = "inarray"
-		default:
+		case len(FilterValues(f)) == 0:
 			return ""
+		case len(FilterValues(f)) == 1:
+			op = "eq"
+		default:
+			op = "inarray"
 		}
 	}
-	// Text variant: use ILIKE with %value% (search) instead of exact match.
-	if strings.ToLower(strings.TrimSpace(f.Variant)) == "text" && (op == "eq" || op == "=" || op == "==") {
-		op = "ilike"
+	if strings.EqualFold(strings.TrimSpace(f.Variant), VariantText) {
+		switch op {
+		case "eq", "=", "==":
+			return "ilike"
+		case "ne", "neq", "!=":
+			return "notilike"
+		}
+	}
+	return op
+}
+
+func conditionForFilterRaw(column string, f Filter, col Column) string {
+	op := normalizeFilterOperator(f)
+	if op == "" {
+		return ""
+	}
+
+	if isRolesColumn(col) {
+		switch op {
+		case "inarray", "in":
+			return conditionForJSONBRoleGrants(column, f)
+		case "notinarray", "notin":
+			if clause := conditionForJSONBRoleGrants(column, f); clause != "" {
+				return "NOT " + clause
+			}
+			return ""
+		case "isempty":
+			return jsonArrayIsEmptySQL(column)
+		case "isnotempty":
+			return jsonArrayIsNotEmptySQL(column)
+		}
+	}
+
+	if isJSONMultiSelectColumn(col) && !isRolesColumn(col) {
+		switch op {
+		case "inarray", "in":
+			return conditionForJSONBArrayContains(column, f)
+		case "notinarray", "notin":
+			if clause := conditionForJSONBArrayContains(column, f); clause != "" {
+				return "NOT " + clause
+			}
+			return ""
+		case "isempty":
+			return jsonArrayIsEmptySQL(column)
+		case "isnotempty":
+			return jsonArrayIsNotEmptySQL(column)
+		}
 	}
 
 	switch op {
@@ -149,53 +270,62 @@ func conditionForFilterRaw(column string, f Filter) string {
 	case "notilike":
 		return column + " NOT ILIKE " + quoteValue("%"+f.Value+"%")
 	case "inarray", "in":
-		if len(f.Values) > 0 {
-			quoted := make([]string, len(f.Values))
-			for i, v := range f.Values {
+		values := FilterValues(f)
+		if len(values) > 0 {
+			quoted := make([]string, len(values))
+			for i, v := range values {
 				quoted[i] = quoteValue(v)
 			}
 			return column + " IN (" + strings.Join(quoted, ",") + ")"
 		}
 		return column + " IN (" + quoteValue(f.Value) + ")"
 	case "notinarray", "notin":
-		if len(f.Values) > 0 {
-			quoted := make([]string, len(f.Values))
-			for i, v := range f.Values {
+		values := FilterValues(f)
+		if len(values) > 0 {
+			quoted := make([]string, len(values))
+			for i, v := range values {
 				quoted[i] = quoteValue(v)
 			}
 			return column + " NOT IN (" + strings.Join(quoted, ",") + ")"
 		}
 		return column + " NOT IN (" + quoteValue(f.Value) + ")"
 	case "isempty":
-		return "(" + column + " IS NULL OR " + column + " = '')"
+		return emptyCheckSQL(column, col)
 	case "isnotempty":
-		return "(" + column + " IS NOT NULL AND " + column + " <> '')"
+		return notEmptyCheckSQL(column, col)
 	case "lt", "<":
-		return column + " < " + quoteValue(f.Value)
+		return column + " < " + quoteSQLComparable(f.Value)
 	case "lte", "<=":
-		return column + " <= " + quoteValue(f.Value)
+		return column + " <= " + quoteSQLComparable(f.Value)
 	case "gt", ">":
-		return column + " > " + quoteValue(f.Value)
+		return column + " > " + quoteSQLComparable(f.Value)
 	case "gte", ">=":
-		return column + " >= " + quoteValue(f.Value)
+		return column + " >= " + quoteSQLComparable(f.Value)
 	case "isbetween":
-		if len(f.Values) >= 2 {
-			return column + " BETWEEN " + quoteValue(f.Values[0]) + " AND " + quoteValue(f.Values[1])
+		values := FilterValues(f)
+		if len(values) >= 2 {
+			return column + " BETWEEN " + quoteSQLComparable(values[0]) + " AND " + quoteSQLComparable(values[1])
 		}
 		if f.Value != "" {
 			parts := strings.SplitN(f.Value, ",", 2)
 			if len(parts) == 2 {
-				return column + " BETWEEN " + quoteValue(strings.TrimSpace(parts[0])) + " AND " + quoteValue(strings.TrimSpace(parts[1]))
+				return column + " BETWEEN " + quoteSQLComparable(strings.TrimSpace(parts[0])) + " AND " + quoteSQLComparable(strings.TrimSpace(parts[1]))
 			}
 		}
 		return ""
 	case "isrelativetotoday":
-		return column + " = " + quoteValue(f.Value)
+		offset := strings.TrimSpace(f.Value)
+		if offset == "" {
+			return ""
+		}
+		// Value is day offset from today (e.g. "0" = today, "-1" = yesterday).
+		return "(" + column + " >= (CURRENT_DATE + (" + quoteSQLComparable(offset) + ") * INTERVAL '1 day') AND " + column + " < (CURRENT_DATE + (" + quoteSQLComparable(offset) + " + 1) * INTERVAL '1 day'))"
 	}
 
-	if len(f.Values) > 1 {
-		quoted := make([]string, len(f.Values))
-		for i, v := range f.Values {
+	values := FilterValues(f)
+	if len(values) > 1 {
+		quoted := make([]string, len(values))
+		for i, v := range values {
 			quoted[i] = quoteValue(v)
 		}
 		return column + " IN (" + strings.Join(quoted, ",") + ")"
@@ -204,6 +334,28 @@ func conditionForFilterRaw(column string, f Filter) string {
 		return column + " = " + quoteValue(f.Value)
 	}
 	return ""
+}
+
+// escapeSQLString escapes a string for use inside PostgreSQL single-quoted literal.
+func escapeSQLString(s string) string {
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `'`, `''`)
+	return `'` + s + `'`
+}
+
+// quoteSQLComparable quotes timestamps and numerics without wildcards for comparisons.
+func quoteSQLComparable(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "''"
+	}
+	if _, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return s
+	}
+	if _, err := strconv.ParseFloat(s, 64); err == nil {
+		return s
+	}
+	return quoteValue(s)
 }
 
 // quoteValue returns a PostgreSQL-legal literal: numeric as-is, otherwise single-quoted escaped string.
@@ -225,10 +377,12 @@ func quoteValue(s string) string {
 // columnNameByID maps filter ID (or AccessorKey) to the actual DB column name; only those columns are used.
 // Returns the clause (with ? placeholders) and args so the caller can do: db.Where(clause, args...).
 // joinOperator should be "and" or "or" (default "and").
-func ConditionsFromFilters(filters []Filter, joinOperator string, columnNameByID map[string]string) (where string, args []any) {
-	if len(filters) == 0 || columnNameByID == nil {
+func ConditionsFromFilters(filters []Filter, joinOperator string, columns []Column) (where string, args []any) {
+	if len(filters) == 0 || len(columns) == 0 {
 		return "", nil
 	}
+	columnNameByID := ColumnNameByID(columns)
+	columnByID := ColumnByID(columns)
 	op := strings.ToLower(strings.TrimSpace(joinOperator))
 	if op != "or" {
 		op = "and"
@@ -240,7 +394,7 @@ func ConditionsFromFilters(filters []Filter, joinOperator string, columnNameByID
 		if !ok || col == "" {
 			continue
 		}
-		clause, a := conditionForFilter(col, f)
+		clause, a := conditionForFilter(col, f, columnByID[f.ID])
 		if clause == "" {
 			continue
 		}
@@ -254,24 +408,44 @@ func ConditionsFromFilters(filters []Filter, joinOperator string, columnNameByID
 }
 
 // conditionForFilter returns one condition fragment and its args for a single filter.
-func conditionForFilter(column string, f Filter) (clause string, args []any) {
-	op := strings.ToLower(strings.TrimSpace(f.Operator))
-	// Normalise simple mode (no operator)
+func conditionForFilter(column string, f Filter, col Column) (clause string, args []any) {
+	op := normalizeFilterOperator(f)
 	if op == "" {
-		switch {
-		case len(f.Values) == 0 && f.Value != "":
-			op = "eq"
-		case len(f.Values) == 1:
-			op = "eq"
-		case len(f.Values) > 1:
-			op = "inarray"
-		default:
-			return "", nil
+		return "", nil
+	}
+
+	if isRolesColumn(col) {
+		switch op {
+		case "inarray", "in":
+			if raw := conditionForJSONBRoleGrants(column, f); raw != "" {
+				return raw, nil
+			}
+		case "notinarray", "notin":
+			if raw := conditionForJSONBRoleGrants(column, f); raw != "" {
+				return "NOT " + raw, nil
+			}
+		case "isempty":
+			return jsonArrayIsEmptySQL(column), nil
+		case "isnotempty":
+			return jsonArrayIsNotEmptySQL(column), nil
 		}
 	}
-	// Text variant: use ILIKE with %value% (search) instead of exact match.
-	if strings.ToLower(strings.TrimSpace(f.Variant)) == "text" && (op == "eq" || op == "=" || op == "==") {
-		op = "ilike"
+
+	if isJSONMultiSelectColumn(col) && !isRolesColumn(col) {
+		switch op {
+		case "inarray", "in":
+			if raw := conditionForJSONBArrayContains(column, f); raw != "" {
+				return raw, nil
+			}
+		case "notinarray", "notin":
+			if raw := conditionForJSONBArrayContains(column, f); raw != "" {
+				return "NOT " + raw, nil
+			}
+		case "isempty":
+			return jsonArrayIsEmptySQL(column), nil
+		case "isnotempty":
+			return jsonArrayIsNotEmptySQL(column), nil
+		}
 	}
 
 	switch op {
@@ -284,27 +458,29 @@ func conditionForFilter(column string, f Filter) (clause string, args []any) {
 	case "notilike":
 		return column + " NOT ILIKE ?", []any{"%" + f.Value + "%"}
 	case "inarray", "in":
-		if len(f.Values) > 0 {
-			placeholders := make([]string, len(f.Values))
-			for i := range f.Values {
+		values := FilterValues(f)
+		if len(values) > 0 {
+			placeholders := make([]string, len(values))
+			for i := range values {
 				placeholders[i] = "?"
 			}
-			return column + " IN (" + strings.Join(placeholders, ",") + ")", sliceToAny(f.Values)
+			return column + " IN (" + strings.Join(placeholders, ",") + ")", sliceToAny(values)
 		}
 		return column + " IN (?)", []any{f.Value}
 	case "notinarray", "notin":
-		if len(f.Values) > 0 {
-			placeholders := make([]string, len(f.Values))
-			for i := range f.Values {
+		values := FilterValues(f)
+		if len(values) > 0 {
+			placeholders := make([]string, len(values))
+			for i := range values {
 				placeholders[i] = "?"
 			}
-			return column + " NOT IN (" + strings.Join(placeholders, ",") + ")", sliceToAny(f.Values)
+			return column + " NOT IN (" + strings.Join(placeholders, ",") + ")", sliceToAny(values)
 		}
 		return column + " NOT IN (?)", []any{f.Value}
 	case "isempty":
-		return "(" + column + " IS NULL OR " + column + " = '')", nil
+		return emptyCheckSQL(column, col), nil
 	case "isnotempty":
-		return "(" + column + " IS NOT NULL AND " + column + " <> '')", nil
+		return notEmptyCheckSQL(column, col), nil
 	case "lt", "<":
 		return column + " < ?", []any{f.Value}
 	case "lte", "<=":
@@ -314,11 +490,11 @@ func conditionForFilter(column string, f Filter) (clause string, args []any) {
 	case "gte", ">=":
 		return column + " >= ?", []any{f.Value}
 	case "isbetween":
-		if len(f.Values) >= 2 {
-			return column + " BETWEEN ? AND ?", []any{f.Values[0], f.Values[1]}
+		values := FilterValues(f)
+		if len(values) >= 2 {
+			return column + " BETWEEN ? AND ?", []any{values[0], values[1]}
 		}
 		if f.Value != "" {
-			// optional: treat Value as "min,max"
 			parts := strings.SplitN(f.Value, ",", 2)
 			if len(parts) == 2 {
 				return column + " BETWEEN ? AND ?", []any{strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])}
@@ -326,17 +502,19 @@ func conditionForFilter(column string, f Filter) (clause string, args []any) {
 		}
 		return "", nil
 	case "isrelativetotoday":
-		// Minimal support: treat value as day offset or leave to caller
+		if raw := conditionForFilterRaw(column, f, col); raw != "" {
+			return raw, nil
+		}
 		return column + " = ?", []any{f.Value}
 	}
 
-	// Fallback
-	if len(f.Values) > 1 {
-		placeholders := make([]string, len(f.Values))
-		for i := range f.Values {
+	values := FilterValues(f)
+	if len(values) > 1 {
+		placeholders := make([]string, len(values))
+		for i := range values {
 			placeholders[i] = "?"
 		}
-		return column + " IN (" + strings.Join(placeholders, ",") + ")", sliceToAny(f.Values)
+		return column + " IN (" + strings.Join(placeholders, ",") + ")", sliceToAny(values)
 	}
 	if f.Value != "" {
 		return column + " = ?", []any{f.Value}

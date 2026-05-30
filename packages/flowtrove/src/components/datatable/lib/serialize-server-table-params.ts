@@ -1,4 +1,5 @@
 import type { ServerColumnFilter, ServerTableState } from "../types/data-table";
+import type { FilterItemSchema } from "./parsers";
 
 /**
  * Serializes ServerTableState into query params the Go datatable ExtractQuery expects.
@@ -24,7 +25,9 @@ export function serializeServerTableParams<TData>(
   }
 
   if (state.filters && state.filters.length > 0) {
-    params.filters = JSON.stringify(state.filters);
+    params.filters = JSON.stringify(
+      state.filters.map((filter) => serializeAdvancedFilter(filter)),
+    );
     params.filterFlag = "advancedFilters";
     if (state.joinOperator) {
       params.joinOperator = state.joinOperator;
@@ -32,6 +35,30 @@ export function serializeServerTableParams<TData>(
   }
 
   return params;
+}
+
+function serializeAdvancedFilter(
+  filter: FilterItemSchema,
+): Record<string, unknown> {
+  const item: Record<string, unknown> = {
+    id: filter.id,
+    variant: filter.variant,
+    operator: filter.operator,
+    filterId: filter.filterId,
+  };
+
+  if (filter.operator === "isEmpty" || filter.operator === "isNotEmpty") {
+    return item;
+  }
+
+  const value = filter.value;
+  if (Array.isArray(value)) {
+    item.values = value.map(String);
+  } else if (value != null && value !== "") {
+    item.value = String(value);
+  }
+
+  return item;
 }
 
 function serializeColumnFilter(filter: ServerColumnFilter): Record<string, unknown> {
@@ -44,5 +71,25 @@ function serializeColumnFilter(filter: ServerColumnFilter): Record<string, unkno
   if (filter.variant) {
     item.variant = filter.variant;
   }
+
+  const operator = defaultColumnFilterOperator(filter);
+  if (operator) {
+    item.operator = operator;
+  }
+
   return item;
+}
+
+function defaultColumnFilterOperator(
+  filter: ServerColumnFilter,
+): string | undefined {
+  switch (filter.variant) {
+    case "text":
+      return "iLike";
+    case "multiSelect":
+    case "select":
+      return "inArray";
+    default:
+      return undefined;
+  }
 }

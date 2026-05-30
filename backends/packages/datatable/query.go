@@ -167,17 +167,20 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 
 	// Column filters from `columnFilters=[{"id":"name","value":"john"}, ...]`
 	if raw := q.Get("columnFilters"); raw != "" {
-		var filters []Filter
-		if err := json.Unmarshal([]byte(raw), &filters); err == nil {
-			for _, f := range filters {
-				if _, ok := validColumns[f.ID]; !ok || f.ID == "" {
-					continue
-				}
-				if f.Value == "" && len(f.Values) == 0 {
-					continue
-				}
-				result.Filters = append(result.Filters, f)
+		if filters, err := parseFiltersJSON(raw, validColumns); err == nil {
+			result.Filters = append(result.Filters, enrichFiltersFromColumns(filters, columns)...)
+		}
+	}
+
+	// Advanced filters from JSON `filters=[{...}]` (TanStack / nuqs advanced filter mode).
+	if filterFlag == "advancedFilters" {
+		if raw := q.Get("filters"); raw != "" {
+			if filters, err := parseFiltersJSON(raw, validColumns); err == nil && len(filters) > 0 {
+				result.Filters = enrichFiltersFromColumns(filters, columns)
 			}
+		}
+		if join := q.Get("joinOperator"); join != "" {
+			result.JoinOperator = join
 		}
 	}
 
@@ -287,9 +290,7 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 		result.Search = search
 	}
 
-	// Column filters: we support TWO distinct modes.
-	//   - If the URL has keys "filters[...]" -> parse advanced filters (and joinOperator).
-	//   - Else if the URL has keys "columnFilters[...]" -> parse simple columnFilters.
+	// Column filters: bracket notation fallback when JSON params were not used.
 	if len(result.Filters) == 0 {
 		hasAdvanced := filterFlag == "advancedFilters"
 		if !hasAdvanced {

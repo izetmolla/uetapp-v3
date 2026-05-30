@@ -27,6 +27,7 @@ import (
 //	})
 func Find[T any](db *gorm.DB, q datatable.TableQuery, columns []datatable.Column) ([]T, datatable.Pagination, error) {
 	columnNameByID := datatable.ColumnNameByID(columns)
+	columnByID := datatable.ColumnByID(columns)
 
 	query := db
 
@@ -36,7 +37,7 @@ func Find[T any](db *gorm.DB, q datatable.TableQuery, columns []datatable.Column
 		if !ok {
 			continue
 		}
-		query = applyFilter(query, colName, f)
+		query = applyFilter(query, colName, f, columnByID[f.ID])
 	}
 
 	// Apply sorting (respecting order).
@@ -117,20 +118,13 @@ func Find[T any](db *gorm.DB, q datatable.TableQuery, columns []datatable.Column
 // For simple mode (columnFilters) where Operator is empty:
 //   - if len(Values) == 1  -> treat as eq
 //   - if len(Values) > 1   -> treat as IN
-func applyFilter(db *gorm.DB, column string, f datatable.Filter) *gorm.DB {
-	op := strings.ToLower(f.Operator)
-
-	// Normalise "simple" mode (no explicit operator).
+func applyFilter(db *gorm.DB, column string, f datatable.Filter, col datatable.Column) *gorm.DB {
+	op := datatable.NormalizeFilterOperator(f)
 	if op == "" {
-		switch {
-		case len(f.Values) == 0 && f.Value != "":
-			op = "eq"
-		case len(f.Values) == 1:
-			op = "eq"
-		case len(f.Values) > 1:
-			op = "inarray"
-		}
+		return db
 	}
+
+	values := datatable.FilterValues(f)
 
 	switch op {
 	case "eq", "==", "=":
@@ -140,35 +134,57 @@ func applyFilter(db *gorm.DB, column string, f datatable.Filter) *gorm.DB {
 		return db.Where(fmt.Sprintf("%s <> ?", column), f.Value)
 
 	case "ilike":
-		// Case-insensitive partial match.
 		return db.Where(fmt.Sprintf("%s ILIKE ?", column), "%"+f.Value+"%")
 
 	case "notilike":
 		return db.Where(fmt.Sprintf("%s NOT ILIKE ?", column), "%"+f.Value+"%")
 
 	case "inarray", "in":
-		// Prefer Values slice; fall back to single Value.
-		if len(f.Values) > 0 {
-			return db.Where(fmt.Sprintf("%s IN ?", column), f.Values)
+		if col.ID == "roles" || col.AccessorKey == "roles" {
+			return applyJSONBRoleGrantsFilter(db, column, values, false)
+		}
+		if len(values) > 0 {
+			return db.Where(fmt.Sprintf("%s IN ?", column), values)
 		}
 		return db.Where(fmt.Sprintf("%s IN (?)", column), []string{f.Value})
 
 	case "notinarray", "notin":
-		if len(f.Values) > 0 {
-			return db.Where(fmt.Sprintf("%s NOT IN ?", column), f.Values)
+		if col.ID == "roles" || col.AccessorKey == "roles" {
+			return applyJSONBRoleGrantsFilter(db, column, values, true)
+		}
+		if len(values) > 0 {
+			return db.Where(fmt.Sprintf("%s NOT IN ?", column), values)
 		}
 		return db.Where(fmt.Sprintf("%s NOT IN (?)", column), []string{f.Value})
 
 	case "isempty":
-		return db.Where(fmt.Sprintf("(%s IS NULL OR %s = '')", column, column))
+		if col.IsJSON && col.Meta != nil && strings.EqualFold(col.Meta.Variant, datatable.VariantMultiSelect) {
+			return db.Where(fmt.Sprintf("(COALESCE(%s::jsonb, '[]'::jsonb) = '[]'::jsonb OR %s IS NULL)", column, column))
+		}
+		return db.Where(datatable.EmptyCheckSQL(column, col))
 
 	case "isnotempty":
-		return db.Where(fmt.Sprintf("(%s IS NOT NULL AND %s <> '')", column, column))
+		if col.IsJSON && col.Meta != nil && strings.EqualFold(col.Meta.Variant, datatable.VariantMultiSelect) {
+			return db.Where(fmt.Sprintf("jsonb_array_length(COALESCE(%s::jsonb, '[]'::jsonb)) > 0", column))
+		}
+		return db.Where(datatable.NotEmptyCheckSQL(column, col))
+
+	case "lt", "<":
+		return db.Where(fmt.Sprintf("%s < ?", column), f.Value)
+	case "lte", "<=":
+		return db.Where(fmt.Sprintf("%s <= ?", column), f.Value)
+	case "gt", ">":
+		return db.Where(fmt.Sprintf("%s > ?", column), f.Value)
+	case "gte", ">=":
+		return db.Where(fmt.Sprintf("%s >= ?", column), f.Value)
+	case "isbetween":
+		if len(values) >= 2 {
+			return db.Where(fmt.Sprintf("%s BETWEEN ? AND ?", column), values[0], values[1])
+		}
 	}
 
-	// Fallback: if we have multiple values, use IN; otherwise equality.
-	if len(f.Values) > 1 {
-		return db.Where(fmt.Sprintf("%s IN ?", column), f.Values)
+	if len(values) > 1 {
+		return db.Where(fmt.Sprintf("%s IN ?", column), values)
 	}
 
 	if f.Value != "" {
@@ -176,4 +192,31 @@ func applyFilter(db *gorm.DB, column string, f datatable.Filter) *gorm.DB {
 	}
 
 	return db
+}
+
+func applyJSONBRoleGrantsFilter(db *gorm.DB, column string, values []string, negate bool) *gorm.DB {
+	if len(values) == 0 {
+		return db
+	}
+	clauses := make([]string, 0, len(values))
+	args := make([]any, 0, len(values)*2)
+	for _, role := range values {
+		role = strings.TrimSpace(role)
+		if role == "" {
+			continue
+		}
+		clauses = append(clauses, fmt.Sprintf(
+			"EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(%s::jsonb, '[]'::jsonb)) AS elem WHERE elem = ? OR elem LIKE ?)",
+			column,
+		))
+		args = append(args, role, role+":%")
+	}
+	if len(clauses) == 0 {
+		return db
+	}
+	expr := "(" + strings.Join(clauses, " OR ") + ")"
+	if negate {
+		expr = "NOT " + expr
+	}
+	return db.Where(expr, args...)
 }

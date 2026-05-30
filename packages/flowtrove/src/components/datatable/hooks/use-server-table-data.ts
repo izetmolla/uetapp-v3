@@ -17,6 +17,7 @@ import { dataTableConfig } from "../config/data-table";
 import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { ARRAY_SEPARATOR, QUERY_KEYS } from "../lib/constants";
 import { getFiltersStateParser, getSortingStateParser } from "../lib/parsers";
+import { getValidFilters } from "../lib/data-table";
 import { serializeServerTableParams } from "../lib/serialize-server-table-params";
 import type {
   ExtendedColumnFilter,
@@ -156,7 +157,9 @@ export function useServerTableData<TData>(
       sorting: (sorting ?? []) as ExtendedColumnSort<TData>[],
       columnFilters,
       ...(enableAdvancedFilter && {
-        filters: (advancedFilters ?? []) as ExtendedColumnFilter<TData>[],
+        filters: getValidFilters(
+          (advancedFilters ?? []) as ExtendedColumnFilter<TData>[],
+        ),
         joinOperator: joinOperator as JoinOperator | undefined,
       }),
     };
