@@ -1,0 +1,32 @@
+---
+description: Flowtrove datatable package — TanStack, nuqs, serialization, filter modes
+globs: packages/flowtrove/src/components/datatable/**
+alwaysApply: false
+---
+
+# Flowtrove datatable package
+
+Read `.cursor/AGENTS.md` and `skills/implement-datatable-frontend/architecture.md` before non-trivial edits.
+
+## Core rules
+
+- **Go contract**: `lib/serialize-server-table-params.ts` ↔ `backends/packages/datatable.ExtractQuery`. Update paired tests on both sides.
+- **Operators/variants**: `config/data-table.ts` must match Go `operators.go`.
+- **`fetch` runtime type**: `useServerTableData` passes `Record<string, string>` to `fetch`, not `ServerTableState`.
+- **Advanced filters**: URL key `filters` (JSON); groups use `type: "group"`. Parser in `lib/parsers.ts`.
+- **`useBackendColumns`**: Do not break `__base` / `__dep` query key split for `filterBy`.
+
+## Mode behavior
+
+| `source.type` | TanStack `manual*` | Row models |
+|---------------|-------------------|------------|
+| `server` | all true | core only |
+| `client` | all false | filtered + sorted + paginated |
+
+`enableAdvancedFilter` prop + URL `filterFlag` control advanced UI (see `useTableAdvancedOptions`).
+
+## Tests
+
+```bash
+pnpm exec vitest run packages/flowtrove/src/components/datatable/lib
+```

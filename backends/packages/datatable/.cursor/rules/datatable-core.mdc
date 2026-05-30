@@ -1,0 +1,53 @@
+---
+description: Conventions for editing backends/packages/datatable (query parsing, operators, SQL helpers)
+globs: backends/packages/datatable/**
+alwaysApply: false
+---
+
+# Datatable package conventions
+
+## Scope
+
+Shared library only — no Fiber handlers here. Apps import `github.com/flowtrove/packages/datatable` and `.../datatable/postgresql`.
+
+## Public API boundaries
+
+- **Types & columns**: `Column`, `ColumnMeta`, `OptionItem`, `GetColumns`, `FormatContent`, `RenderPagination`
+- **Request parsing**: `ExtractQuery(rawURL, columns)` → `TableQuery`
+- **SQL**: `ConditionsFromFilters`, `ColumnNameByID`, `FilterColumnNameByID`, `OrderByClause`, operator constants
+- **PostgreSQL**: `postgresql.Find`, `postgresql.FindRaw` — keep DB-specific logic in `postgresql/`, not root package
+
+## Column visibility
+
+Use `Hidden: true` on `Column` (not a `DefaultVisible` field). `GetColumns` sets `columnVisibility[id] = !Hidden`.
+
+## SQL column mapping
+
+- `SQLColumn` — SELECT / ORDER BY expression (default for filters if no override)
+- `FilterSQLColumn` — WHERE only (display name vs filter id)
+- `IsEmptySQL` / `IsNotEmptySQL` — computed columns (subqueries, CONCAT, etc.)
+- `IsJSON: true` — `FormatContent` unmarshals string/[]byte JSON in row maps
+
+## ExtractQuery contract
+
+- Validates sort/filter IDs against `Column.ID` and `Column.AccessorKey`
+- Supports JSON params (`pagination`, `sorting`, `columnFilters`, `filters`) and bracket notation
+- Advanced mode: `filterFlag=advancedFilters`, `joinOperator`, nested filter groups (`Type: "group"`)
+- Defaults: page 1, pageSize 10
+
+## Operators
+
+Match frontend `dataTableConfig` exactly (case-sensitive in URLs, normalized lowercase in SQL):
+
+`iLike`, `notILike`, `eq`, `ne`, `inArray`, `notInArray`, `isEmpty`, `isNotEmpty`, `lt`, `lte`, `gt`, `gte`, `isBetween`, `isRelativeToToday`
+
+Simple mode (empty operator): 1 value → eq; multiple → inArray. Text variant maps eq/ne → iLike/notILike.
+
+## Tests
+
+Add/update tests in `*_test.go` when changing `ExtractQuery`, filter parsing, or `ConditionsFromFilters`. Run: `go test ./...` from this package directory.
+
+## Do not
+
+- Break URL param compatibility with `packages/flowtrove` `serializeServerTableParams`
+- Use `ConditionsFromFiltersWithoutargs` with untrusted user input in dynamic apps (prefer bound `?` args via `ConditionsFromFilters` / `Find`)

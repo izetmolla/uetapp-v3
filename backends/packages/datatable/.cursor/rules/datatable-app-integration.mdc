@@ -1,0 +1,73 @@
+---
+description: Integrate server datatables in Fiber app modules (columns, list API, PostgreSQL)
+globs: backends/app/**/*
+alwaysApply: false
+---
+
+# App datatable integration
+
+## Required endpoints per table
+
+1. **Columns** — `Get*Columns` → `datatable.GetColumns(columns)`
+2. **List API** — parse query, query DB, return `data` + `pagination`
+3. **List view** (optional) — same data shape for SSR
+
+## Standard list handler
+
+```go
+columns, err := cc.getFooColumns(ctx)
+q, err := tablequery.Extract(c, columns)
+items, pagination, err := postgresql.FindRaw[map[string]any](db, q, columns, tableName).Run()
+datatable.FormatContent(&items, columns)
+return c.JSON(fiber.Map{
+    "data": items,
+    "pagination": datatable.RenderPagination(pagination),
+})
+```
+
+Use `postgresql.Find[Model](db.Model(&Model{}), q, columns)` for simple GORM models without custom SELECT.
+
+Use `FindRaw` when `SQLColumn` has expressions, subqueries, or `.AddJoin(...)`.
+
+## Column definition checklist
+
+- Stable `ID` (matches frontend filter/sort state)
+- `AccessorKey` usually equals `ID` (camelCase in JSON rows)
+- `SQLColumn` for anything not a plain column name
+- `FilterSQLColumn` when UI shows labels but filters store ids
+- `Meta.Variant`: `text`, `number`, `date`, `select`, `multiSelect`, `boolean`, etc.
+- `Meta.Options` for select/multiSelect (load from DB in `get*Columns`)
+- `Meta.FilterBy` for dependent dropdowns (refetch columns when parent filter changes)
+- `Hidden: true` for id / internal columns still needed in SQL
+- `EnableOnlyAdvancedFilters: true` to hide from simple toolbar only
+
+## Dependent filter options
+
+When `Meta.FilterBy` is set, read parent value in `get*Columns`:
+
+```go
+studyLevel := tablequery.GetFilterValue(c, "study_level")
+// rebuild Meta.Options for faculty column
+```
+
+## Custom stats / non-table filters
+
+Use `tablequery.GetFilter` / `GetFilterValue` for one-off query params without adding a column.
+
+## Imports
+
+```go
+"github.com/flowtrove/packages/datatable"
+"github.com/flowtrove/packages/datatable/postgresql"
+"github.com/uetedu/app/pkg/tablequery"
+```
+
+## Response contract
+
+- `pagination`: `{ page, limit, total, total_pages, pageCount }`
+- Row keys must match `AccessorKey` (or `ID`) from columns
+
+## Reference implementations
+
+- GORM model list: `backends/app/modules/cadmin/users/list/`
+- Raw SQL + subqueries: `backends/app/modules/contracts/internal/students/list/`

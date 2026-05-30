@@ -1,0 +1,38 @@
+---
+description: App pages using Flowtrove DataTable — server lists, client pickers, APIs
+globs: apps/**/*
+alwaysApply: false
+---
+
+# App DataTable integration
+
+Skill: `packages/flowtrove/src/components/datatable/.cursor/skills/implement-datatable-frontend/SKILL.md`
+
+## Server list (default)
+
+1. `get*Columns()` + `get*List(params: unknown)` in `api/index.ts`
+2. `useBackendColumns` → `columnVisibility` → `DataTable` `initialState`
+3. `fetch: (params) => getList(params)` — pass params unchanged
+4. `queryKey: (params) => [PAGE_KEY, "list", params]`
+
+Copy: `apps/app/src/pages/cadmin/pages/resources/pages/list/`
+
+## Advanced (see advanced-server.md)
+
+- Custom fetch / pagination mapping → secretary `student1`
+- `fetchColumns(filters)` → filterBy columns
+- Store actions → users list
+- `actionBar` + `enableRowSelection` → orgunits/users
+- Stats: separate `useQuery`, not inside DataTable
+
+## Client (dialogs, small data)
+
+```tsx
+<DataTable disableParamPersistence source={{ type: "client", data: rows }} />
+```
+
+See `advanced-client.md`. No list API; optional columns API only.
+
+## Backend
+
+Go handlers required for server mode: `backends/packages/datatable/.cursor/skills/implement-datatable/`
