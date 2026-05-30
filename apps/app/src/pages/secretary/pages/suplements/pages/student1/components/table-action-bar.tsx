@@ -6,7 +6,7 @@ import {
     DataTableActionBar,
     DataTableActionBarAction,
     DataTableActionBarSelection,
-} from "@workspace/flowtrove/components/data-table/components/data-table-action-bar";
+} from "@workspace/flowtrove/components/datatable/components/data-table-action-bar";
 import ButtonDialog from "@workspace/ui/components/dialog-button";
 import { Separator } from "@workspace/ui/components/separator";
 

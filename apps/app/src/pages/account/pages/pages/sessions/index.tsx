@@ -2,7 +2,7 @@ import {
     DataTable,
     useBackendColumns,
     type BackendColumnsResponse,
-} from "@workspace/flowtrove/components/data-table"
+} from "@workspace/flowtrove/components/datatable"
 import { useMemo, useState } from "react"
 import { withError } from "@workspace/flowtrove/lib/network"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"

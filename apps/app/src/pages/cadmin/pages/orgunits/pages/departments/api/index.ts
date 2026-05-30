@@ -1,4 +1,4 @@
-import type { BackendColumnsResponse } from "@workspace/flowtrove/components/data-table";
+import type { BackendColumnsResponse } from "@workspace/flowtrove/components/datatable";
 import ApiService, { type ResponseWithError, type ResponseWithPagination, withAPI } from "@workspace/flowtrove/lib/network";
 
 export interface Department {

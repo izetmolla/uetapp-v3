@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Ellipsis } from "lucide-react";
 import { Link } from "react-router";
-import type { DataTableRowAction } from "@workspace/flowtrove/components/data-table/types/data-table";
+import type { DataTableRowAction } from "@workspace/flowtrove/components/datatable/types/data-table";
 import { Button } from "@workspace/ui/components/button";
 import {
     DropdownMenu,

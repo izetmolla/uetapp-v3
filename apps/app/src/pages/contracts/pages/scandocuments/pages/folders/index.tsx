@@ -10,7 +10,7 @@ import {
   Pagination, PaginationContent, PaginationItem, PaginationLink,
   PaginationNext, PaginationPrevious,
 } from "@workspace/ui/components/pagination";
-import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
+import { formatDate } from "@workspace/flowtrove/components/datatable/lib/format";
 import { Crumbs } from "../../components/crumbs";
 import { PageHeader, PageShell } from "../../components/page-shell";
 import { GridSkeleton, TableSkeleton } from "../../components/skeleton-page";

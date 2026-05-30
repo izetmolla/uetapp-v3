@@ -1,10 +1,10 @@
-import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
+import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/datatable";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getApiErrorMessageFromBody, isApiErrorBody, queryClient } from "@workspace/flowtrove/lib/network";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";
-import type { DataTableRowAction } from "@workspace/flowtrove/components/data-table/types/data-table";
+import type { DataTableRowAction } from "@workspace/flowtrove/components/datatable/types/data-table";
 import { useTranslation } from "react-i18next";
 import { Button } from "@workspace/ui/components/button";
 import { GraduationCap, PlusIcon } from "lucide-react";

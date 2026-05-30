@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { CircleDashed, Ellipsis, Text, Trash2, UserCheck, UserCog, UserX } from "lucide-react";
 
-import { DataTableColumnHeader } from "@workspace/flowtrove/components/data-table/components/data-table-column-header";
-import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
+import { DataTableColumnHeader } from "@workspace/flowtrove/components/datatable/components/data-table-column-header";
+import { formatDate } from "@workspace/flowtrove/components/datatable/lib/format";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";

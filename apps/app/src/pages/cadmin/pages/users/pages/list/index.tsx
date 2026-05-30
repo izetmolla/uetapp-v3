@@ -1,4 +1,4 @@
-import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
+import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/datatable";
 import { USER_FETCH_PERSISTANT, type User } from "./api";
 import { getUsersColumns, getUsersList } from "./api";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";

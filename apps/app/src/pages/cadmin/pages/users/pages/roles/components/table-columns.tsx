@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
+import { formatDate } from "@workspace/flowtrove/components/datatable/lib/format";
 import type { Role } from "../api";
 import useRolesListStore from "../store";
 

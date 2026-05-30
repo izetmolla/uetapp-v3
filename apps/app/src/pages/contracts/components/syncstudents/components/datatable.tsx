@@ -1,4 +1,4 @@
-import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
+import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/datatable";
 import type { FC } from "react";
 import {
     SYNC_STUDENTS_FETCH_PERSISTANT,

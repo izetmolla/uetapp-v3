@@ -1,7 +1,7 @@
 import { Search, UserPlus, UsersIcon } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import type { FC } from "react";
-import { QUERY_KEYS } from "@workspace/flowtrove/components/data-table/lib/constants";
+import { QUERY_KEYS } from "@workspace/flowtrove/components/datatable/lib/constants";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import useStudentsListStore from "../store";

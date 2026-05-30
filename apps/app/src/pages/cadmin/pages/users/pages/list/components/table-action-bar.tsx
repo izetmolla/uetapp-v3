@@ -17,7 +17,7 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 import { useCallback, useState, useTransition } from "react";
 import type { User } from "../api";
-import { DataTableActionBar, DataTableActionBarAction, DataTableActionBarSelection } from "@workspace/flowtrove/components/data-table/components/data-table-action-bar";
+import { DataTableActionBar, DataTableActionBarAction, DataTableActionBarSelection } from "@workspace/flowtrove/components/datatable/components/data-table-action-bar";
 // import { exportTableToCSV } from "@/lib/export";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 // import { deletePreApplication } from "../api";

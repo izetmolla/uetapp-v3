@@ -1,4 +1,4 @@
-import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
+import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/datatable";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";

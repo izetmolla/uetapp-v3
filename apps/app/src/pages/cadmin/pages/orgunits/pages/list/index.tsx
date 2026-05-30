@@ -1,10 +1,10 @@
-import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
+import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/datatable";
 import { useEffect, useMemo, useState } from "react";
 import { getOrgUnitsColumns, getOrgUnitsList, type OrgUnit } from "./api";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";
 import { getActionsColumn, prependColumns } from "./components/table-columns";
 import TableConfigCustomizator from "./components/table-config-customizator";
-import type { DataTableRowAction } from "@workspace/flowtrove/components/data-table/types/data-table";
+import type { DataTableRowAction } from "@workspace/flowtrove/components/datatable/types/data-table";
 import { useTranslation } from "react-i18next";
 import { OrgUnitsTableActionBar } from "./components/table-action-bar";
 import AddOrgUnitDialog from "./components/add-org-unit-dialog";

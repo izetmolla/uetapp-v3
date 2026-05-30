@@ -13,7 +13,7 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { create } from 'zustand'
 import type { Student } from "../api"
-import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format"
+import { formatDate } from "@workspace/flowtrove/components/datatable/lib/format"
 import { useMutation } from "@tanstack/react-query"
 import { createSingleSupplementRequest } from "../api"
 import {

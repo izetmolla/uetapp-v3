@@ -1,4 +1,4 @@
-import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/data-table";
+import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/datatable";
 import ContentLoader, { type BreadcrumbItem } from "@workspace/flowtrove/components/content-loader";
 import {
     STUDENTS_FETCH_PERSISTANT,

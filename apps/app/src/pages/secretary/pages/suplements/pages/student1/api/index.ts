@@ -1,7 +1,7 @@
 import type {
     BackendColumnDefinition,
     BackendColumnsResponse,
-} from "@workspace/flowtrove/components/data-table";
+} from "@workspace/flowtrove/components/datatable";
 import ApiService, {
     type ResponseWithError,
     type ResponseWithPagination,

@@ -6,7 +6,7 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 import { useCallback, useState } from "react";
 import { importStudents, type Student } from "../api";
-import { DataTableActionBar, DataTableActionBarAction, DataTableActionBarSelection } from "@workspace/flowtrove/components/data-table/components/data-table-action-bar";
+import { DataTableActionBar, DataTableActionBarAction, DataTableActionBarSelection } from "@workspace/flowtrove/components/datatable/components/data-table-action-bar";
 import { useImportDialogPortalContainer } from "../portal-container-context";
 import { ConfirmAlertDialog } from "./alert-dialog";
 import { useMutation } from "@tanstack/react-query";

@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { CircleDashed, Ellipsis, Text } from "lucide-react";
 
-import { DataTableColumnHeader } from "@workspace/flowtrove/components/data-table/components/data-table-column-header";
-import type { DataTableRowAction } from "@workspace/flowtrove/components/data-table/types/data-table";
+import { DataTableColumnHeader } from "@workspace/flowtrove/components/datatable/components/data-table-column-header";
+import type { DataTableRowAction } from "@workspace/flowtrove/components/datatable/types/data-table";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import {

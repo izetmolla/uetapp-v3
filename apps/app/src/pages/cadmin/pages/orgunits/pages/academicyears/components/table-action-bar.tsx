@@ -6,7 +6,7 @@ import {
     DataTableActionBar,
     DataTableActionBarAction,
     DataTableActionBarSelection,
-} from "@workspace/flowtrove/components/data-table/components/data-table-action-bar";
+} from "@workspace/flowtrove/components/datatable/components/data-table-action-bar";
 
 export function AcademicYearsTableActionBar({ table }: { table: Table<AcademicYear> }) {
     return (

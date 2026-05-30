@@ -8,7 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
+import { formatDate } from "@workspace/flowtrove/components/datatable/lib/format";
 import type { Student } from "../api";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
