@@ -1,8 +1,8 @@
-import type { LayoutBuilderItem } from "../types/items";
+import type { LayoutBuilderChildItem } from "../types/base-layout";
 
 /** True when `children` contains any item whose `type` is in `slotTypes`. */
 export function childrenUseComposedSlots(
-    children: LayoutBuilderItem[] | undefined,
+    children: LayoutBuilderChildItem[] | undefined,
     slotTypes: readonly string[],
 ): boolean {
     if (!children?.length) {

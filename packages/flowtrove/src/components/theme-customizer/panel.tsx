@@ -9,12 +9,12 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import {
   PresetSelector,
-  ThemeScaleSelector,
-  ColorModeSelector,
-  ContentLayoutSelector,
-  ThemeRadiusSelector,
-  ResetThemeButton
-} from "./index";
+} from "./preset-selector";
+import { ThemeScaleSelector } from "./scale-selector";
+import { ColorModeSelector } from "./color-mode-selector";
+import { ContentLayoutSelector } from "./content-layout-selector";
+import { ThemeRadiusSelector } from "./radius-selector";
+import { ResetThemeButton } from "./reset-theme";
 import { useIsMobile } from "@workspace/flowtrove/hooks/use-mobile";
 import { SidebarModeSelector } from "./sidebar-mode-selector";
 

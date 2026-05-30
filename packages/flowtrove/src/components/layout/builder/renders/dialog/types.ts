@@ -1,5 +1,4 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 /**
  * Dialog – maps to shadcn Dialog (Radix)
@@ -14,12 +13,12 @@ import type { LayoutBuilderItem } from "../../types/items";
 export type DialogItem = BaseLayoutItem & {
     type: "dialog";
     /** Legacy: items that open the dialog. Composed: use `dialog-trigger` in `children`. */
-    trigger?: LayoutBuilderItem[];
+    trigger?: LayoutBuilderChildItem[];
     /** Legacy: main body. Composed: slot items (`dialog-trigger`, `dialog-content`, …). */
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     title?: string;
     description?: string;
-    footer?: LayoutBuilderItem[];
+    footer?: LayoutBuilderChildItem[];
     showCloseButton?: boolean;
     triggerClassName?: string;
     contentClassName?: string;
@@ -31,18 +30,18 @@ export type DialogItem = BaseLayoutItem & {
 
 export type DialogTriggerItem = BaseLayoutItem & {
     type: "dialog-trigger";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type DialogContentItem = BaseLayoutItem & {
     type: "dialog-content";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     showCloseButton?: boolean;
 };
 
 export type DialogHeaderItem = BaseLayoutItem & {
     type: "dialog-header";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type DialogTitleItem = BaseLayoutItem & {
@@ -57,6 +56,6 @@ export type DialogDescriptionItem = BaseLayoutItem & {
 
 export type DialogFooterItem = BaseLayoutItem & {
     type: "dialog-footer";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     showCloseButton?: boolean;
 };

@@ -1,18 +1,17 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 export type PopoverItem = BaseLayoutItem & {
     type: "popover";
-    children?: LayoutBuilderItem[];
-    trigger?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
+    trigger?: LayoutBuilderChildItem[];
 };
 
 export type PopoverTriggerItem = BaseLayoutItem & {
     type: "popover-trigger";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type PopoverContentItem = BaseLayoutItem & {
     type: "popover-content";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };

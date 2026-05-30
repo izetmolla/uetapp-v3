@@ -1,5 +1,4 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 /**
  * Card – maps to shadcn Card
@@ -14,11 +13,11 @@ export type CardItem = BaseLayoutItem & {
     type: "card";
     size?: "default" | "sm";
     /** Main body in legacy mode, or composed slot items (see type doc). */
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     title?: string;
     description?: string;
-    footer?: LayoutBuilderItem[];
-    headerAction?: LayoutBuilderItem[];
+    footer?: LayoutBuilderChildItem[];
+    headerAction?: LayoutBuilderChildItem[];
     contentClassName?: string;
     headerClassName?: string;
     footerClassName?: string;
@@ -30,14 +29,14 @@ export type CardItem = BaseLayoutItem & {
 
 export type CardActionItem = BaseLayoutItem & {
     type: "card-action";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type CardContentItem = BaseLayoutItem & {
     type: "card-content";
     /** Extra top padding when this block is the main body and there is no `card-header` sibling (optional). */
     paddingTopWhenNoHeader?: boolean;
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type CardDescriptionItem = BaseLayoutItem & {
@@ -51,9 +50,9 @@ export type CardTitleItem = BaseLayoutItem & {
 };
 export type CardFooterItem = BaseLayoutItem & {
     type: "card-footer";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 export type CardHeaderItem = BaseLayoutItem & {
     type: "card-header";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };

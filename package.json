@@ -8,6 +8,7 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
+    "check:circular": "madge --circular --warning --extensions ts,tsx apps/app/src packages/flowtrove/src packages/ui/src packages/utils/src",
     "pub": "node --experimental-specifier-resolution=node packages/utils/src/cloud/publish.ts",
     "pub app:backend": "./backends/app/deploy.sh",
     "test": "turbo test"
@@ -16,6 +17,7 @@
     "@types/node": "^25.7.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.4",
+    "madge": "^8.0.0",
     "turbo": "^2.9.16",
     "typescript": "5.9.3"
   },

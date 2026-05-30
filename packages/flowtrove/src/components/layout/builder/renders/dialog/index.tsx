@@ -1,7 +1,6 @@
 "use client";
 
 import type { FC } from "react";
-import type { LayoutBuilderItem } from "../../types/items";
 import type { LayoutRendererProps } from "../../types";
 import {
     Dialog,
@@ -24,7 +23,7 @@ import type {
     DialogTriggerItem,
 } from "./types";
 
-function dialogUsesComposedSlots(children: LayoutBuilderItem[] | undefined): boolean {
+function dialogUsesComposedSlots(children: import("../../types/base-layout").LayoutBuilderChildItem[] | undefined): boolean {
     if (!children?.length) {
         return false;
     }

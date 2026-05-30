@@ -1,12 +1,12 @@
 import { Suspense, type FC, type ReactNode } from "react";
 import { useLayoutBuilderContext } from "../LayoutBuilderContext";
 import { evaluateCondition } from "../lib/utils";
-import type { LayoutRendererProps, LayoutBuilderItem } from "../types";
+import type { LayoutRendererProps, LayoutBuilderItem, LayoutBuilderChildItem } from "../types";
 import { getRenderer, isLazyRenderer } from "./registry";
 
-export type RenderItemsFn = (items: LayoutBuilderItem[]) => React.ReactNode;
+export type RenderItemsFn = (items: LayoutBuilderChildItem[]) => React.ReactNode;
 export type RenderItemsWithPathFn = (
-    items: LayoutBuilderItem[],
+    items: LayoutBuilderChildItem[],
     pathPrefix?: number[]
 ) => React.ReactNode;
 
@@ -65,7 +65,7 @@ const LayoutBuilderItemRenderer: FC<LayoutBuilderItemRendererProps> = ({
 
 export function renderChildren(
     renderItems: RenderItemsFn | RenderItemsWithPathFn,
-    children: LayoutBuilderItem[],
+    children: LayoutBuilderChildItem[],
     path: number[] | undefined
 ): React.ReactNode {
     const list = Array.isArray(children) ? children : [];

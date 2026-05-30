@@ -1,15 +1,14 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 export type TabDef = {
     value: string;
     label: string;
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type TabsItem = BaseLayoutItem & {
     type: "tabs";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     tabs?: TabDef[];
     defaultValue?: string;
     orientation?: "horizontal" | "vertical";
@@ -18,7 +17,7 @@ export type TabsItem = BaseLayoutItem & {
 
 export type TabsListItem = BaseLayoutItem & {
     type: "tabs-list";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     variant?: "default" | "line";
 };
 
@@ -31,5 +30,5 @@ export type TabsTriggerItem = BaseLayoutItem & {
 export type TabsContentItem = BaseLayoutItem & {
     type: "tabs-content";
     value: string;
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };

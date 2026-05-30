@@ -1,5 +1,5 @@
-import type { JoinOperator } from "../types/data-table";
-import type { FilterItemSchema } from "./parsers";
+import type { JoinOperator } from "../types/table-operators";
+import type { FilterItemSchema } from "./filter-schema";
 
 export interface AdvancedFilterGroup<_TData = unknown> {
   type: "group";

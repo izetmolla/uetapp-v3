@@ -4,7 +4,6 @@ import type { FC } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@workspace/ui/components/toggle-group";
 import { cn } from "@workspace/ui/lib/utils";
 import type { LayoutRendererProps } from "../../types";
-import type { LayoutBuilderItem } from "../../types/items";
 import type { ToggleGroupLayoutItem, ToggleGroupMemberItem } from "./types";
 
 const ToggleGroupRenderer: FC<LayoutRendererProps<ToggleGroupLayoutItem>> = ({
@@ -43,7 +42,7 @@ const ToggleGroupRenderer: FC<LayoutRendererProps<ToggleGroupLayoutItem>> = ({
             className={cn(item.className)}
             style={item.style}
         >
-            {renderItems(children as LayoutBuilderItem[], path)}
+            {renderItems(children, path)}
         </ToggleGroup>
     );
 };

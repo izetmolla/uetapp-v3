@@ -1,17 +1,18 @@
 import { createParser } from "nuqs/server";
 import { z } from "zod";
 
-import { dataTableConfig } from "../config/data-table";
+import type { AdvancedFilterEntry } from "./advanced-filter-types";
+import {
+  filterEntrySchema,
+  sortingItemSchema,
+} from "./filter-schema";
+import type { ExtendedColumnSort } from "../types/table-sort";
 
-import type {
-  AdvancedFilterEntry,
-  ExtendedColumnSort,
-} from "../types/data-table";
-
-const sortingItemSchema = z.object({
-  id: z.string(),
-  desc: z.boolean(),
-});
+export type {
+  FilterEntrySchema,
+  FilterGroupSchema,
+  FilterItemSchema,
+} from "./filter-schema";
 
 function resolveValidColumnKeys(
   columnIds?: string[] | Set<string>,
@@ -52,30 +53,6 @@ export const getSortingStateParser = <TData>(
       ),
   });
 };
-
-const joinOperatorSchema = z.enum(dataTableConfig.joinOperators);
-
-const filterConditionSchema = z.object({
-  id: z.string(),
-  value: z.union([z.string(), z.array(z.string())]).optional(),
-  variant: z.enum(dataTableConfig.filterVariants),
-  operator: z.enum(dataTableConfig.operators),
-  filterId: z.string(),
-  joinOperator: joinOperatorSchema.optional(),
-});
-
-const filterGroupSchema = z.object({
-  type: z.literal("group"),
-  groupId: z.string(),
-  joinOperator: joinOperatorSchema.optional(),
-  filters: z.array(filterConditionSchema).min(1),
-});
-
-const filterEntrySchema = z.union([filterGroupSchema, filterConditionSchema]);
-
-export type FilterItemSchema = z.infer<typeof filterConditionSchema>;
-export type FilterGroupSchema = z.infer<typeof filterGroupSchema>;
-export type FilterEntrySchema = z.infer<typeof filterEntrySchema>;
 
 export const getFiltersStateParser = <TData>(
   _columnIds?: string[] | Set<string>,

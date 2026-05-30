@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import type { LayoutBuilderItem } from "./items";
 
 /** Base properties shared by all layout items */
 export type BaseLayoutItem = {
@@ -11,7 +10,13 @@ export type BaseLayoutItem = {
     locked?: boolean;
 };
 
-/** Container base with typed children (type-only import avoids runtime cycle) */
+/**
+ * Forward reference for nested items in type definitions.
+ * Avoids import cycles with the `LayoutBuilderItem` union in `items.ts`.
+ */
+export type LayoutBuilderChildItem = BaseLayoutItem & Record<string, unknown>;
+
+/** Container base with typed children */
 export type ContainerItem = BaseLayoutItem & {
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };

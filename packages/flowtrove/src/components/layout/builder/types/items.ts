@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import type { BaseFormFieldItem } from "./items-types";
 import type { AlertDialogItem, AlertDialogTriggerItem, AlertDialogContentItem, AlertDialogHeaderItem, AlertDialogTitleItem, AlertDialogDescriptionItem, AlertDialogFooterItem } from "../renders/alert-dialog/types";
 import type { AvatarItem } from "../renders/avatar/types";
@@ -45,21 +44,6 @@ import type { TimelineItem } from "../renders/timeline/types";
 import type { ToggleItem } from "../renders/toggle/types";
 import type { ToggleGroupLayoutItem, ToggleGroupMemberItem } from "../renders/toggle-group/types";
 import type { TooltipItem, TooltipTriggerItem, TooltipContentItem } from "../renders/tooltip/types";
-
-/** Base properties shared by all layout items */
-export type BaseLayoutItem = {
-  type: string;
-  id: string;
-  className?: string;
-  style?: CSSProperties;
-  condition?: string;
-  locked?: boolean;
-};
-
-/** Base properties for items that can contain children */
-export type ContainerItem = BaseLayoutItem & {
-  children?: LayoutBuilderItem[];
-};
 
 export type LayoutBuilderItem =
   | AlertDialogItem
@@ -150,3 +134,5 @@ export type LayoutBuilderItem =
 
 /** Items that have a form field name */
 export type FormFieldItem = BaseFormFieldItem;
+
+export type { BaseLayoutItem, ContainerItem, LayoutBuilderChildItem } from "./base-layout";

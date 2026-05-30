@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import type { FilterMode } from "../components/data-table-advanced-options";
+import type { FilterMode } from "../lib/filter-mode";
 import type { AdvancedFilterEntry } from "../lib/advanced-filter-types";
 import type {
   ExtendedColumnSort,

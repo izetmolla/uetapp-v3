@@ -1,9 +1,8 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 export type ToggleGroupLayoutItem = BaseLayoutItem & {
     type: "toggle-group";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     groupType?: "single" | "multiple";
     defaultValue?: string | string[];
     variant?: "default" | "outline";

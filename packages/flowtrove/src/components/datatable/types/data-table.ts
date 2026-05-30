@@ -1,8 +1,12 @@
-import type { DataTableConfig } from "../config/data-table";
-import type { FilterItemSchema } from "../lib/parsers";
 import type { AdvancedFilterEntry } from "../lib/advanced-filter-types";
+import type { FilterItemSchema } from "../lib/filter-schema";
+import type { JoinOperator, FilterVariant } from "./table-operators";
+import type { ExtendedColumnSort } from "./table-sort";
+import type { Row, RowData } from "@tanstack/react-table";
+
 export type { AdvancedFilterEntry };
-import type { ColumnSort, Row, RowData } from "@tanstack/react-table";
+export type { FilterOperator, FilterVariant, JoinOperator } from "./table-operators";
+export type { ExtendedColumnSort } from "./table-sort";
 
 declare module "@tanstack/react-table" {
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
@@ -36,14 +40,6 @@ export interface Option {
     value: string;
     count?: number;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
-}
-
-export type FilterOperator = DataTableConfig["operators"][number];
-export type FilterVariant = DataTableConfig["filterVariants"][number];
-export type JoinOperator = DataTableConfig["joinOperators"][number];
-
-export interface ExtendedColumnSort<TData> extends Omit<ColumnSort, "id"> {
-    id: Extract<keyof TData, string>;
 }
 
 export interface ExtendedColumnFilter<TData> extends FilterItemSchema {
@@ -137,3 +133,6 @@ export interface BackendColumnDefinition {
 export interface BackendColumnsResponse {
     columns: BackendColumnDefinition[];
 }
+
+// Keep DataTableConfig available for consumers importing filter-related types from this module.
+export type { DataTableConfig } from "../config/data-table";

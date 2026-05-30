@@ -8,7 +8,7 @@ import {
 import { LayoutBuilderContext } from "./LayoutBuilderContext";
 import { cn } from "@workspace/ui/lib/utils";
 import type { LayoutInterpolationConfig } from "./types/layout-interpolation";
-import type { LayoutBuilderItem } from "./types/items";
+import type { LayoutBuilderItem, LayoutBuilderChildItem } from "./types/items";
 import { keyForItem } from "./lib/utils";
 import LayoutBuilderItemRenderer from "./renders";
 import ErrorBoundary from "./components/error-boundary";
@@ -68,22 +68,22 @@ const LayoutBuilder: FC<LayoutBuilderProps> = ({
   const needsOwnQueryProvider = queryClientProp !== undefined || parentQueryClient === undefined;
 
   const renderItemsWithPath = (
-    list: LayoutBuilderItem[],
+    list: LayoutBuilderChildItem[],
     pathPrefix: number[] = [],
   ): React.ReactNode => {
     const nodes = list?.map((item, index) => {
       const path = [...pathPrefix, index];
-      const id = item.id ?? keyForItem(item, index);
+      const id = item.id ?? keyForItem(item as LayoutBuilderItem, index);
       const content = (
         <LayoutBuilderItemRenderer
           key={id}
-          item={item}
+          item={item as LayoutBuilderItem}
           path={renderItemWrapper ? path : undefined}
           renderItems={
             renderItemWrapper
-              ? (childList: LayoutBuilderItem[], prefix?: number[]) =>
+              ? (childList: LayoutBuilderChildItem[], prefix?: number[]) =>
                 renderItemsWithPath(childList, prefix ?? path)
-              : (childList: LayoutBuilderItem[]) => renderItemsWithPath(childList, path)
+              : (childList: LayoutBuilderChildItem[]) => renderItemsWithPath(childList, path)
           }
         />
       );
@@ -98,14 +98,14 @@ const LayoutBuilder: FC<LayoutBuilderProps> = ({
     return <>{nodes}</>;
   };
 
-  const renderItemsSimple = (list: LayoutBuilderItem[]) => (
+  const renderItemsSimple = (list: LayoutBuilderChildItem[]) => (
     <>
       {list.map((item, index) => {
-        const id = item.id ?? keyForItem(item, index);
+        const id = item.id ?? keyForItem(item as LayoutBuilderItem, index);
         return (
           <LayoutBuilderItemRenderer
             key={id}
-            item={item}
+            item={item as LayoutBuilderItem}
             renderItems={renderItemsSimple}
           />
         );

@@ -1,6 +1,7 @@
 import z from "zod";
 import { hasChildren } from "../utils";
-import type { FormFieldItem, LayoutBuilderItem } from "../../types/items";
+import type { FormFieldItem } from "../../types/items";
+import type { LayoutBuilderChildItem } from "../../types/base-layout";
 import type { FieldValidation } from "./types";
 import type { InputItem } from "../../renders/input/types";
 import type { RadioGroupItem } from "../../renders/radio-group/types";
@@ -20,7 +21,7 @@ export function isFormFieldItem(item: any): item is FormFieldItem {
 
 
 
-function collectFieldItems(items: LayoutBuilderItem[] | undefined): FormFieldItem[] {
+function collectFieldItems(items: LayoutBuilderChildItem[] | undefined): FormFieldItem[] {
     if (!Array.isArray(items)) return [];
     const fields: FormFieldItem[] = [];
     for (const item of items) {
@@ -36,13 +37,13 @@ function collectFieldItems(items: LayoutBuilderItem[] | undefined): FormFieldIte
         // Tabs / steps: not yet in LayoutBuilderItem union — guard for forward compatibility.
         const itemType = item.type as string;
         if (itemType === "tabs") {
-            for (const tab of (item as { tabs?: { children?: LayoutBuilderItem[] }[] }).tabs ?? []) {
+            for (const tab of (item as { tabs?: { children?: LayoutBuilderChildItem[] }[] }).tabs ?? []) {
                 fields.push(...collectFieldItems(tab.children));
             }
         }
 
         if (itemType === "steps") {
-            for (const step of (item as { steps?: { children?: LayoutBuilderItem[] }[] }).steps ?? []) {
+            for (const step of (item as { steps?: { children?: LayoutBuilderChildItem[] }[] }).steps ?? []) {
                 fields.push(...collectFieldItems(step.children));
             }
         }
@@ -51,12 +52,12 @@ function collectFieldItems(items: LayoutBuilderItem[] | undefined): FormFieldIte
 }
 
 /** Collect all form field names from items (for server error field mapping). */
-export function getFormFieldNames(items: LayoutBuilderItem[]): string[] {
+export function getFormFieldNames(items: LayoutBuilderChildItem[]): string[] {
     return collectFieldItems(items).map((f) => f.name);
 }
 
 /** Deduplicate by field name: when multiple fields share a name, prefer the one with validation. */
-function getFieldsByName(items: LayoutBuilderItem[]): Map<string, FormFieldItem> {
+function getFieldsByName(items: LayoutBuilderChildItem[]): Map<string, FormFieldItem> {
     const fields = collectFieldItems(items);
     const nameToField = new Map<string, FormFieldItem>();
     for (const field of fields) {
@@ -623,7 +624,7 @@ function zodTypeForField(field: FormFieldItem): z.ZodTypeAny {
  * Build a Zod schema from a flat or nested array of form builder items.
  * When multiple fields share the same name, the one with validation is preferred so schema rules apply.
  */
-export function buildFormSchema(items: LayoutBuilderItem[]): z.ZodObject<Record<string, z.ZodTypeAny>> {
+export function buildFormSchema(items: LayoutBuilderChildItem[]): z.ZodObject<Record<string, z.ZodTypeAny>> {
     const nameToField = getFieldsByName(items);
     const shape: Record<string, z.ZodTypeAny> = {};
     for (const field of nameToField.values()) {
@@ -636,7 +637,7 @@ export function buildFormSchema(items: LayoutBuilderItem[]): z.ZodObject<Record<
  * Build default values for react-hook-form from the same items.
  * Uses the same field selection as buildFormSchema (prefer field with validation when names duplicate).
  */
-export function buildDefaultValues(items: LayoutBuilderItem[]): Record<string, unknown> {
+export function buildDefaultValues(items: LayoutBuilderChildItem[]): Record<string, unknown> {
     const nameToField = getFieldsByName(items);
     const defaults: Record<string, unknown> = {};
     for (const field of nameToField.values()) {

@@ -1,19 +1,18 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 export type CollapsibleItem = BaseLayoutItem & {
     type: "collapsible";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     open?: boolean;
     triggerLabel?: string;
 };
 
 export type CollapsibleTriggerItem = BaseLayoutItem & {
     type: "collapsible-trigger";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type CollapsibleContentItem = BaseLayoutItem & {
     type: "collapsible-content";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };

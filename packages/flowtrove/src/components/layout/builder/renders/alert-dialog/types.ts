@@ -1,30 +1,29 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 export type AlertDialogItem = BaseLayoutItem & {
     type: "alert-dialog";
-    children?: LayoutBuilderItem[];
-    trigger?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
+    trigger?: LayoutBuilderChildItem[];
     title?: string;
     description?: string;
-    footer?: LayoutBuilderItem[];
+    footer?: LayoutBuilderChildItem[];
     size?: "default" | "sm";
 };
 
 export type AlertDialogTriggerItem = BaseLayoutItem & {
     type: "alert-dialog-trigger";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type AlertDialogContentItem = BaseLayoutItem & {
     type: "alert-dialog-content";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     size?: "default" | "sm";
 };
 
 export type AlertDialogHeaderItem = BaseLayoutItem & {
     type: "alert-dialog-header";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type AlertDialogTitleItem = BaseLayoutItem & { type: "alert-dialog-title"; text: string };
@@ -35,5 +34,5 @@ export type AlertDialogDescriptionItem = BaseLayoutItem & {
 
 export type AlertDialogFooterItem = BaseLayoutItem & {
     type: "alert-dialog-footer";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };

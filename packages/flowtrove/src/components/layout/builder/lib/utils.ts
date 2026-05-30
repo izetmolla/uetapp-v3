@@ -1,6 +1,9 @@
 import { type LayoutBuilderItem } from "../types/items";
+import type { LayoutBuilderChildItem } from "../types/base-layout";
 
-export function hasChildren(item: LayoutBuilderItem): item is LayoutBuilderItem & { children: LayoutBuilderItem[] } {
+export function hasChildren(
+    item: LayoutBuilderChildItem,
+): item is LayoutBuilderChildItem & { children: LayoutBuilderChildItem[] } {
     return "children" in item && Array.isArray(item.children);
 }
 

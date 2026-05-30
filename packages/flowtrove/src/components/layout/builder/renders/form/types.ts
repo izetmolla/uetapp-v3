@@ -1,5 +1,4 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 /**
  * Form – form container
@@ -10,7 +9,7 @@ import type { LayoutBuilderItem } from "../../types/items";
 export type FormItem = BaseLayoutItem & {
     type: "form";
     /** Form children */
-    children: LayoutBuilderItem[];
+    children: LayoutBuilderChildItem[];
     /** HTML `name` on the root form element (identifies the form in the document). */
     name?: string;
     /** Key from designer config.forms_fields to bind this form to; when set, field names are restricted to that config. */

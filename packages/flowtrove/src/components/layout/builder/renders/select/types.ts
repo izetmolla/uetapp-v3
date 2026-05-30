@@ -1,4 +1,4 @@
-import type { FetchOptions } from "../../types";
+import type { FetchOptions } from "../../types/fetch-options";
 import type { BaseFormFieldItem } from "../../types/items-types";
 
 /** Select option */

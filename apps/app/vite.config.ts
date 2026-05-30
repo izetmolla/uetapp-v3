@@ -17,6 +17,7 @@ export default defineConfig(async ({ command }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
+      dedupe: ["react", "react-dom"],
     },
     // Source workspace packages: skip esbuild pre-bundle so Vite transforms TS/TSX and HMR stays correct.
     optimizeDeps: {
@@ -43,17 +44,23 @@ export default defineConfig(async ({ command }) => {
         input: path.resolve(__dirname, "index.html"),
         output: {
           manualChunks(id: string) {
-            if (id.includes("node_modules")) {
-              if (id.includes("node_modules/react") || id.includes("node_modules/react-dom") || id.includes("node_modules/scheduler")) {
+            const normalized = id.replace(/\\/g, "/");
+
+            if (normalized.includes("node_modules")) {
+              // Match only core React packages — not react-select, react-router, etc.
+              if (
+                normalized.includes("/node_modules/react/") ||
+                normalized.includes("/node_modules/react-dom/") ||
+                normalized.includes("/node_modules/scheduler/")
+              ) {
                 return "react-vendor";
               }
 
-              if (id.includes("node_modules/react-hook-form") || id.includes("node_modules/@hookform")) {
+              if (normalized.includes("/node_modules/react-hook-form/") || normalized.includes("/node_modules/@hookform/")) {
                 return "forms-vendor";
               }
 
-              if (id.includes("node_modules/lucide-react")) return "lucide";
-              if (id.includes("node_modules/sonner")) return "sonner";
+              if (normalized.includes("/node_modules/sonner/")) return "sonner";
             }
 
             // One async chunk per `renders/<renderer>/` package (e.g. div, button). Matches
@@ -65,7 +72,7 @@ export default defineConfig(async ({ command }) => {
 
 
             const rederondifferentbundle = ["div"];
-            const rendererDir = rederondifferentbundle.find(renderer => id.includes(`/layout/builder/renders/${renderer}`));
+            const rendererDir = rederondifferentbundle.find(renderer => normalized.includes(`/layout/builder/renders/${renderer}`));
             if (rendererDir) {
               return `render-${rendererDir}`;
             } 
@@ -79,7 +86,7 @@ export default defineConfig(async ({ command }) => {
             // }
 
             // if (id.includes("src/components/layout/builder")) return "layout-builder";
-            if (id.includes("packages/flowtrove/src/components/layout/builder")) return "layout-builder";
+            if (normalized.includes("packages/flowtrove/src/components/layout/builder")) return "layout-builder";
           }
         }
       }

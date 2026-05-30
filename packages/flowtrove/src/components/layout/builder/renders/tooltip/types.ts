@@ -1,15 +1,14 @@
-import type { BaseLayoutItem } from "../../types/base-layout";
-import type { LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem, LayoutBuilderChildItem } from "../../types/base-layout";
 
 export type TooltipItem = BaseLayoutItem & {
     type: "tooltip";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
     content?: string;
 };
 
 export type TooltipTriggerItem = BaseLayoutItem & {
     type: "tooltip-trigger";
-    children?: LayoutBuilderItem[];
+    children?: LayoutBuilderChildItem[];
 };
 
 export type TooltipContentItem = BaseLayoutItem & {

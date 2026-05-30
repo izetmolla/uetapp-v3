@@ -8,8 +8,7 @@ import * as React from "react";
 
 import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { QUERY_KEYS } from "../lib/constants";
-
-export type FilterMode = "simple" | "advancedFilters";
+import type { FilterMode } from "../lib/filter-mode";
 
 const SIMPLE_VALUE = "simple";
 const ADVANCED_VALUE: FilterMode = "advancedFilters";
@@ -176,3 +175,5 @@ export function DataTableAdvancedOptions({
     </ToggleGroup>
   );
 }
+
+export type { FilterMode } from "../lib/filter-mode";

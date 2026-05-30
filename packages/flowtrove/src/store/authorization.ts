@@ -1,5 +1,5 @@
 import axios from "axios"
-import ApiService from "../lib/network"
+import ApiService from "../lib/network/api-service"
 import type { AuthSession, Tokens, User } from "../types"
 import { create, type StateCreator } from "zustand"
 import { devtools } from "zustand/middleware"
