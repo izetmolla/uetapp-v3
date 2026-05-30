@@ -44,7 +44,6 @@ function serializeAdvancedFilter(
     id: filter.id,
     variant: filter.variant,
     operator: filter.operator,
-    filterId: filter.filterId,
   };
 
   if (filter.operator === "isEmpty" || filter.operator === "isNotEmpty") {

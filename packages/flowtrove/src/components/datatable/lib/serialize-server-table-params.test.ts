@@ -115,17 +115,17 @@ describe("serializeServerTableParams", () => {
         id: "roles",
         variant: "multiSelect",
         operator: "inArray",
-        filterId: "f-roles",
         values: ["admin", "editor", "guest"],
       },
       {
         id: "last_name",
         variant: "text",
         operator: "iLike",
-        filterId: "f-last",
         value: "smith",
       },
     ]);
+    expect(parsed[0]).not.toHaveProperty("filterId");
+    expect(parsed[1]).not.toHaveProperty("filterId");
   });
 
   it("serializes isEmpty advanced filter without value fields", () => {
@@ -149,8 +149,8 @@ describe("serializeServerTableParams", () => {
       id: "email",
       variant: "text",
       operator: "isEmpty",
-      filterId: "f-email",
     });
+    expect(parsed[0]).not.toHaveProperty("filterId");
     expect(parsed[0]).not.toHaveProperty("value");
     expect(parsed[0]).not.toHaveProperty("values");
   });
@@ -194,11 +194,11 @@ describe("frontend/backend filter contract", () => {
       values?: string[];
       operator: string;
       variant: string;
-      filterId: string;
     }>;
 
     expect(filters[0]?.id).toBe("roles");
     expect(filters[0]?.values).toEqual(["admin"]);
     expect(filters[0]?.operator).toBe("inArray");
+    expect(filters[0]).not.toHaveProperty("filterId");
   });
 });
