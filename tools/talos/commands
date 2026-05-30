@@ -1,0 +1,39 @@
+
+
+
+talosctl gen config talos-proxmox-cluster https://192.168.5.170:6443 --output-dir _out
+
+
+talosctl gen config talos-proxmox-cluster https://192.168.5.170:6443 --output-dir _out --install-image factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515:v1.13.1
+
+
+// Load the controller
+talosctl apply-config --insecure --nodes 192.168.5.170 --file _out/controlplane.yaml
+
+// Load Worker
+talosctl apply-config --insecure --nodes 192.168.5.171 --file _out/worker.yaml
+talosctl apply-config --insecure --nodes 192.168.5.172 --file _out/worker.yaml
+
+
+
+
+
+export TALOSCONFIG="_out/talosconfig"
+talosctl config endpoint 192.168.5.170
+talosctl config node 192.168.5.170
+
+
+talosctl bootstrap
+
+
+talosctl kubeconfig .
+
+
+
+
+
+talosctl -e 192.168.5.170 -n 192.168.5.170 --talosconfig talosconfig kubeconfig ./kubeconfig
+
+
+
+talosctl apply-config  --nodes 192.168.5.172  --file worker.yaml   --dry-run
