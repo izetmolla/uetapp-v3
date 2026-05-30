@@ -27,17 +27,12 @@ import (
 //	})
 func Find[T any](db *gorm.DB, q datatable.TableQuery, columns []datatable.Column) ([]T, datatable.Pagination, error) {
 	columnNameByID := datatable.ColumnNameByID(columns)
-	columnByID := datatable.ColumnByID(columns)
 
 	query := db
 
-	// Apply filters.
-	for _, f := range q.Filters {
-		colName, ok := columnNameByID[f.ID]
-		if !ok {
-			continue
-		}
-		query = applyFilter(query, colName, f, columnByID[f.ID])
+	// Apply filters (supports nested groups).
+	if where, args := datatable.ConditionsFromFilters(q.Filters, q.JoinOperator, columns); where != "" {
+		query = query.Where(where, args...)
 	}
 
 	// Apply sorting (respecting order).

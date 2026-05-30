@@ -6,6 +6,10 @@ import type {
 import type { Column } from "@tanstack/react-table";
 
 import { dataTableConfig } from "../config/data-table";
+import {
+    type AdvancedFilterEntry,
+    isAdvancedFilterGroup,
+} from "./advanced-filter-types";
 
 export function getCommonPinningStyles<TData>({
     column,
@@ -90,4 +94,35 @@ export function getValidFilters<TData>(
                 filter.value !== null &&
                 filter.value !== undefined),
     );
+}
+
+export function getValidAdvancedFilterEntries<TData>(
+    entries: AdvancedFilterEntry<TData>[],
+): AdvancedFilterEntry<TData>[] {
+    return entries.reduce<AdvancedFilterEntry<TData>[]>((acc, entry) => {
+        if (isAdvancedFilterGroup(entry)) {
+            const validFilters = getValidFilters(
+                entry.filters as ExtendedColumnFilter<TData>[],
+            );
+            if (validFilters.length === 0) {
+                return acc;
+            }
+            acc.push({ ...entry, filters: validFilters });
+            return acc;
+        }
+
+        if (
+            entry.operator === "isEmpty" ||
+            entry.operator === "isNotEmpty" ||
+            (Array.isArray(entry.value)
+                ? entry.value.length > 0
+                : entry.value !== "" &&
+                entry.value !== null &&
+                entry.value !== undefined)
+        ) {
+            acc.push(entry);
+        }
+
+        return acc;
+    }, []);
 }

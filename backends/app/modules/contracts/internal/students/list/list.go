@@ -2,12 +2,15 @@ package list
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
 	"github.com/flowtrove/packages/datatable"
 	"github.com/flowtrove/packages/datatable/postgresql"
 	"github.com/flowtrove/packages/models"
 	"github.com/gofiber/fiber/v3"
 	"github.com/uetedu/app/pkg/tablequery"
+	"gorm.io/gorm"
 )
 
 // sqlLatestEnrollmentScalar returns a correlated subquery for the latest student_study_programs row.
@@ -34,6 +37,10 @@ var (
 		"sl.name",
 		`
 	INNER JOIN study_levels sl ON sl.id = ssp.study_level_id AND sl.deleted_at IS NULL`,
+	)
+	sqlLatestStudentStudyLevelID = sqlLatestEnrollmentScalar(
+		"ssp.study_level_id",
+		"",
 	)
 	// Start year only (e.g. "2020" from "2020-2021") for list UI formatting.
 	sqlLatestStudentRegYear = sqlLatestEnrollmentScalar(
@@ -136,7 +143,11 @@ func (cc *Controller) GetStudentsColumns(c fiber.Ctx) error {
 	return cc.app.Api(c, cc.app.Render().WithData(datatable.GetColumns(columns)))
 }
 
-func (cc *Controller) getStudentsColumns(_ context.Context) ([]datatable.Column, error) {
+func (cc *Controller) getStudentsColumns(ctx context.Context) ([]datatable.Column, error) {
+	studyLevelOptions, err := cc.getStudyLevelOptions(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return []datatable.Column{
 		{
 			ID:          "id",
@@ -193,9 +204,15 @@ func (cc *Controller) getStudentsColumns(_ context.Context) ([]datatable.Column,
 			ID:                 "study_level",
 			AccessorKey:        "study_level",
 			SQLColumn:          sqlLatestStudentStudyLevelName,
+			FilterSQLColumn:    sqlLatestStudentStudyLevelID,
 			Header:             "Study Level",
 			EnableSorting:      true,
-			EnableColumnFilter: false,
+			EnableColumnFilter: true,
+			Meta: &datatable.ColumnMeta{
+				Label:   "Study Level",
+				Variant: "multiSelect",
+				Options: studyLevelOptions,
+			},
 		},
 		{
 			ID:                 "year",
@@ -267,4 +284,20 @@ func (cc *Controller) getStudentsColumns(_ context.Context) ([]datatable.Column,
 			},
 		},
 	}, nil
+}
+
+func (cc *Controller) getStudyLevelOptions(ctx context.Context) ([]datatable.OptionItem, error) {
+	studyLevels := []datatable.OptionItem{}
+	studyLevelsDb, err := gorm.G[models.StudyLevel](cc.app.Postgres()).Find(ctx)
+	if err != nil {
+		fmt.Println("Error getting study levels: ", err)
+	} else {
+		for _, studyLevel := range studyLevelsDb {
+			studyLevels = append(studyLevels, datatable.OptionItem{
+				Label: studyLevel.Name,
+				Value: strconv.FormatInt(studyLevel.ID, 10),
+			})
+		}
+	}
+	return studyLevels, nil
 }

@@ -108,7 +108,17 @@ func extractFromFiltersJSON(raw string, column string) ([]string, bool) {
 	if err := json.Unmarshal([]byte(raw), &filters); err != nil {
 		return nil, false
 	}
+	return extractFromFilterEntries(filters, column)
+}
+
+func extractFromFilterEntries(filters []datatable.Filter, column string) ([]string, bool) {
 	for _, f := range filters {
+		if f.Type == "group" && len(f.Filters) > 0 {
+			if values, ok := extractFromFilterEntries(f.Filters, column); ok {
+				return values, true
+			}
+			continue
+		}
 		if f.ID != column {
 			continue
 		}
@@ -124,7 +134,6 @@ func extractFromFiltersJSON(raw string, column string) ([]string, bool) {
 			}
 		}
 		if f.Value != "" {
-			// Single selection: wrap in a one-item slice.
 			return []string{f.Value}, true
 		}
 	}

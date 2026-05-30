@@ -19,6 +19,11 @@ func usersListColumns() []Column {
 			Meta:        &ColumnMeta{Variant: VariantText},
 		},
 		{
+			ID:          "email",
+			AccessorKey: "email",
+			Meta:        &ColumnMeta{Variant: VariantText},
+		},
+		{
 			ID:          "status",
 			AccessorKey: "status",
 			Meta:        &ColumnMeta{Variant: VariantMultiSelect},

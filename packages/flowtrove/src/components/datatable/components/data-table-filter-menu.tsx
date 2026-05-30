@@ -37,7 +37,14 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { useDebouncedCallback } from "../hooks/use-debounced-callback";
+import {
+  flattenAdvancedFilterConditions,
+  getLastRemovableFilterId,
+  removeFilterFromEntries,
+  updateFilterInEntries,
+} from "../lib/advanced-filters";
 import { getDefaultFilterOperator, getFilterOperators } from "../lib/data-table";
+import type { AdvancedFilterEntry } from "../lib/advanced-filter-types";
 import { formatDate } from "../lib/format";
 import { generateId } from "../lib/id";
 import { NESTED_OVERLAY_Z_CLASS } from "../lib/constants";
@@ -154,9 +161,7 @@ export function DataTableFilterMenu<TData>({
 
   const onFilterRemove = React.useCallback(
     (filterId: string) => {
-      const updatedFilters = filters.filter(
-        (filter) => filter.filterId !== filterId,
-      );
+      const updatedFilters = removeFilterFromEntries(filters, filterId);
       debouncedSetFilters(updatedFilters);
       requestAnimationFrame(() => {
         triggerRef.current?.focus();
@@ -170,15 +175,9 @@ export function DataTableFilterMenu<TData>({
       filterId: string,
       updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
     ) => {
-      debouncedSetFilters((prevFilters) => {
-        const updatedFilters = prevFilters.map((filter) => {
-          if (filter.filterId === filterId) {
-            return { ...filter, ...updates } as ExtendedColumnFilter<TData>;
-          }
-          return filter;
-        });
-        return updatedFilters;
-      });
+      debouncedSetFilters((prevFilters: AdvancedFilterEntry<TData>[]) =>
+        updateFilterInEntries(prevFilters, filterId, updates),
+      );
     },
     [debouncedSetFilters],
   );
@@ -213,7 +212,7 @@ export function DataTableFilterMenu<TData>({
         filters.length > 0
       ) {
         event.preventDefault();
-        onFilterRemove(filters[filters.length - 1]?.filterId ?? "");
+        onFilterRemove(getLastRemovableFilterId(filters) ?? "");
       }
     }
 
@@ -228,18 +227,23 @@ export function DataTableFilterMenu<TData>({
         filters.length > 0
       ) {
         event.preventDefault();
-        onFilterRemove(filters[filters.length - 1]?.filterId ?? "");
+        onFilterRemove(getLastRemovableFilterId(filters) ?? "");
       }
     },
     [filters, onFilterRemove],
   );
 
+  const visibleFilters = React.useMemo(
+    () => flattenAdvancedFilterConditions(filters),
+    [filters],
+  );
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {filters.map((filter) => (
+      {visibleFilters.map((filter) => (
         <DataTableFilterItem
           key={filter.filterId}
-          filter={filter}
+          filter={filter as ExtendedColumnFilter<TData>}
           filterItemId={`${id}-filter-${filter.filterId}`}
           columns={columns}
           onFilterUpdate={onFilterUpdate}

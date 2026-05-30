@@ -54,33 +54,60 @@ var JoinOperators = []string{JoinAnd, JoinOr}
 // ConditionsFromFiltersWithoutargs builds a PostgreSQL WHERE fragment with values inlined (raw SQL).
 // Use only when column names and filter values are trusted; otherwise prefer ConditionsFromFilters with bound args.
 // Values are escaped for PostgreSQL (strings single-quoted and escaped).
-func ConditionsFromFiltersWithoutargs(filters []Filter, joinOperator string, columns []Column) string {
+// Each filter after the first may set JoinOperator ("and" / "or") to combine with the expression built so far (left-to-right).
+// defaultJoin is used when a filter omits JoinOperator (legacy global joinOperator query param).
+func ConditionsFromFiltersWithoutargs(filters []Filter, defaultJoin string, columns []Column) string {
 	if len(filters) == 0 || len(columns) == 0 {
 		return ""
 	}
-	columnNameByID := ColumnNameByID(columns)
+	columnNameByID := FilterColumnNameByID(columns)
 	columnByID := ColumnByID(columns)
-	op := strings.ToLower(strings.TrimSpace(joinOperator))
-	if op != "or" {
-		op = "and"
-	}
-	sep := " " + strings.ToUpper(op) + " "
-	var clauses []string
+
+	var result string
 	for _, f := range filters {
-		col, ok := columnNameByID[f.ID]
-		if !ok || col == "" {
+		var clause string
+		if isFilterGroup(f) {
+			inner := ConditionsFromFiltersWithoutargs(f.Filters, JoinAnd, columns)
+			if inner == "" {
+				continue
+			}
+			clause = "(" + inner + ")"
+		} else {
+			col, ok := columnNameByID[f.ID]
+			if !ok || col == "" {
+				continue
+			}
+			clause = conditionForFilterRaw(col, f, columnByID[f.ID])
+			if clause == "" {
+				continue
+			}
+			clause = "(" + clause + ")"
+		}
+
+		if result == "" {
+			result = clause
 			continue
 		}
-		clause := conditionForFilterRaw(col, f, columnByID[f.ID])
-		if clause == "" {
-			continue
-		}
-		clauses = append(clauses, "("+clause+")")
+		result += joinSeparator(resolveJoinOperator(f.JoinOperator, defaultJoin)) + clause
 	}
-	if len(clauses) == 0 {
-		return ""
+	return result
+}
+
+func resolveJoinOperator(filterJoin, defaultJoin string) string {
+	if j := strings.ToLower(strings.TrimSpace(filterJoin)); j == "or" || j == "and" {
+		return j
 	}
-	return strings.Join(clauses, sep)
+	if j := strings.ToLower(strings.TrimSpace(defaultJoin)); j == "or" {
+		return "or"
+	}
+	return "and"
+}
+
+func joinSeparator(join string) string {
+	if strings.ToLower(join) == "or" {
+		return " OR "
+	}
+	return " AND "
 }
 
 // conditionForJSONBRoleGrants matches users whose roles JSON array includes any selected role
@@ -376,35 +403,51 @@ func quoteValue(s string) string {
 // ConditionsFromFilters builds a PostgreSQL WHERE fragment and args from filters and joinOperator.
 // columnNameByID maps filter ID (or AccessorKey) to the actual DB column name; only those columns are used.
 // Returns the clause (with ? placeholders) and args so the caller can do: db.Where(clause, args...).
-// joinOperator should be "and" or "or" (default "and").
-func ConditionsFromFilters(filters []Filter, joinOperator string, columns []Column) (where string, args []any) {
+// defaultJoin is the fallback when a filter omits JoinOperator.
+func ConditionsFromFilters(filters []Filter, defaultJoin string, columns []Column) (where string, args []any) {
 	if len(filters) == 0 || len(columns) == 0 {
 		return "", nil
 	}
-	columnNameByID := ColumnNameByID(columns)
+	columnNameByID := FilterColumnNameByID(columns)
 	columnByID := ColumnByID(columns)
-	op := strings.ToLower(strings.TrimSpace(joinOperator))
-	if op != "or" {
-		op = "and"
-	}
-	sep := " " + strings.ToUpper(op) + " "
-	var clauses []string
+
+	var result string
 	for _, f := range filters {
-		col, ok := columnNameByID[f.ID]
-		if !ok || col == "" {
+		var wrapped string
+		var filterArgs []any
+
+		if isFilterGroup(f) {
+			inner, innerArgs := ConditionsFromFilters(f.Filters, JoinAnd, columns)
+			if inner == "" {
+				continue
+			}
+			wrapped = "(" + inner + ")"
+			filterArgs = innerArgs
+		} else {
+			col, ok := columnNameByID[f.ID]
+			if !ok || col == "" {
+				continue
+			}
+			clause, a := conditionForFilter(col, f, columnByID[f.ID])
+			if clause == "" {
+				continue
+			}
+			wrapped = "(" + clause + ")"
+			filterArgs = a
+		}
+
+		if result == "" {
+			result = wrapped
+			args = append(args, filterArgs...)
 			continue
 		}
-		clause, a := conditionForFilter(col, f, columnByID[f.ID])
-		if clause == "" {
-			continue
-		}
-		clauses = append(clauses, "("+clause+")")
-		args = append(args, a...)
+		result += joinSeparator(resolveJoinOperator(f.JoinOperator, defaultJoin)) + wrapped
+		args = append(args, filterArgs...)
 	}
-	if len(clauses) == 0 {
+	if result == "" {
 		return "", nil
 	}
-	return strings.Join(clauses, sep), args
+	return result, args
 }
 
 // conditionForFilter returns one condition fragment and its args for a single filter.
@@ -531,13 +574,24 @@ func sliceToAny(s []string) []any {
 }
 
 // ColumnNameByID builds a map from column ID and AccessorKey to the DB column name (AccessorKey or ID).
-// Pass the same columns slice used for the datatable so ConditionsFromFilters can resolve filter IDs.
+// Pass the same columns slice used for the datatable so ORDER BY can resolve sort IDs.
 func ColumnNameByID(columns []Column) map[string]string {
+	return columnNameByID(columns, false)
+}
+
+// FilterColumnNameByID builds a map from column ID and AccessorKey to the DB expression used in WHERE filters.
+// When FilterSQLColumn is set it takes precedence over SQLColumn.
+func FilterColumnNameByID(columns []Column) map[string]string {
+	return columnNameByID(columns, true)
+}
+
+func columnNameByID(columns []Column, forFilters bool) map[string]string {
 	m := make(map[string]string, len(columns)*2)
 	for _, c := range columns {
-		// Prefer SQLColumn (e.g. expressions like CONCAT(...)) for WHERE/ORDER BY.
-		// Fall back to AccessorKey, then ID.
 		name := c.SQLColumn
+		if forFilters && c.FilterSQLColumn != "" {
+			name = c.FilterSQLColumn
+		}
 		if name == "" {
 			name = c.AccessorKey
 		}

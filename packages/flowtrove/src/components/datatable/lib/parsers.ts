@@ -2,9 +2,10 @@ import { createParser } from "nuqs/server";
 import { z } from "zod";
 
 import { dataTableConfig } from "../config/data-table";
+import { isAdvancedFilterGroup } from "./advanced-filter-types";
 
 import type {
-  ExtendedColumnFilter,
+  AdvancedFilterEntry,
   ExtendedColumnSort,
 } from "../types/data-table";
 
@@ -13,14 +14,18 @@ const sortingItemSchema = z.object({
   desc: z.boolean(),
 });
 
+function resolveValidColumnKeys(
+  columnIds?: string[] | Set<string>,
+): Set<string> | null {
+  if (!columnIds) return null;
+  const set = columnIds instanceof Set ? columnIds : new Set(columnIds);
+  return set.size > 0 ? set : null;
+}
+
 export const getSortingStateParser = <TData>(
   columnIds?: string[] | Set<string>,
 ) => {
-  const validKeys = columnIds
-    ? columnIds instanceof Set
-      ? columnIds
-      : new Set(columnIds)
-    : null;
+  const validKeys = resolveValidColumnKeys(columnIds);
 
   return createParser({
     parse: (value) => {
@@ -49,70 +54,57 @@ export const getSortingStateParser = <TData>(
   });
 };
 
-const filterItemSchema = z
-  .object({
-    id: z.string(),
-    value: z.union([z.string(), z.array(z.string())]).optional(),
-    variant: z.enum(dataTableConfig.filterVariants),
-    operator: z.enum(dataTableConfig.operators),
-    filterId: z.string(),
-  })
-  .superRefine((filter, ctx) => {
-    if (filter.operator === "isEmpty" || filter.operator === "isNotEmpty") {
-      return;
-    }
+const joinOperatorSchema = z.enum(dataTableConfig.joinOperators);
 
-    const value = filter.value;
-    const hasValue = Array.isArray(value)
-      ? value.length > 0
-      : value != null && value !== "";
+const filterConditionSchema = z.object({
+  id: z.string(),
+  value: z.union([z.string(), z.array(z.string())]).optional(),
+  variant: z.enum(dataTableConfig.filterVariants),
+  operator: z.enum(dataTableConfig.operators),
+  filterId: z.string(),
+  joinOperator: joinOperatorSchema.optional(),
+});
 
-    if (!hasValue) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Filter value is required for this operator",
-        path: ["value"],
-      });
-    }
-  });
+const filterGroupSchema = z.object({
+  type: z.literal("group"),
+  groupId: z.string(),
+  joinOperator: joinOperatorSchema.optional(),
+  filters: z.array(filterConditionSchema).min(1),
+});
 
-export type FilterItemSchema = z.infer<typeof filterItemSchema>;
+const filterEntrySchema = z.union([filterGroupSchema, filterConditionSchema]);
+
+export type FilterItemSchema = z.infer<typeof filterConditionSchema>;
+export type FilterGroupSchema = z.infer<typeof filterGroupSchema>;
+export type FilterEntrySchema = z.infer<typeof filterEntrySchema>;
+
+function entryUsesValidColumns(
+  entry: FilterEntrySchema,
+  validKeys: Set<string>,
+): boolean {
+  if (isAdvancedFilterGroup(entry)) {
+    return entry.filters.every((filter) => validKeys.has(filter.id));
+  }
+  return validKeys.has(entry.id);
+}
 
 export const getFiltersStateParser = <TData>(
-  columnIds?: string[] | Set<string>,
+  _columnIds?: string[] | Set<string>,
 ) => {
-  const validKeys = columnIds
-    ? columnIds instanceof Set
-      ? columnIds
-      : new Set(columnIds)
-    : null;
-
   return createParser({
     parse: (value) => {
       try {
         const parsed = JSON.parse(value);
-        const result = z.array(filterItemSchema).safeParse(parsed);
+        const result = z.array(filterEntrySchema).safeParse(parsed);
 
         if (!result.success) return null;
 
-        if (validKeys && result.data.some((item) => !validKeys.has(item.id))) {
-          return null;
-        }
-
-        return result.data as ExtendedColumnFilter<TData>[];
+        return result.data as AdvancedFilterEntry<TData>[];
       } catch {
         return null;
       }
     },
     serialize: (value) => JSON.stringify(value),
-    eq: (a, b) =>
-      a.length === b.length &&
-      a.every(
-        (filter, index) =>
-          filter.id === b[index]?.id &&
-          filter.value === b[index]?.value &&
-          filter.variant === b[index]?.variant &&
-          filter.operator === b[index]?.operator,
-      ),
+    eq: (a, b) => JSON.stringify(a) === JSON.stringify(b),
   });
 };

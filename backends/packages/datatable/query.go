@@ -54,8 +54,11 @@ type Filter struct {
 	//   columnFilters[1][value][1]=marketing
 	Values   []string `json:"values,omitempty"`
 	Variant  string   `json:"variant,omitempty"`
-	Operator string   `json:"operator,omitempty"`
-	FilterID string   `json:"filterId,omitempty"`
+	Operator     string   `json:"operator,omitempty"`
+	FilterID     string   `json:"filterId,omitempty"`
+	JoinOperator string   `json:"joinOperator,omitempty"`
+	Type         string   `json:"type,omitempty"`
+	Filters      []Filter `json:"filters,omitempty"`
 }
 
 // ExtractQuery parses a Fiber OriginalURL (or any raw URL with query string)
@@ -173,12 +176,20 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 	}
 
 	// Advanced filters from JSON `filters=[{...}]` (TanStack / nuqs advanced filter mode).
-	if filterFlag == "advancedFilters" {
-		if raw := q.Get("filters"); raw != "" {
-			if filters, err := parseFiltersJSON(raw, validColumns); err == nil && len(filters) > 0 {
+	if raw := q.Get("filters"); raw != "" {
+		trimmed := strings.TrimSpace(raw)
+		if strings.HasPrefix(trimmed, "[") {
+			if filters, err := parseFiltersJSON(trimmed, validColumns); err == nil && len(filters) > 0 {
 				result.Filters = enrichFiltersFromColumns(filters, columns)
 			}
 		}
+	}
+	if len(result.Filters) == 0 {
+		if bracketFilters := parseBracketAdvancedFilters(q, validColumns); len(bracketFilters) > 0 {
+			result.Filters = enrichFiltersFromColumns(bracketFilters, columns)
+		}
+	}
+	if filterFlag == "advancedFilters" || len(result.Filters) > 0 {
 		if join := q.Get("joinOperator"); join != "" {
 			result.JoinOperator = join
 		}
@@ -290,7 +301,7 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 		result.Search = search
 	}
 
-	// Column filters: bracket notation fallback when JSON params were not used.
+	// Column filters: flat bracket notation fallback when JSON params were not used.
 	if len(result.Filters) == 0 {
 		hasAdvanced := filterFlag == "advancedFilters"
 		if !hasAdvanced {
@@ -301,7 +312,7 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 				}
 			}
 		}
-		// 1) Advanced filters: filters[0][...] with joinOperator.
+		// Legacy flat advanced filters: filters[0][id]=... (no nested groups).
 		if hasAdvanced {
 			filterMap := make(map[int]*Filter)
 			for key, values := range q {
@@ -355,6 +366,8 @@ func ExtractQuery(rawURL string, columns []Column) (TableQuery, error) {
 					entry.Operator = value
 				case "filterId":
 					entry.FilterID = value
+				case "joinOperator":
+					entry.JoinOperator = value
 				}
 			}
 

@@ -39,6 +39,9 @@ type Column struct {
 	// SQLColumn is the DB expression for SELECT (e.g. "first_name", "CONCAT(a,b)").
 	// If empty, ID (or AccessorKey) is used as the column name.
 	SQLColumn string `json:"sqlColumn,omitempty"`
+	// FilterSQLColumn overrides SQLColumn for WHERE filters when the displayed value
+	// differs from the value stored in filter state (e.g. show name, filter by id).
+	FilterSQLColumn string `json:"filterSQLColumn,omitempty"`
 	// IsEmptySQL overrides the SQL used for isEmpty filters on computed columns.
 	IsEmptySQL string `json:"isEmptySQL,omitempty"`
 	// IsNotEmptySQL overrides the SQL used for isNotEmpty filters on computed columns.

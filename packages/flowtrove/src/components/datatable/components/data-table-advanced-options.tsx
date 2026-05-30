@@ -4,6 +4,7 @@ import { useQueryState, parseAsString } from "nuqs";
 import { FileSpreadsheetIcon, ListFilter, RotateCcw } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { ToggleGroup, ToggleGroupItem } from "@workspace/ui/components/toggle-group";
+import * as React from "react";
 
 import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { QUERY_KEYS } from "../lib/constants";
@@ -17,6 +18,7 @@ const validValues: FilterMode[] = [SIMPLE_VALUE as FilterMode, ADVANCED_VALUE];
 
 export function useTableAdvancedOptions() {
   const localState = useOptionalDataTableLocalState();
+  const [rawFiltersParam] = useQueryState(QUERY_KEYS.FILTERS, parseAsString);
   const [urlFilterFlag, setUrlFilterFlag] = useQueryState<FilterMode | null>(
     "filterFlag",
     {
@@ -36,10 +38,16 @@ export function useTableAdvancedOptions() {
 
   const filterFlag = localState?.filterFlag ?? urlFilterFlag;
   const setFilterFlag = localState?.setFilterFlag ?? setUrlFilterFlag;
+  const hasUrlFilters = hasActiveAdvancedFilters(rawFiltersParam);
+
+  React.useEffect(() => {
+    if (localState || !hasUrlFilters || filterFlag === ADVANCED_VALUE) return;
+    void setUrlFilterFlag(ADVANCED_VALUE);
+  }, [filterFlag, hasUrlFilters, localState, setUrlFilterFlag]);
 
   return {
-    enableAdvancedFilter: filterFlag === ADVANCED_VALUE,
-    filterFlag,
+    enableAdvancedFilter: filterFlag === ADVANCED_VALUE || hasUrlFilters,
+    filterFlag: filterFlag === ADVANCED_VALUE || hasUrlFilters ? ADVANCED_VALUE : filterFlag,
     setFilterFlag,
   };
 }
@@ -75,7 +83,7 @@ export function DataTableAdvancedResetButton() {
 
   const rawFiltersValue = localState?.advancedFilters ?? rawFilters ?? null;
   const showReset =
-    filterFlag === ADVANCED_VALUE &&
+    (filterFlag === ADVANCED_VALUE || hasActiveAdvancedFilters(rawFilters)) &&
     hasActiveAdvancedFilters(
       localState
         ? localState.advancedFilters

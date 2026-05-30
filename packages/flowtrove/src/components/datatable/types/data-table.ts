@@ -1,5 +1,7 @@
 import type { DataTableConfig } from "../config/data-table";
 import type { FilterItemSchema } from "../lib/parsers";
+import type { AdvancedFilterEntry } from "../lib/advanced-filter-types";
+export type { AdvancedFilterEntry };
 import type { ColumnSort, Row, RowData } from "@tanstack/react-table";
 
 declare module "@tanstack/react-table" {
@@ -67,7 +69,7 @@ export interface ServerTableState<TData = unknown> {
     sorting: ExtendedColumnSort<TData>[];
     columnFilters: ServerColumnFilter[];
     /** Advanced filter mode: filters + joinOperator */
-    filters?: ExtendedColumnFilter<TData>[];
+    filters?: AdvancedFilterEntry<TData>[];
     joinOperator?: JoinOperator;
 }
 

@@ -3,8 +3,8 @@
 import * as React from "react";
 
 import type { FilterMode } from "../components/data-table-advanced-options";
+import type { AdvancedFilterEntry } from "../lib/advanced-filter-types";
 import type {
-  ExtendedColumnFilter,
   ExtendedColumnSort,
   JoinOperator,
 } from "../types/data-table";
@@ -14,7 +14,7 @@ export interface DataTableLocalState<TData = unknown> {
   perPage: number;
   sorting: ExtendedColumnSort<TData>[];
   filterValues: Record<string, string | string[] | null>;
-  advancedFilters: ExtendedColumnFilter<TData>[];
+  advancedFilters: AdvancedFilterEntry<TData>[];
   joinOperator: JoinOperator;
   filterFlag: FilterMode | null;
   setPage: (page: number) => void;
@@ -29,10 +29,10 @@ export interface DataTableLocalState<TData = unknown> {
   ) => void;
   setAdvancedFilters: (
     value:
-      | ExtendedColumnFilter<TData>[]
+      | AdvancedFilterEntry<TData>[]
       | ((
-          prev: ExtendedColumnFilter<TData>[],
-        ) => ExtendedColumnFilter<TData>[]),
+          prev: AdvancedFilterEntry<TData>[],
+        ) => AdvancedFilterEntry<TData>[]),
   ) => void;
   setJoinOperator: (op: JoinOperator) => void;
   setFilterFlag: (flag: FilterMode | null) => void;
@@ -84,7 +84,7 @@ export function useCreateDataTableLocalState<TData>({
     Record<string, string | string[] | null>
   >({});
   const [advancedFilters, setAdvancedFilters] = React.useState<
-    ExtendedColumnFilter<TData>[]
+    AdvancedFilterEntry<TData>[]
   >([]);
   const [joinOperator, setJoinOperator] =
     React.useState<JoinOperator>("and");

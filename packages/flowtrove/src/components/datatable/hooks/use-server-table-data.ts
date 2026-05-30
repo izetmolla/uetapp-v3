@@ -15,9 +15,14 @@ import * as React from "react";
 
 import { dataTableConfig } from "../config/data-table";
 import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
+import { useAdvancedFiltersQueryState } from "../hooks/use-advanced-filters-query-state";
 import { ARRAY_SEPARATOR, QUERY_KEYS } from "../lib/constants";
-import { getFiltersStateParser, getSortingStateParser } from "../lib/parsers";
-import { getValidFilters } from "../lib/data-table";
+import { getSortingStateParser } from "../lib/parsers";
+import { getValidAdvancedFilterEntries } from "../lib/data-table";
+import {
+  normalizeAdvancedFilterJoinOperators,
+} from "../lib/advanced-filters";
+import type { AdvancedFilterEntry } from "../lib/advanced-filter-types";
 import { serializeServerTableParams } from "../lib/serialize-server-table-params";
 import type {
   ExtendedColumnFilter,
@@ -115,14 +120,7 @@ export function useServerTableData<TData>(
     );
   }, [filterParsers, localState, setUrlFilterValues]);
 
-  const filtersParser = React.useMemo(
-    () => getFiltersStateParser<TData>(columnIds),
-    [columnIds]
-  );
-  const [urlAdvancedFilters] = useQueryState(
-    QUERY_KEYS.FILTERS,
-    filtersParser.withDefault([])
-  );
+  const [urlAdvancedFilters] = useAdvancedFiltersQueryState<TData>();
   const [urlJoinOperator] = useQueryState(
     QUERY_KEYS.JOIN_OPERATOR,
     parseAsStringEnum([...dataTableConfig.joinOperators]).withDefault("and")
@@ -152,14 +150,21 @@ export function useServerTableData<TData>(
           []
         );
 
+    const normalizedAdvancedFilters = enableAdvancedFilter
+      ? normalizeAdvancedFilterJoinOperators(
+          getValidAdvancedFilterEntries(
+            (advancedFilters ?? []) as AdvancedFilterEntry<TData>[],
+          ),
+          (joinOperator ?? "and") as JoinOperator,
+        )
+      : [];
+
     return {
       pagination: { page, perPage },
       sorting: (sorting ?? []) as ExtendedColumnSort<TData>[],
       columnFilters,
       ...(enableAdvancedFilter && {
-        filters: getValidFilters(
-          (advancedFilters ?? []) as ExtendedColumnFilter<TData>[],
-        ),
+        filters: normalizedAdvancedFilters,
         joinOperator: joinOperator as JoinOperator | undefined,
       }),
     };

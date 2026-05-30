@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/flowtrove/packages/datatable"
 	"github.com/flowtrove/packages/datatable/postgresql"
@@ -31,7 +30,8 @@ func (cc *Controller) GetUsersListAPI(c fiber.Ctx) error {
 			r.WithCode("BAD_REQUEST"),
 		)
 	}
-	fmt.Println("q", q)
+	// fmt.Println("filters", datatable.FormatTableQueryFilters(q.Filters))
+	// fmt.Println("where", datatable.ConditionsFromFiltersWithoutargs(q.Filters, q.JoinOperator, columns))
 	users, pagination, err := postgresql.FindRaw[map[string]any](db, q, columns, models.User{}.TableName()).Run()
 	if err != nil {
 		return cc.app.Api(c,

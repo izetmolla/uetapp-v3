@@ -10,12 +10,15 @@ import (
 // flexibleFilter mirrors the frontend advanced-filter JSON shape where `value`
 // may be a string, string array (multiSelect / isBetween), or omitted (isEmpty).
 type flexibleFilter struct {
-	ID       string          `json:"id"`
-	Value    json.RawMessage `json:"value,omitempty"`
-	Values   []string        `json:"values,omitempty"`
-	Variant  string          `json:"variant,omitempty"`
-	Operator string          `json:"operator,omitempty"`
-	FilterID string          `json:"filterId,omitempty"`
+	Type         string           `json:"type,omitempty"`
+	ID           string           `json:"id"`
+	Value        json.RawMessage  `json:"value,omitempty"`
+	Values       []string         `json:"values,omitempty"`
+	Variant      string           `json:"variant,omitempty"`
+	Operator     string           `json:"operator,omitempty"`
+	FilterID     string           `json:"filterId,omitempty"`
+	JoinOperator string           `json:"joinOperator,omitempty"`
+	Filters      []flexibleFilter `json:"filters,omitempty"`
 }
 
 // parseFiltersJSON parses a JSON array of filters (advanced or columnFilters mode).
@@ -32,29 +35,53 @@ func parseFiltersJSON(raw string, validColumns map[string]struct{}) ([]Filter, e
 
 	out := make([]Filter, 0, len(items))
 	for _, item := range items {
-		if item.ID == "" {
-			continue
+		if f, ok := parseFlexibleFilterItem(item, validColumns); ok {
+			out = append(out, f)
 		}
-		if validColumns != nil {
-			if _, ok := validColumns[item.ID]; !ok {
-				continue
-			}
-		}
-
-		f := Filter{
-			ID:       item.ID,
-			Variant:  item.Variant,
-			Operator: item.Operator,
-			FilterID: item.FilterID,
-		}
-		normalizeFilterValues(&f, item.Value, item.Values)
-
-		if !filterHasPayload(f) {
-			continue
-		}
-		out = append(out, f)
 	}
 	return out, nil
+}
+
+func parseFlexibleFilterItem(item flexibleFilter, validColumns map[string]struct{}) (Filter, bool) {
+	if strings.EqualFold(strings.TrimSpace(item.Type), "group") || len(item.Filters) > 0 {
+		nested := make([]Filter, 0, len(item.Filters))
+		for _, child := range item.Filters {
+			if f, ok := parseFlexibleFilterItem(child, validColumns); ok {
+				nested = append(nested, f)
+			}
+		}
+		if len(nested) == 0 {
+			return Filter{}, false
+		}
+		return Filter{
+			Type:         "group",
+			JoinOperator: item.JoinOperator,
+			Filters:      nested,
+		}, true
+	}
+
+	if item.ID == "" {
+		return Filter{}, false
+	}
+	if validColumns != nil {
+		if _, ok := validColumns[item.ID]; !ok {
+			return Filter{}, false
+		}
+	}
+
+	f := Filter{
+		ID:           item.ID,
+		Variant:      item.Variant,
+		Operator:     item.Operator,
+		FilterID:     item.FilterID,
+		JoinOperator: item.JoinOperator,
+	}
+	normalizeFilterValues(&f, item.Value, item.Values)
+
+	if !filterHasPayload(f) {
+		return Filter{}, false
+	}
+	return f, true
 }
 
 func normalizeFilterValues(f *Filter, rawValue json.RawMessage, values []string) {
@@ -152,6 +179,13 @@ func enrichFiltersFromColumns(filters []Filter, columns []Column) []Filter {
 	byID := ColumnByID(columns)
 	out := make([]Filter, 0, len(filters))
 	for _, f := range filters {
+		if strings.EqualFold(f.Type, "group") {
+			f.Filters = enrichFiltersFromColumns(f.Filters, columns)
+			if len(f.Filters) > 0 {
+				out = append(out, f)
+			}
+			continue
+		}
 		if f.Variant == "" {
 			if col, ok := byID[f.ID]; ok && col.Meta != nil {
 				f.Variant = col.Meta.Variant
@@ -174,4 +208,8 @@ func ColumnByID(columns []Column) map[string]Column {
 		}
 	}
 	return m
+}
+
+func isFilterGroup(f Filter) bool {
+	return strings.EqualFold(strings.TrimSpace(f.Type), "group") && len(f.Filters) > 0
 }

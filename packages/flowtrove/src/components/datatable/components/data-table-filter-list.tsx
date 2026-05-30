@@ -10,6 +10,7 @@ import {
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
+import { DataTableFilterGroup } from "./data-table-filter-group";
 import { DataTableRangeFilter } from "./data-table-range-filter";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -56,19 +57,32 @@ import {
 import { dataTableConfig } from "../config/data-table";
 import { useOptionalDataTableLocalState } from "../context/data-table-local-state";
 import { useDebouncedCallback } from "../hooks/use-debounced-callback";
+import { useAdvancedFiltersQueryState } from "../hooks/use-advanced-filters-query-state";
+import {
+  addFilterToGroup,
+  countAdvancedFilterEntries,
+  createDefaultAdvancedFilterGroup,
+  getAdvancedFilterEntryKey,
+  getLastRemovableFilterId,
+  isAdvancedFilterGroup,
+  normalizeAdvancedFilterJoinOperators,
+  removeFilterFromEntries,
+  removeGroupFromEntries,
+  updateFilterInEntries,
+  updateGroupInEntries,
+} from "../lib/advanced-filters";
 import { getDefaultFilterOperator, getFilterOperators } from "../lib/data-table";
 import { formatDate } from "../lib/format";
 import { generateId } from "../lib/id";
 import { QUERY_KEYS, NESTED_OVERLAY_Z_CLASS } from "../lib/constants";
-import { getFiltersStateParser } from "../lib/parsers";
 import { cn } from "@workspace/ui/lib/utils";
 import type {
   ExtendedColumnFilter,
   FilterOperator,
   JoinOperator,
 } from "../types/data-table";
+import type { AdvancedFilterEntry, AdvancedFilterGroup } from "../lib/advanced-filter-types";
 
-const FILTERS_KEY = "filters";
 const JOIN_OPERATOR_KEY = "joinOperator";
 const DEBOUNCE_MS = 300;
 const THROTTLE_MS = 50;
@@ -104,36 +118,12 @@ export function DataTableFilterList<TData>({
       .filter((column) => column.columnDef.enableColumnFilter);
   }, [columnDefs, table]);
 
-  const columnIdsToken = React.useMemo(
-    () =>
-      columns
-        .map((column) => column.id)
-        .filter(Boolean)
-        .sort()
-        .join(","),
-    [columns],
-  );
-
-  const filtersParser = React.useMemo(
-    () =>
-      getFiltersStateParser<TData>(
-        columnIdsToken ? columnIdsToken.split(",") : [],
-      ),
-    [columnIdsToken],
-  );
-
   const localState = useOptionalDataTableLocalState<TData>();
-  const [urlFilters, setUrlFilters] = useQueryState(
-    FILTERS_KEY,
-    filtersParser
-      .withDefault([])
-      .withOptions({
-        clearOnDefault: true,
-        shallow,
-        throttleMs,
-      }),
-  );
-  const filters = localState?.advancedFilters ?? urlFilters ?? [];
+  const [urlFilters, setUrlFilters] = useAdvancedFiltersQueryState<TData>({
+    shallow,
+    throttleMs,
+  });
+  const filters = (localState?.advancedFilters ?? urlFilters ?? []) as AdvancedFilterEntry<TData>[];
   const setFilters = localState?.setAdvancedFilters ?? setUrlFilters;
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
@@ -160,49 +150,86 @@ export function DataTableFilterList<TData>({
 
     if (!column) return;
 
-    debouncedSetFilters([
-      ...filters,
-      {
-        id: column.id as Extract<keyof TData, string>,
-        value: "",
-        variant: column.columnDef.meta?.variant ?? "text",
-        operator: getDefaultFilterOperator(
-          column.columnDef.meta?.variant ?? "text",
-        ),
-        filterId: generateId({ length: 8 }),
-      },
-    ]);
-  }, [columns, filters, debouncedSetFilters]);
+    const newFilter: ExtendedColumnFilter<TData> = {
+      id: column.id as Extract<keyof TData, string>,
+      value: "",
+      variant: column.columnDef.meta?.variant ?? "text",
+      operator: getDefaultFilterOperator(
+        column.columnDef.meta?.variant ?? "text",
+      ),
+      filterId: generateId({ length: 8 }),
+      ...(filters.length > 0 && { joinOperator: "and" as JoinOperator }),
+    };
+
+    void setFilters([...filters, newFilter]);
+  }, [columns, filters, setFilters]);
+
+  const onGroupAdd = React.useCallback(() => {
+    const column = columns[0];
+    if (!column) return;
+
+    const newGroup = createDefaultAdvancedFilterGroup(
+      column,
+      () => generateId({ length: 8 }),
+      getDefaultFilterOperator,
+      filters.length > 0 ? { joinOperator: "and" } : undefined,
+    );
+
+    void setFilters([...filters, newGroup]);
+  }, [columns, filters, setFilters]);
 
   const onFilterUpdate = React.useCallback(
     (
       filterId: string,
       updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
     ) => {
-      debouncedSetFilters((prevFilters) => {
-        const updatedFilters = prevFilters.map((filter) => {
-          if (filter.filterId === filterId) {
-            return { ...filter, ...updates } as ExtendedColumnFilter<TData>;
-          }
-          return filter;
-        });
-        return updatedFilters;
-      });
+      debouncedSetFilters((prevFilters: AdvancedFilterEntry<TData>[]) =>
+        updateFilterInEntries(prevFilters, filterId, updates),
+      );
     },
     [debouncedSetFilters],
   );
 
   const onFilterRemove = React.useCallback(
     (filterId: string) => {
-      const updatedFilters = filters.filter(
-        (filter) => filter.filterId !== filterId,
-      );
+      const updatedFilters = removeFilterFromEntries(filters, filterId);
       void setFilters(updatedFilters);
       requestAnimationFrame(() => {
         addButtonRef.current?.focus();
       });
     },
     [filters, setFilters],
+  );
+
+  const onGroupUpdate = React.useCallback(
+    (
+      groupId: string,
+      updates: Partial<Omit<AdvancedFilterGroup, "type" | "groupId">>,
+    ) => {
+      void setFilters((prevFilters: AdvancedFilterEntry<TData>[]) =>
+        updateGroupInEntries(prevFilters, groupId, updates),
+      );
+    },
+    [setFilters],
+  );
+
+  const onGroupRemove = React.useCallback(
+    (groupId: string) => {
+      void setFilters(removeGroupFromEntries(filters, groupId));
+      requestAnimationFrame(() => {
+        addButtonRef.current?.focus();
+      });
+    },
+    [filters, setFilters],
+  );
+
+  const onFilterAddToGroup = React.useCallback(
+    (groupId: string, filter: ExtendedColumnFilter<TData>) => {
+      void setFilters((prevFilters: AdvancedFilterEntry<TData>[]) =>
+        addFilterToGroup(prevFilters, groupId, filter),
+      );
+    },
+    [setFilters],
   );
 
   const onFiltersReset = React.useCallback(() => {
@@ -241,7 +268,10 @@ export function DataTableFilterList<TData>({
         filters.length > 0
       ) {
         event.preventDefault();
-        onFilterRemove(filters[filters.length - 1]?.filterId ?? "");
+        const filterId = getLastRemovableFilterId(filters);
+        if (filterId) {
+          onFilterRemove(filterId);
+        }
       }
     }
 
@@ -256,11 +286,16 @@ export function DataTableFilterList<TData>({
         filters.length > 0
       ) {
         event.preventDefault();
-        onFilterRemove(filters[filters.length - 1]?.filterId ?? "");
+        const filterId = getLastRemovableFilterId(filters);
+        if (filterId) {
+          onFilterRemove(filterId);
+        }
       }
     },
     [filters, onFilterRemove],
   );
+
+  const filterCount = countAdvancedFilterEntries(filters);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={false}>
@@ -268,12 +303,12 @@ export function DataTableFilterList<TData>({
           <Button variant="outline" size="sm" onKeyDown={onTriggerKeyDown}>
             <ListFilter />
             Filter
-            {filters.length > 0 && (
+            {filterCount > 0 && (
               <Badge
                 variant="secondary"
                 className="h-[18.24px] rounded-[3.2px] px-[5.12px] font-mono font-normal text-[10.4px]"
               >
-                {filters.length}
+                {filterCount}
               </Badge>
             )}
           </Button>
@@ -303,27 +338,62 @@ export function DataTableFilterList<TData>({
           {open && filters.length > 0 ? (
             <Sortable
               value={filters}
-              onValueChange={setFilters}
-              getItemValue={(item) => item.filterId}
+              onValueChange={(reordered) =>
+                void setFilters(
+                  normalizeAdvancedFilterJoinOperators(
+                    reordered as AdvancedFilterEntry<TData>[],
+                    joinOperator,
+                  ),
+                )
+              }
+              getItemValue={(item: AdvancedFilterEntry<TData>) =>
+                getAdvancedFilterEntryKey(item)
+              }
             >
               <SortableContent asChild>
                 <div
                   role="list"
                   className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
                 >
-                  {filters.map((filter, index) => (
-                    <DataTableFilterItem<TData>
-                      key={filter.filterId}
-                      filter={filter}
-                      index={index}
-                      filterItemId={`${id}-filter-${filter.filterId}`}
-                      joinOperator={joinOperator}
-                      setJoinOperator={setJoinOperator}
-                      columns={columns}
-                      onFilterUpdate={onFilterUpdate}
-                      onFilterRemove={onFilterRemove}
-                    />
-                  ))}
+                  {filters.map((entry, index) => {
+                    if (isAdvancedFilterGroup(entry)) {
+                      return (
+                        <DataTableFilterGroup<TData>
+                          key={entry.groupId}
+                          group={entry}
+                          index={index}
+                          groupItemId={`${id}-group-${entry.groupId}`}
+                          defaultJoinOperator={joinOperator}
+                          columns={columns}
+                          onGroupUpdate={onGroupUpdate}
+                          onGroupRemove={onGroupRemove}
+                          onFilterAddToGroup={onFilterAddToGroup}
+                          renderFilterItem={(props) => (
+                            <DataTableFilterItem<TData>
+                              {...props}
+                              defaultJoinOperator={joinOperator}
+                              columns={columns}
+                              onFilterUpdate={onFilterUpdate}
+                              onFilterRemove={onFilterRemove}
+                            />
+                          )}
+                        />
+                      );
+                    }
+
+                    return (
+                      <DataTableFilterItem<TData>
+                        key={entry.filterId}
+                        filter={entry as ExtendedColumnFilter<TData>}
+                        index={index}
+                        filterItemId={`${id}-filter-${entry.filterId}`}
+                        defaultJoinOperator={joinOperator}
+                        columns={columns}
+                        onFilterUpdate={onFilterUpdate}
+                        onFilterRemove={onFilterRemove}
+                      />
+                    );
+                  })}
                 </div>
               </SortableContent>
               <SortableOverlay>
@@ -338,7 +408,7 @@ export function DataTableFilterList<TData>({
               </SortableOverlay>
             </Sortable>
           ) : null}
-          <div className="flex w-full items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2">
             <Button
               size="sm"
               className="rounded"
@@ -346,6 +416,14 @@ export function DataTableFilterList<TData>({
               onClick={onFilterAdd}
             >
               Add filter
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="rounded"
+              onClick={onGroupAdd}
+            >
+              Add group
             </Button>
             {filters.length > 0 ? (
               <Button
@@ -367,9 +445,9 @@ interface DataTableFilterItemProps<TData> {
   filter: ExtendedColumnFilter<TData>;
   index: number;
   filterItemId: string;
-  joinOperator: JoinOperator;
-  setJoinOperator: (value: JoinOperator) => void;
+  defaultJoinOperator: JoinOperator;
   columns: Column<TData>[];
+  nested?: boolean;
   onFilterUpdate: (
     filterId: string,
     updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
@@ -381,9 +459,9 @@ function DataTableFilterItem<TData>({
   filter,
   index,
   filterItemId,
-  joinOperator,
-  setJoinOperator,
+  defaultJoinOperator,
   columns,
+  nested = false,
   onFilterUpdate,
   onFilterRemove,
 }: DataTableFilterItemProps<TData>) {
@@ -429,46 +507,45 @@ function DataTableFilterItem<TData>({
     ],
   );
 
-  return (
-    <SortableItem value={filter.filterId} asChild>
-      <div
-        role="listitem"
-        id={filterItemId}
-        tabIndex={-1}
-        className="flex items-center gap-2"
-        onKeyDown={onItemKeyDown}
-      >
+  const row = (
+    <div
+      role="listitem"
+      id={filterItemId}
+      tabIndex={-1}
+      className={cn("flex items-center gap-2", nested && "pl-1")}
+      onKeyDown={onItemKeyDown}
+    >
         <div className="min-w-[72px] text-center">
           {index === 0 ? (
             <span className="text-muted-foreground text-sm">Where</span>
-          ) : index === 1 ? (
+          ) : (
             <Select
-              value={joinOperator}
-              onValueChange={(value: JoinOperator) => setJoinOperator(value)}
+              value={filter.joinOperator ?? defaultJoinOperator}
+              onValueChange={(value: JoinOperator) =>
+                onFilterUpdate(filter.filterId, { joinOperator: value })
+              }
             >
               <SelectTrigger
                 aria-label="Select join operator"
                 aria-controls={joinOperatorListboxId}
                 className="h-8 rounded lowercase [&[data-size]]:h-8"
               >
-                <SelectValue placeholder={joinOperator} />
+                <SelectValue
+                  placeholder={filter.joinOperator ?? defaultJoinOperator}
+                />
               </SelectTrigger>
               <SelectContent
                 id={joinOperatorListboxId}
                 position="popper"
                 className="min-w-(--radix-select-trigger-width) lowercase"
               >
-                {dataTableConfig.joinOperators.map((joinOperator) => (
-                  <SelectItem key={joinOperator} value={joinOperator}>
-                    {joinOperator}
+                {dataTableConfig.joinOperators.map((operator) => (
+                  <SelectItem key={operator} value={operator}>
+                    {operator}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <span className="text-muted-foreground text-sm">
-              {joinOperator}
-            </span>
           )}
         </div>
         <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector}>
@@ -587,12 +664,23 @@ function DataTableFilterItem<TData>({
         >
           <Trash2 />
         </Button>
-        <SortableItemHandle asChild>
-          <Button variant="outline" size="icon" className="size-8 rounded">
-            <GripVertical />
-          </Button>
-        </SortableItemHandle>
+        {!nested ? (
+          <SortableItemHandle asChild>
+            <Button variant="outline" size="icon" className="size-8 rounded">
+              <GripVertical />
+            </Button>
+          </SortableItemHandle>
+        ) : null}
       </div>
+  );
+
+  if (nested) {
+    return row;
+  }
+
+  return (
+    <SortableItem value={filter.filterId} asChild>
+      {row}
     </SortableItem>
   );
 }

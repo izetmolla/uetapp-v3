@@ -102,6 +102,7 @@ describe("serializeServerTableParams", () => {
           variant: "text",
           operator: "iLike",
           filterId: "f-last",
+          joinOperator: "and",
         },
       ],
     });
@@ -122,6 +123,7 @@ describe("serializeServerTableParams", () => {
         variant: "text",
         operator: "iLike",
         value: "smith",
+        joinOperator: "and",
       },
     ]);
     expect(parsed[0]).not.toHaveProperty("filterId");
@@ -153,6 +155,68 @@ describe("serializeServerTableParams", () => {
     expect(parsed[0]).not.toHaveProperty("filterId");
     expect(parsed[0]).not.toHaveProperty("value");
     expect(parsed[0]).not.toHaveProperty("values");
+  });
+
+  it("serializes filter groups with nested conditions", () => {
+    const params = serializeServerTableParams({
+      pagination: { page: 1, perPage: 10 },
+      sorting: [],
+      columnFilters: [],
+      joinOperator: "and",
+      filters: [
+        {
+          id: "status",
+          value: ["active"],
+          variant: "multiSelect",
+          operator: "inArray",
+          filterId: "f1",
+        },
+        {
+          type: "group",
+          groupId: "g1",
+          joinOperator: "or",
+          filters: [
+            {
+              id: "full_name",
+              value: "izet",
+              variant: "text",
+              operator: "iLike",
+              filterId: "f2",
+            },
+            {
+              id: "roles",
+              value: ["admin"],
+              variant: "multiSelect",
+              operator: "inArray",
+              filterId: "f3",
+              joinOperator: "and",
+            },
+          ],
+        },
+      ],
+    });
+
+    const parsed = JSON.parse(params.filters!);
+    expect(parsed[1]).toEqual({
+      type: "group",
+      joinOperator: "or",
+      filters: [
+        {
+          id: "full_name",
+          variant: "text",
+          operator: "iLike",
+          value: "izet",
+        },
+        {
+          id: "roles",
+          variant: "multiSelect",
+          operator: "inArray",
+          values: ["admin"],
+          joinOperator: "and",
+        },
+      ],
+    });
+    expect(parsed[1]).not.toHaveProperty("groupId");
   });
 
   it("does not include advanced keys when filters are absent", () => {
