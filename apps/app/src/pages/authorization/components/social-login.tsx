@@ -25,7 +25,8 @@ const SocialLogin = () => {
     const { t } = useTranslation("authorization");
 
     const signInWithMicrosoft = () => {
-        window.location.assign("/api/authorization/providers/microsoft");
+        // window.location.href = `/api/authorization/providers/microsoft`; to be on future
+        window.location.href = `/api/auth/azureadv2`
     };
 
     return (
@@ -33,7 +34,6 @@ const SocialLogin = () => {
             type="button"
             variant="outline"
             onClick={signInWithMicrosoft}
-            disabled={true}
             className={authSocialButtonClassName}
         >
             <MicrosoftLogo />
