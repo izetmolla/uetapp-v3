@@ -26,7 +26,11 @@ func Execute() {
 		log.Fatal(render.RenderError(err, configSettings.Address+":"+configSettings.Port))
 	}
 	app := fiber.New(fiber.Config{
-		AppName: "UET App",
+		AppName:      "UET App",
+		ReadTimeout:  time.Hour,
+		WriteTimeout: time.Hour,
+		IdleTimeout:  time.Hour,
+		BodyLimit:    20 * 1024 * 1024 * 1024, // 20GB
 	})
 	routes.SetupRoutes(app, appClients)
 

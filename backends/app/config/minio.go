@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -25,6 +26,90 @@ type MinioClientConfig struct {
 
 func (app *AppClients) Minio(ctx context.Context, id int64) (*minio.Client, error) {
 	return app.getMinioClient(ctx, id)
+}
+
+func (m *AppClients) UploadFileFromBytes(ctx context.Context, id int64, bucketName, objectName string, data []byte, contentType string) error {
+	minioClient, err := m.getMinioClient(ctx, id)
+	if err != nil {
+		return err
+	}
+	// Check if bucket exists, create if it doesn't
+	exists, err := minioClient.BucketExists(ctx, bucketName)
+	if err != nil {
+		return fmt.Errorf("error checking bucket existence: %w", err)
+	}
+	if !exists {
+		err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		if err != nil {
+			return fmt.Errorf("error creating bucket: %w", err)
+		}
+	}
+
+	// Create folder structure if it doesn't exist
+	err = m.createFolderStructure(ctx, id, bucketName, objectName)
+	if err != nil {
+		return fmt.Errorf("error creating folder structure: %w", err)
+	}
+
+	// Upload the byte data
+	_, err = minioClient.PutObject(ctx, bucketName, objectName, bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{
+		ContentType: contentType,
+	})
+	if err != nil {
+		return fmt.Errorf("error uploading file from bytes: %w", err)
+	}
+
+	return nil
+}
+
+// createFolderStructure creates the folder structure for the given object path.
+//
+// This is a helper function used internally by UploadFile to ensure that
+// the necessary folder structure exists before uploading a file. In MinIO,
+// folders are represented as empty objects with trailing slashes and
+// the content type "application/x-directory".
+//
+// Parameters:
+//   - ctx: Context for the operation
+//   - bucketName: The name of the MinIO bucket
+//   - objectName: The full path/name of the object (e.g., "documents/images/photo.jpg")
+//
+// The function extracts the folder path from the object name and creates
+// the necessary folder structure. For example, if objectName is
+// "documents/images/photo.jpg", it will create the folder "documents/images/"
+// if it doesn't already exist.
+//
+// Returns an error if the folder creation fails.
+func (m *AppClients) createFolderStructure(ctx context.Context, id int64, bucketName, objectName string) error {
+	minioClient, err := m.getMinioClient(ctx, id)
+	if err != nil {
+		return err
+	}
+	// Extract folder path from object name
+	lastSlash := strings.LastIndex(objectName, "/")
+	if lastSlash == -1 {
+		// No folders needed, file is in root
+		return nil
+	}
+
+	folderPath := objectName[:lastSlash+1] // Include the trailing slash
+
+	// Check if folder already exists
+	_, err = minioClient.StatObject(ctx, bucketName, folderPath, minio.StatObjectOptions{})
+	if err == nil {
+		// Folder already exists
+		return nil
+	}
+
+	// Create folder by uploading an empty object with trailing slash
+	_, err = minioClient.PutObject(ctx, bucketName, folderPath, strings.NewReader(""), 0, minio.PutObjectOptions{
+		ContentType: "application/x-directory",
+	})
+	if err != nil {
+		return fmt.Errorf("error creating folder %s: %w", folderPath, err)
+	}
+
+	return nil
 }
 
 func ParseMinioURL(raw string) (*MinioClientConfig, error) {
@@ -108,6 +193,7 @@ func (app *AppClients) getMinioClient(ctx context.Context, id int64) (*minio.Cli
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("cfg", cfg)
 	minioClient, err := InitializeMinioFromConfig(cfg)
 	if err != nil {
 		return nil, err
