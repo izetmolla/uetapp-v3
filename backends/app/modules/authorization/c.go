@@ -24,6 +24,7 @@ func SetupRoutes(app fiber.Router, api fiber.Router, appClients *config.AppClien
 	authApi := api.Group("/authorization")
 	authApi.Post("/sign-in", controller.SignInApi)
 	authApi.Post("/check-email", controller.SignInCheckEmail)
+	authApi.Post("/check-trusted-device", controller.CheckTrustedDevice)
 	// The sign-out endpoint is intentionally unauthenticated: a client
 	// with a stale or already-revoked session should still be able to
 	// drop the cookie and clear server-side state without bouncing
@@ -82,6 +83,11 @@ func (cc *Controller) SignInApi(c fiber.Ctx) error {
 	}
 	auth.SetCookie(c, res.SessionID)
 	return c.JSON(fiber.Map{
+		// "confirmation": fiber.Map{
+		// 	"type":    "email",
+		// 	"email":   "user@example.com",
+		// 	"message": "Enter the 6-digit code we sent to user@example.com",
+		// },
 		"user":       res.User,
 		"tokens":     res.Tokens,
 		"session_id": res.SessionID,
@@ -110,6 +116,28 @@ func (c *Controller) SignInCheckEmail(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(fiber.Map{
 		"user": res.User,
+	})
+}
+
+func (cc *Controller) CheckTrustedDevice(c fiber.Ctx) error {
+	var req struct {
+		SessionID string `json:"session_id"`
+	}
+	if err := c.Bind().JSON(&req); err != nil {
+		return cc.app.Api(c, cc.app.Render().WithError(errors.New("Invalid request")))
+	}
+	if c == nil || cc.app == nil || cc.app.Auth() == nil {
+		return cc.app.Api(c, cc.app.Render().WithError(errors.New("Authorization not initialized")))
+	}
+	auth := cc.app.Auth()
+	session, err := auth.GetSession(c.Context(), req.SessionID)
+	if err != nil {
+		return cc.app.Api(c, cc.app.Render().WithError(err))
+	}
+
+	auth.SetCookie(c, session.ID)
+	return c.JSON(fiber.Map{
+		"trusted": session.ID != "",
 	})
 }
 

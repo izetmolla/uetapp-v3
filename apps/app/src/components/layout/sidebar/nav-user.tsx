@@ -44,8 +44,7 @@ import useAuthorizationStore, {
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
 
 export function NavUser() {
-    const { user, sessions, signOut, signOutAll, setCurrentSession } =
-        useAuthorizationStore();
+    const { user, signOut, setCurrentSession } = useAuthorizationStore();
     const authState = useAuthorizationStore();
     const { theme, setTheme } = useTheme();
     const fullName = `${user?.first_name} ${user?.last_name}`;
@@ -61,12 +60,6 @@ export function NavUser() {
     const handleSwitchAccount = () => {
         const returnTo = `${window.location.pathname}${window.location.search}`;
         window.location.replace(`/sign-in?redirectUrl=${encodeURIComponent(returnTo)}`);
-    };
-
-    const handleSignOutAll = () => {
-        signOutAll();
-        void useSignOutApi();
-        window.location.replace("/sign-in");
     };
 
     return (
@@ -198,17 +191,8 @@ export function NavUser() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleSwitchAccount} className="cursor-pointer text-xs">
                             <UserRound className="size-3.5 opacity-70" />
-                            Add account
+                            Switch account
                         </DropdownMenuItem>
-                        {sessions.length > 1 ? (
-                            <DropdownMenuItem
-                                onClick={handleSignOutAll}
-                                className="cursor-pointer text-xs text-destructive focus:text-destructive"
-                            >
-                                <LogOut className="size-3.5 opacity-70" />
-                                Sign out of all accounts
-                            </DropdownMenuItem>
-                        ) : null}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>

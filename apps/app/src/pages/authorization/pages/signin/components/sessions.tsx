@@ -1,5 +1,6 @@
 import type { AuthSession } from "@workspace/flowtrove/store/authorization"
 import useAuthorizationStore, {
+    sessionCanResume,
     sessionHasTokens,
 } from "@workspace/flowtrove/store/authorization"
 import type { User } from "@workspace/flowtrove/types"
@@ -11,13 +12,14 @@ import {
     DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 import { cn, generateAvatarFallback } from "@workspace/ui/lib/utils"
-import { MoreVertical, Plus } from "lucide-react"
+import { MoreVertical, Plus, LoaderCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 export interface SessionsProps {
     sessions: AuthSession[]
     onSelectSession: (session: AuthSession) => void
     onUseAnotherAccount: () => void
+    resumingSessionId?: string | null
 }
 
 function isPresent(value?: string | null): value is string {
@@ -51,6 +53,7 @@ export default function Sessions({
     sessions,
     onSelectSession,
     onUseAnotherAccount,
+    resumingSessionId = null,
 }: SessionsProps) {
     const { t } = useTranslation("authorization")
     const removeSession = useAuthorizationStore((state) => state.removeSession)
@@ -73,6 +76,7 @@ export default function Sessions({
                 {sessions.map((session) => {
                     const name = sessionDisplayName(session)
                     const signedIn = sessionHasTokens(session)
+                    const trusted = sessionCanResume(session)
                     const avatarUrl = userAvatarUrl(session.user)
                     const emailLabel = isPresent(session.user.email)
                         ? session.user.email.trim()
@@ -85,7 +89,8 @@ export default function Sessions({
                         >
                             <button
                                 type="button"
-                                className="flex min-w-0 flex-1 items-center gap-3 text-left transition-opacity hover:opacity-80"
+                                className="flex min-w-0 flex-1 items-center gap-3 text-left transition-opacity hover:opacity-80 disabled:opacity-60"
+                                disabled={resumingSessionId !== null}
                                 onClick={() => onSelectSession(session)}
                             >
                                 <Avatar className="size-10 shrink-0 rounded-full bg-muted">
@@ -105,7 +110,11 @@ export default function Sessions({
                                             {emailLabel}
                                         </p>
                                     ) : null}
-                                    {signedIn ? (
+                                    {trusted ? (
+                                        <p className="text-xs text-muted-foreground/80">
+                                            {t("Trusted device")}
+                                        </p>
+                                    ) : signedIn ? (
                                         <p className="text-xs text-muted-foreground/80">
                                             {t("Signed in")}
                                         </p>
@@ -113,6 +122,9 @@ export default function Sessions({
                                 </div>
                             </button>
 
+                            {resumingSessionId === session.id ? (
+                                <LoaderCircle className="size-4 shrink-0 animate-spin text-muted-foreground" />
+                            ) : (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <button
@@ -137,6 +149,7 @@ export default function Sessions({
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
+                            )}
                         </div>
                     )
                 })}

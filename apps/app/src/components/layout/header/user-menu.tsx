@@ -35,8 +35,7 @@ import useAuthorizationStore, {
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
 
 export default function UserMenu() {
-  const { user, sessions, signOut, signOutAll, setCurrentSession } =
-    useAuthorizationStore()
+  const { user, signOut, setCurrentSession } = useAuthorizationStore()
   const authState = useAuthorizationStore()
   const { theme, setTheme } = useTheme()
   const fullName = `${user?.first_name} ${user?.last_name}`
@@ -51,12 +50,6 @@ export default function UserMenu() {
   const handleSwitchAccount = () => {
     const returnTo = `${window.location.pathname}${window.location.search}`
     window.location.replace(`/sign-in?redirectUrl=${encodeURIComponent(returnTo)}`)
-  }
-
-  const handleSignOutAll = () => {
-    signOutAll()
-    void useSignOutApi()
-    window.location.replace("/sign-in")
   }
 
   return (
@@ -165,17 +158,8 @@ export default function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSwitchAccount} className="cursor-pointer text-xs">
           <UserRound className="size-3.5 opacity-70" />
-          Add account
+          Switch account
         </DropdownMenuItem>
-        {sessions.length > 1 ? (
-          <DropdownMenuItem
-            onClick={handleSignOutAll}
-            className="cursor-pointer text-xs text-destructive focus:text-destructive"
-          >
-            <LogOut className="size-3.5 opacity-70" />
-            Sign out of all accounts
-          </DropdownMenuItem>
-        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

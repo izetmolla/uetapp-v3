@@ -20,4 +20,14 @@ export interface AuthSession {
   id: string
   user: User
   tokens?: Tokens
+  /** When true, resume on this device without a password until sign-out. */
+  trusted?: boolean
+}
+
+export interface Confirmation {
+  message?: string
+  type: "email" | "phone" | "device"
+  email?: string
+  phone?: string
+  device?: string
 }

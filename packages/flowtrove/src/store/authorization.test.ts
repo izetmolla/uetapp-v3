@@ -72,9 +72,21 @@ describe("authorization store (multi-session)", () => {
     expect(state.sessions).toHaveLength(1)
     expect(state.sessions[0]?.user.id).toBe("user-a")
     expect(state.sessions[0]?.tokens).toBeUndefined()
+    expect(state.sessions[0]?.trusted).toBe(false)
     expect(state.current_session).toBe("")
     expect(state.isSignedIn).toBe(false)
     expect(state.user).toBeUndefined()
+  })
+
+  it("signOut clears trusted device but keeps session in the list", () => {
+    useAuthorizationStore.getState().signInUser({ user: userA, tokens: tokensA })
+    useAuthorizationStore.getState().setSessionTrusted("user-a", true)
+    useAuthorizationStore.getState().signOut()
+
+    const session = useAuthorizationStore.getState().sessions[0]
+    expect(session?.user.email).toBe("a@test.com")
+    expect(session?.trusted).toBe(false)
+    expect(session?.tokens).toBeUndefined()
   })
 
   it("signOut does not remove other signed-in sessions or auto-switch", () => {

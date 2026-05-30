@@ -27,14 +27,15 @@ export interface AuthorizationState {
   /** Clears every local session and calls the backend sign-out endpoint. */
   signOutAll: () => void
   /** Removes one session by id; updates `current_session` when needed. */
-  removeSession: (sessionId: string) => void
-  setCurrentSession: (sessionId: string) => void
+  removeSession: (session_id: string) => void
+  setCurrentSession: (session_id: string) => void
   setAccessToken: (token: string) => void
+  setSessionTrusted: (session_id: string, trusted: boolean) => void
   signInUser: (props: {
     user?: User
     tokens?: Tokens
     /** Defaults to `user.id`. */
-    sessionId?: string
+    session_id?: string
   }) => void
   setRedirectUrl: (url: string) => void
   setAccessDenied: (accessDenied: boolean) => void
@@ -45,6 +46,15 @@ export function sessionHasTokens(session: AuthSession): boolean {
   return Boolean(
     session.tokens?.access_token || session.tokens?.refresh_token,
   )
+}
+
+export function sessionIsTrusted(session: AuthSession | undefined): boolean {
+  return Boolean(session?.trusted)
+}
+
+/** Trusted session with valid tokens can resume without re-entering a password. */
+export function sessionCanResume(session: AuthSession): boolean {
+  return sessionIsTrusted(session) && sessionHasTokens(session)
 }
 
 export function getActiveSession(
@@ -83,6 +93,15 @@ function sessionIdForUser(user?: User): string {
     return crypto.randomUUID()
   }
   return `session-${Date.now()}`
+}
+
+/** Drops access/refresh tokens and trust; keeps the account in the sessions list. */
+function signedOutSession(session: AuthSession): AuthSession {
+  return {
+    id: session.id,
+    user: session.user,
+    trusted: false,
+  }
 }
 
 /** Migrates legacy persisted blobs (flat user/tokens or `sessions: string[]`). */
@@ -164,19 +183,19 @@ const authorizationStore: StateCreator<AuthorizationState> = (set, get) => ({
   setAccessDenied: (accessDenied) => set({ accessDenied }),
   clearAccessDenied: () => set({ accessDenied: false }),
   signIn: (isSignedIn) => set({ isSignedIn }),
-  setCurrentSession: (sessionId) => {
+  setCurrentSession: (session_id) => {
     const { sessions } = get()
-    const session = sessions.find((s) => s.id === sessionId)
+    const session = sessions.find((s) => s.id === session_id)
     if (!session || !sessionHasTokens(session)) return
     set({
-      current_session: sessionId,
+      current_session: session_id,
       accessDenied: false,
-      ...syncActiveSessionFields(sessions, sessionId),
+      ...syncActiveSessionFields(sessions, session_id),
     })
   },
-  removeSession: (sessionId) => {
+  removeSession: (session_id) => {
     const { sessions, current_session } = get()
-    const remaining = sessions.filter((s) => s.id !== sessionId)
+    const remaining = sessions.filter((s) => s.id !== session_id)
     if (remaining.length === 0) {
       set({
         sessions: [],
@@ -189,7 +208,7 @@ const authorizationStore: StateCreator<AuthorizationState> = (set, get) => ({
       return
     }
     const nextCurrent =
-      sessionId === current_session ? remaining[0]!.id : current_session
+    session_id === current_session ? remaining[0]!.id : current_session
     set({
       sessions: remaining,
       current_session: nextCurrent,
@@ -200,7 +219,7 @@ const authorizationStore: StateCreator<AuthorizationState> = (set, get) => ({
   signOutAll: () => {
     void callSignOutEndpoint()
     set((state) => ({
-      sessions: state.sessions.map((s) => ({ ...s, tokens: undefined })),
+      sessions: state.sessions.map(signedOutSession),
       current_session: "",
       user: undefined,
       tokens: undefined,
@@ -212,7 +231,7 @@ const authorizationStore: StateCreator<AuthorizationState> = (set, get) => ({
     const { current_session, sessions } = get()
     void callSignOutEndpoint()
     const sessionsNext = sessions.map((s) =>
-      s.id === current_session ? { ...s, tokens: undefined } : s,
+      s.id === current_session ? signedOutSession(s) : s,
     )
     set({
       sessions: sessionsNext,
@@ -223,6 +242,12 @@ const authorizationStore: StateCreator<AuthorizationState> = (set, get) => ({
       accessDenied: false,
     })
   },
+  setSessionTrusted: (sessionId, trusted) =>
+    set((state) => ({
+      sessions: state.sessions.map((s) =>
+        s.id === sessionId ? { ...s, trusted } : s,
+      ),
+    })),
   setAccessToken: (access_token) =>
     set((state) => {
       const tokens: Tokens = {
@@ -235,14 +260,19 @@ const authorizationStore: StateCreator<AuthorizationState> = (set, get) => ({
       return { tokens, sessions }
     }),
   signInUser: (props) => {
-    const { user, tokens, sessionId } = props
+    const { user, tokens, session_id } = props
     if (!tokens) return
 
     set((state) => {
       if (user) {
-        const id = sessionId ?? sessionIdForUser(user)
-        const without = state.sessions.filter((s) => s.id !== id)
-        const sessions: AuthSession[] = [...without, { id, user, tokens }]
+        const id = session_id ?? sessionIdForUser(user)
+        const without = state.sessions.filter(
+          (s) => s.id !== id && (!session_id || s.user.id !== user.id),
+        )
+        const sessions: AuthSession[] = [
+          ...without,
+          { id, user, tokens, trusted: false },
+        ]
         return {
           sessions,
           current_session: id,
@@ -252,7 +282,7 @@ const authorizationStore: StateCreator<AuthorizationState> = (set, get) => ({
       }
 
       // Tokens-only (reauthorize / tests): update the active session when possible.
-      const id = sessionId ?? state.current_session
+      const id = session_id ?? state.current_session
       if (id && state.sessions.some((s) => s.id === id)) {
         const sessions = state.sessions.map((s) =>
           s.id === id ? { ...s, tokens } : s,

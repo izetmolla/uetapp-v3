@@ -3,7 +3,7 @@ import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
 import SocialLogin from "../../components/social-login";
 import { useMutation } from "@tanstack/react-query";
-import { signIn } from "./api";
+import { checkTrustedDevice, signIn } from "./api";
 import { toast } from "@workspace/ui/components/sonner";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
 import { useForm } from "react-hook-form";
@@ -12,13 +12,19 @@ import { signInSchema, type SignInSchema } from "./api/validations";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import useAuthorizationStore from "@workspace/flowtrove/store/authorization";
+import useAuthorizationStore, {
+    sessionCanResume,
+} from "@workspace/flowtrove/store/authorization";
 import type { AuthSession } from "@workspace/flowtrove/store/authorization";
 import PasswordInput from "@workspace/flowtrove/components/password";
 import Links from "../../components/links";
 import { useTranslation } from "react-i18next";
 import LanguageSwitch from "@workspace/flowtrove/components/language-switch";
 import Sessions, { userLoginId } from "./components/sessions";
+import TrustDevice from "./components/trust-device";
+import ConfirmOtp from "./components/confirm-otp";
+import type { SignInResponseType } from "./api";
+import type { Confirmation } from "@workspace/flowtrove/types";
 import {
     authCardClassName,
     authInputClassName,
@@ -32,7 +38,7 @@ import {
 /** When true, email and password are shown together for direct sign-in. When false, email is checked first. */
 const show2fields = true;
 
-type SignInView = "picker" | "form";
+type SignInView = "picker" | "form" | "trust" | "otp";
 
 const FlowTroveLogo = ({ className }: { className?: string }) => {
     const navigate = useNavigate();
@@ -55,9 +61,14 @@ const SignIn = () => {
     const redirectUrl = useMemo(() => searchParams.get("redirectUrl"), [searchParams]);
     const navigate = useNavigate();
 
-    const { signInUser, sessions } = useAuthorizationStore()
+    const { signInUser, sessions, setCurrentSession, setSessionTrusted } =
+        useAuthorizationStore()
     const [view, setView] = useState<SignInView>(() => (sessions.length > 0 ? "picker" : "form"));
     const [emailDisabled, setEmailDisabled] = useState(false);
+    const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+    const [pendingConfirmation, setPendingConfirmation] = useState<Confirmation | null>(null);
+    const [otpError, setOtpError] = useState<string | undefined>();
+    const [isCompletingSignIn, setIsCompletingSignIn] = useState(false);
 
     const form = useForm<SignInSchema>({
         resolver: zodResolver(signInSchema),
@@ -100,7 +111,49 @@ const SignIn = () => {
         setShowPassword(show2fields);
     };
 
-    const handleSelectSession = (session: AuthSession) => {
+    const completeRedirect = () => {
+        setIsCompletingSignIn(true);
+        if (redirectUrl) {
+            window.location.replace(redirectUrl)
+        } else {
+            navigate("/", { replace: true })
+        }
+    };
+
+    const completeSignInAfterAuth = (data: SignInResponseType) => {
+        const session_id = data.session_id
+        signInUser({
+            user: data.user,
+            tokens: data.tokens,
+            session_id,
+        })
+        if (session_id) {
+            const existing = useAuthorizationStore
+                .getState()
+                .sessions.find((s) => s.id === session_id)
+            if (existing?.trusted) {
+                completeRedirect()
+            } else {
+                setPendingSessionId(session_id)
+                setView("trust")
+            }
+        } else {
+            completeRedirect()
+        }
+    }
+
+    const handleSignInResponse = (data: SignInResponseType) => {
+        if (data.confirmation) {
+            setPendingConfirmation(data.confirmation)
+            setPendingSessionId(data.session_id ?? null)
+            setOtpError(undefined)
+            setView("otp")
+            return
+        }
+        completeSignInAfterAuth(data)
+    }
+
+    const openPasswordForm = (session: AuthSession) => {
         const loginId = userLoginId(session.user)
         form.setValue("email", loginId);
         form.setValue("password", "");
@@ -112,6 +165,66 @@ const SignIn = () => {
         setView("form");
     };
 
+    const resumeTrustedSession = useMutation({
+        mutationFn: (session_id: string) => checkTrustedDevice(session_id),
+        onSuccess: (data, session_id) => {
+            if (data?.error) {
+                useAuthorizationStore.setState({
+                    current_session: "",
+                    user: undefined,
+                    tokens: undefined,
+                    isSignedIn: false,
+                });
+                toast.error(data.error.message ?? t("Session expired. Please sign in again."));
+                const session = useAuthorizationStore
+                    .getState()
+                    .sessions.find((s) => s.id === session_id);
+                if (session) openPasswordForm(session);
+                return;
+            }
+
+            if (data.confirmation) {
+                handleSignInResponse(data);
+                return;
+            }
+
+            const resolvedSessionId = data.session_id ?? session_id;
+            if (data.user && data.tokens) {
+                signInUser({
+                    user: data.user,
+                    tokens: data.tokens,
+                    session_id: resolvedSessionId,
+                });
+            } else {
+                setCurrentSession(resolvedSessionId);
+            }
+            completeRedirect();
+        },
+        onError: (_error, session_id) => {
+            useAuthorizationStore.setState({
+                current_session: "",
+                user: undefined,
+                tokens: undefined,
+                isSignedIn: false,
+            });
+            toast.error(t("Session expired. Please sign in again."));
+            const session = useAuthorizationStore
+                .getState()
+                .sessions.find((s) => s.id === session_id);
+            if (session) openPasswordForm(session);
+        },
+    });
+
+    const handleSelectSession = (session: AuthSession) => {
+        if (sessionCanResume(session)) {
+            setCurrentSession(session.id);
+            resumeTrustedSession.mutate(session.id);
+            return;
+        }
+
+        openPasswordForm(session);
+    };
+
     const handleUseAnotherAccount = () => {
         resetFormState();
         setView("form");
@@ -119,7 +232,36 @@ const SignIn = () => {
 
     const handleBackToPicker = () => {
         resetFormState();
+        setPendingSessionId(null);
+        setPendingConfirmation(null);
+        setOtpError(undefined);
         setView("picker");
+    };
+
+    const handleBackFromOtp = () => {
+        setPendingConfirmation(null);
+        setPendingSessionId(null);
+        setOtpError(undefined);
+        setView(sessions.length > 0 ? "picker" : "form");
+    };
+
+    const handleOtpConfirm = (_code: string) => {
+        // OTP verify API to be wired here
+    };
+
+    const handleOtpResend = () => {
+        // OTP resend API to be wired here
+    };
+
+    const handleTrustDevice = () => {
+        if (pendingSessionId) {
+            setSessionTrusted(pendingSessionId, true);
+        }
+        completeRedirect();
+    };
+
+    const handleSkipTrustDevice = () => {
+        completeRedirect();
     };
 
     const mutation = useMutation({
@@ -139,12 +281,7 @@ const SignIn = () => {
                     form.setValue("password", "");
                     form.setValue("checkEmail", false);
                 } else {
-                    signInUser({ user: data.user, tokens: data.tokens })
-                    if (redirectUrl) {
-                        window.location.replace(redirectUrl ?? "/")
-                    } else {
-                        navigate("/", { replace: true })
-                    }
+                    handleSignInResponse(data)
                 }
             }
         },
@@ -181,7 +318,9 @@ const SignIn = () => {
         })
     }
 
-    const showPicker = view === "picker" && sessions.length > 0;
+    const showOtp = view === "otp" && pendingConfirmation !== null;
+    const showPicker = view === "picker" && sessions.length > 0 && !isCompletingSignIn && !showOtp;
+    const showTrust = (view === "trust" && pendingSessionId !== null) || (isCompletingSignIn && !showOtp);
 
     return (
         <Form {...form}>
@@ -195,11 +334,30 @@ const SignIn = () => {
                                     <LanguageSwitch variant="minimal" />
                                 </div>
 
-                                {showPicker ? (
+                                {showOtp ? (
+                                    <ConfirmOtp
+                                        confirmation={pendingConfirmation}
+                                        onConfirm={handleOtpConfirm}
+                                        onResend={handleOtpResend}
+                                        onCancel={handleBackFromOtp}
+                                        error={otpError}
+                                    />
+                                ) : showTrust ? (
+                                    <TrustDevice
+                                        onTrust={handleTrustDevice}
+                                        onSkip={handleSkipTrustDevice}
+                                        isCompleting={isCompletingSignIn}
+                                    />
+                                ) : showPicker ? (
                                     <Sessions
                                         sessions={sessions}
                                         onSelectSession={handleSelectSession}
                                         onUseAnotherAccount={handleUseAnotherAccount}
+                                        resumingSessionId={
+                                            resumeTrustedSession.isPending
+                                                ? resumeTrustedSession.variables
+                                                : null
+                                        }
                                     />
                                 ) : (
                                     <>
