@@ -22,26 +22,40 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { ReactSelect } from "@workspace/ui/components/reactselect";
 import { useMutation, type QueryKey } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getApiErrorMessageFromBody, isApiErrorBody, queryClient } from "@workspace/flowtrove/lib/network";
 import { useTranslation } from "react-i18next";
 import { useResourcesListStore } from "../../store";
-import type { Resource } from "../../api";
+import type { Resource, ResourceDriverOption } from "../../api";
 import { createResource, updateResource } from "../../api";
 
 const formSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(1, "Name is required"),
     description: z.string().optional(),
+    driver: z.string().min(1, "Driver is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+type DriverSelectOption = { value: string; label: string };
 
 interface ResourceFormDialogProps {
     queryKey: QueryKey;
     record?: Resource | null;
     onClose?: () => void;
+    drivers?: ResourceDriverOption[];
+}
+
+function normalizeDriverOptions(drivers: ResourceDriverOption[] | undefined) {
+    return (drivers ?? [])
+        .map((opt) => ({
+            value: opt.value ?? opt.id ?? "",
+            label: opt.label,
+        }))
+        .filter((opt) => opt.value);
 }
 
 function toFormValues(record?: Resource | null): FormValues {
@@ -49,13 +63,15 @@ function toFormValues(record?: Resource | null): FormValues {
         id: record?.id ?? "",
         name: record?.name ?? "",
         description: record?.description ?? "",
+        driver: record?.driver ?? "",
     };
 }
 
-const ResourceFormDialog: FC<ResourceFormDialogProps> = ({ record, queryKey, onClose }) => {
+const ResourceFormDialog: FC<ResourceFormDialogProps> = ({ record, queryKey, onClose, drivers }) => {
     const { t } = useTranslation("admin");
     const { isFormDialogOpen, setIsFormDialogOpen } = useResourcesListStore();
     const isEditMode = Boolean(record?.id);
+    const driverOptions = useMemo(() => normalizeDriverOptions(drivers), [drivers]);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -78,6 +94,7 @@ const ResourceFormDialog: FC<ResourceFormDialogProps> = ({ record, queryKey, onC
             const payload = {
                 name: data.name,
                 description: data.description ?? "",
+                driver: data.driver,
             };
             return isEditMode && data.id
                 ? updateResource(data.id, payload)
@@ -135,6 +152,29 @@ const ResourceFormDialog: FC<ResourceFormDialogProps> = ({ record, queryKey, onC
                                         <FormLabel>{t("Name")}</FormLabel>
                                         <FormControl>
                                             <Input {...field} placeholder={t("Resource name")} autoComplete="off" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="driver"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>{t("Driver")}</FormLabel>
+                                        <FormControl>
+                                            <ReactSelect<DriverSelectOption>
+                                                className="w-full"
+                                                options={driverOptions}
+                                                placeholder={t("Select a driver")}
+                                                value={field.value || null}
+                                                onValueChange={(value) => field.onChange(value ?? "")}
+                                                onBlur={field.onBlur}
+                                                isDisabled={driverOptions.length === 0}
+                                                invalid={!!form.formState.errors.driver}
+                                                isClearable
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

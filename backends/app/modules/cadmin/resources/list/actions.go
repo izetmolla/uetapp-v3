@@ -13,6 +13,7 @@ import (
 type resourcePayload struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Driver      string `json:"driver"`
 }
 
 type deleteResourcesRequest struct {
@@ -180,6 +181,7 @@ func (p resourcePayload) toModel() (*models.Resource, error) {
 	return &models.Resource{
 		Name:        name,
 		Description: strings.TrimSpace(p.Description),
+		Driver:      models.ResourceDriver(strings.TrimSpace(p.Driver)),
 	}, nil
 }
 

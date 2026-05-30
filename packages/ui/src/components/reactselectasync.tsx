@@ -11,6 +11,7 @@ import {
     extractValueFromChange,
     reactSelectClassNames,
     reactSelectStyles,
+    resolveReactSelectMenuPortalTarget,
     resolveValue,
     type GroupBase,
     type ReactSelectKeyApi,
@@ -59,6 +60,10 @@ export function ReactSelectAsync<
         defaultOptions,
         isMulti,
         getOptionValue,
+        menuPortalTarget,
+        menuPosition,
+        menuShouldBlockScroll,
+        captureMenuScroll,
         ...rest
     } = props as ReactSelectAsyncComponentProps<Option, IsMulti, Group> & {
         onValueChange?: (value: unknown) => void
@@ -89,6 +94,12 @@ export function ReactSelectAsync<
           }
         : providedOnChange
 
+    const resolvedMenuPortalTarget = resolveReactSelectMenuPortalTarget(
+        menuPortalTarget,
+    )
+    const resolvedMenuPosition =
+        menuPosition ?? (resolvedMenuPortalTarget ? "fixed" : undefined)
+
     return (
         <RawAsyncSelect<Option, IsMulti, Group>
             unstyled={unstyled}
@@ -117,6 +128,10 @@ export function ReactSelectAsync<
             value={resolvedValue}
             onChange={resolvedOnChange}
             {...rest}
+            menuPortalTarget={resolvedMenuPortalTarget}
+            menuPosition={resolvedMenuPosition}
+            menuShouldBlockScroll={menuShouldBlockScroll ?? false}
+            captureMenuScroll={captureMenuScroll ?? true}
         />
     )
 }

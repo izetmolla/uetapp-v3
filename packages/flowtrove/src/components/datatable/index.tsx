@@ -597,6 +597,7 @@ export { hasValidFilterVariant } from "./lib/filter-variants";
 export type {
   ServerTableState,
   ServerPaginationMeta,
+  ServerFetchResult,
   UseServerTableDataOptions,
   ExtendedColumnSort,
   ExtendedColumnFilter,

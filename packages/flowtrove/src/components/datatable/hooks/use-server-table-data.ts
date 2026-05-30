@@ -208,6 +208,8 @@ export function useServerTableData<TData>(
 
   return {
     data,
+    /** Full object returned by `fetch` (includes `data`/`pagination` plus any extra API fields). */
+    fetchResult: query.data,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     isError: query.isError,

@@ -11,6 +11,16 @@ type ResourceDriver string
 const (
 	ResourceDriverHTTPRequest ResourceDriver = "http-request"
 	ResourceDriverMinio       ResourceDriver = "minio"
+	ResourceDriverPostgreSQL  ResourceDriver = "postgresql"
+	ResourceDriverRedis       ResourceDriver = "redis"
+	ResourceDriverMongoDB     ResourceDriver = "mongodb"
+	ResourceDriverKafka       ResourceDriver = "kafka"
+	ResourceDriverMSSQL       ResourceDriver = "mssql"
+	ResourceDriverTwilio      ResourceDriver = "twilio"
+	ResourceDriverTelegram    ResourceDriver = "telegram"
+	ResourceDriverWhatsApp    ResourceDriver = "whatsapp"
+	ResourceDriverSMTP        ResourceDriver = "smtp"
+	ResourceDriverNATS        ResourceDriver = "nats"
 )
 
 // Server specific settings.

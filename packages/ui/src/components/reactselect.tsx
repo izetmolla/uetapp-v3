@@ -9,6 +9,7 @@ import RawSelect, {
     type DropdownIndicatorProps,
     type GroupBase,
     type LoadingIndicatorProps,
+    type MenuListProps,
     type MultiValueRemoveProps,
     type OptionProps,
     type Props as ReactSelectProps,
@@ -21,6 +22,29 @@ import { CheckIcon, ChevronDownIcon, Loader2Icon, XIcon } from "lucide-react"
 import { cn } from "@workspace/ui/lib/utils"
 
 type Size = "sm" | "default"
+
+/** z-index above Radix `Dialog` / `Sheet` (z-50) and aligned with `SelectContent` (z-110). */
+const REACT_SELECT_MENU_Z_INDEX = 110
+
+/**
+ * Portal target for the dropdown menu. Prefer the Radix dialog portal root so
+ * the menu stays outside `inert` / `aria-hidden` siblings while not being
+ * clipped by `overflow-hidden` on `[data-slot=dialog-content]`.
+ */
+export function resolveReactSelectMenuPortalTarget(
+    explicit?: HTMLElement | null,
+): HTMLElement | null {
+    if (typeof document === "undefined") return null
+    if (explicit !== undefined) return explicit
+
+    const dialogContent = document.querySelector("[data-slot=dialog-content]")
+    const portalParent = dialogContent?.parentElement
+    if (portalParent instanceof HTMLElement) {
+        return portalParent
+    }
+
+    return document.body
+}
 
 /**
  * Convenience type that extracts the primitive `value` field from an
@@ -155,17 +179,17 @@ export function reactSelectClassNames<
         // Mirrors `SelectContent`.
         menu: () =>
             cn(
-                "mt-1 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10",
+                "mt-1 overflow-visible rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10",
                 wrapOptionText
                     ? "max-w-[min(100vw-2rem,28rem)]"
                     : "min-w-36",
             ),
         menuList: () =>
             cn(
-                "group/rs-menulist max-h-64 overflow-y-auto p-1",
+                "group/rs-menulist max-h-64 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y p-1",
                 wrapOptionText && "max-h-72",
             ),
-        menuPortal: () => "z-[60] pointer-events-auto",
+        menuPortal: () => "z-[110] pointer-events-auto",
         group: () => "py-1",
         // Mirrors `SelectLabel`.
         groupHeading: () => "px-1.5 py-1 text-xs text-muted-foreground",
@@ -273,6 +297,26 @@ function createOptionComponent<
 
 const Option = createOptionComponent(false)
 
+function MenuList<
+    Option,
+    IsMulti extends boolean,
+    Group extends GroupBase<Option>,
+>(props: MenuListProps<Option, IsMulti, Group>) {
+    const { innerProps, ...rest } = props
+    return (
+        <defaultComponents.MenuList
+            {...rest}
+            innerProps={{
+                ...innerProps,
+                onWheel: (event) => {
+                    event.stopPropagation()
+                    innerProps?.onWheel?.(event)
+                },
+            }}
+        />
+    )
+}
+
 /**
  * Default `components` overrides used by the shadcn-styled wrappers.
  * Spread on top with the user-provided `components` to override per-call.
@@ -283,6 +327,7 @@ export const reactSelectComponents = {
     MultiValueRemove,
     LoadingIndicator,
     Option,
+    MenuList,
 }
 
 /**
@@ -345,11 +390,9 @@ export function composeComponents<
  * Default `styles` overrides for slots where react-select injects inline
  * Emotion styles that would otherwise beat our Tailwind classes.
  *
- * - `menuPortal`: always gets `position/top/left/width/zIndex:1` from
- *   react-select; bump zIndex above shadcn `Dialog`/`Sheet`/`Popover` (all
- *   `z-50`) and force `pointer-events: auto` so the menu stays clickable
- *   inside a Radix modal Dialog (which marks body siblings with `aria-hidden`/
- *   `inert`, blocking pointer events on portaled content).
+ * - `menuPortal`: z-index above Radix `Dialog`/`Sheet` and `pointer-events:
+ *   auto`. The menu is portaled via `resolveReactSelectMenuPortalTarget` into
+ *   the open dialog's portal root (not `document.body`) so it is not `inert`.
  * - `option`: always gets `display: block` from react-select even in
  *   `unstyled` mode, which would stack the children of our overridden Option
  *   component vertically. Force a horizontal flex row so the label and the
@@ -370,7 +413,15 @@ export function reactSelectStyles<
     return {
         menuPortal: (base) => ({
             ...base,
-            zIndex: 60,
+            zIndex: REACT_SELECT_MENU_Z_INDEX,
+            pointerEvents: "auto",
+        }),
+        menuList: (base) => ({
+            ...base,
+            maxHeight: wrapOptionText ? "18rem" : "16rem",
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
             pointerEvents: "auto",
         }),
         menu: (base) =>
@@ -544,18 +595,17 @@ export function ReactSelect<
         getOptionValue,
         menuPortalTarget,
         menuPosition,
+        menuShouldBlockScroll,
+        captureMenuScroll,
         ...rest
     } = props as ReactSelectComponentProps<Option, IsMulti, Group> & {
         onValueChange?: (value: unknown) => void
         onChange?: ReactSelectProps<Option, IsMulti, Group>["onChange"]
     }
 
-    const resolvedMenuPortalTarget =
-        menuPortalTarget !== undefined
-            ? menuPortalTarget
-            : typeof document !== "undefined"
-              ? document.body
-              : null
+    const resolvedMenuPortalTarget = resolveReactSelectMenuPortalTarget(
+        menuPortalTarget,
+    )
     const resolvedMenuPosition =
         menuPosition ?? (resolvedMenuPortalTarget ? "fixed" : undefined)
 
@@ -606,9 +656,11 @@ export function ReactSelect<
             getOptionValue={getOptionValue}
             value={resolvedValue}
             onChange={resolvedOnChange}
+            {...rest}
             menuPortalTarget={resolvedMenuPortalTarget}
             menuPosition={resolvedMenuPosition}
-            {...rest}
+            menuShouldBlockScroll={menuShouldBlockScroll ?? false}
+            captureMenuScroll={captureMenuScroll ?? true}
         />
     )
 }

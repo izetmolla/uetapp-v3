@@ -1,4 +1,4 @@
-import { DataTable, useBackendColumns } from "@workspace/flowtrove/components/datatable";
+import { DataTable, useBackendColumns, useServerTableData } from "@workspace/flowtrove/components/datatable";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import {
     getResourcesColumns,
     getResourcesList,
     type Resource,
+    type ResourcesListResponse,
 } from "./api";
 import { getActionsColumn, prependColumns } from "./components/table-columns";
 import TableConfigCustomizator from "./components/table-config-customizator";
@@ -40,6 +41,19 @@ const ResourcesListPage = () => {
         appendColumns: getActionsColumn(setRowAction),
         overrideColumns: prependColumns(),
     });
+
+    const { fetchResult: listFetchResult } = useServerTableData<Resource>({
+        fetch: (state) => getResourcesList(state),
+        queryKey: (state) => [RESOURCES_FETCH_KEY, "list", state],
+        columns,
+        initialPerPage: 10,
+        enabled: columns.length > 0,
+    });
+
+    const drivers = useMemo(
+        () => (listFetchResult as ResourcesListResponse | undefined)?.drivers ?? [],
+        [listFetchResult],
+    );
 
     const editRecord = useMemo(() => {
         if (rowAction?.variant === "quickEdit" && rowAction.row.original) return rowAction.row.original;
@@ -121,6 +135,7 @@ const ResourcesListPage = () => {
                 enableRowSelection
             />
             <ResourceFormDialog
+                drivers={drivers}
                 record={editRecord}
                 queryKey={listQueryKey}
                 onClose={() => setRowAction(null)}

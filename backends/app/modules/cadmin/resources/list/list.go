@@ -43,6 +43,7 @@ func (cc *Controller) GetResourcesListAPI(c fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"data":       rows,
 		"pagination": datatable.RenderPagination(pagination),
+		"drivers":    getDrivers(),
 	})
 }
 
@@ -69,7 +70,7 @@ func (cc *Controller) GetResourcesListView(c fiber.Ctx) error {
 	return cc.app.View(c, r.WithContext(ctxPtr), r.WithTitle("Resources"), r.WithData(fiber.Map{
 		"data":       rows,
 		"pagination": datatable.RenderPagination(pagination),
-		"query":      q,
+		"drivers":    getDrivers(),
 	}))
 }
 
@@ -122,4 +123,57 @@ func (cc *Controller) getResourcesColumns() ([]datatable.Column, error) {
 			Hidden:             true,
 		},
 	}, nil
+}
+
+func getDrivers() []map[string]any {
+	return []map[string]any{
+		{
+			"value": models.ResourceDriverHTTPRequest,
+			"label": "HTTP Request",
+		},
+		{
+			"value": models.ResourceDriverMinio,
+			"label": "Minio",
+		},
+		{
+			"value": models.ResourceDriverPostgreSQL,
+			"label": "PostgreSQL",
+		},
+		{
+			"value": models.ResourceDriverRedis,
+			"label": "Redis",
+		},
+		{
+			"value": models.ResourceDriverMongoDB,
+			"label": "MongoDB",
+		},
+		{
+			"value": models.ResourceDriverKafka,
+			"label": "Kafka",
+		},
+		{
+			"value": models.ResourceDriverMSSQL,
+			"label": "Microsoft SQL Server",
+		},
+		{
+			"value": models.ResourceDriverTwilio,
+			"label": "Twilio",
+		},
+		{
+			"value": models.ResourceDriverTelegram,
+			"label": "Telegram",
+		},
+		{
+			"value": models.ResourceDriverWhatsApp,
+			"label": "WhatsApp",
+		},
+		{
+			"value": models.ResourceDriverSMTP,
+			"label": "SMTP",
+		},
+		{
+			"value": models.ResourceDriverNATS,
+			"label": "NATS",
+		},
+	}
 }

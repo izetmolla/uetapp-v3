@@ -11,6 +11,7 @@ import {
     extractValueFromChange,
     reactSelectClassNames,
     reactSelectStyles,
+    resolveReactSelectMenuPortalTarget,
     resolveValue,
     type GroupBase,
     type ReactSelectKeyApi,
@@ -58,6 +59,10 @@ export function ReactSelectCreatable<
         options,
         isMulti,
         getOptionValue,
+        menuPortalTarget,
+        menuPosition,
+        menuShouldBlockScroll,
+        captureMenuScroll,
         ...rest
     } = props as ReactSelectCreatableComponentProps<Option, IsMulti, Group> & {
         onValueChange?: (value: unknown) => void
@@ -83,6 +88,12 @@ export function ReactSelectCreatable<
               providedOnChange?.(newValue, meta)
           }
         : providedOnChange
+
+    const resolvedMenuPortalTarget = resolveReactSelectMenuPortalTarget(
+        menuPortalTarget,
+    )
+    const resolvedMenuPosition =
+        menuPosition ?? (resolvedMenuPortalTarget ? "fixed" : undefined)
 
     return (
         <RawCreatableSelect<Option, IsMulti, Group>
@@ -112,6 +123,10 @@ export function ReactSelectCreatable<
             value={resolvedValue}
             onChange={resolvedOnChange}
             {...rest}
+            menuPortalTarget={resolvedMenuPortalTarget}
+            menuPosition={resolvedMenuPosition}
+            menuShouldBlockScroll={menuShouldBlockScroll ?? false}
+            captureMenuScroll={captureMenuScroll ?? true}
         />
     )
 }

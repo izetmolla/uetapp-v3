@@ -77,12 +77,15 @@ export interface ServerPaginationMeta {
     perPage?: number;
 }
 
+/** Minimum list fetch shape; APIs may include extra fields (exposed via `useServerTableData().fetchResult`). */
+export type ServerFetchResult<TData> = {
+    data: TData[];
+    pagination: ServerPaginationMeta;
+};
+
 export interface UseServerTableDataOptions<TData> {
     /** Fetch data for the current table state. Called on state/URL change. */
-    fetch: (state: ServerTableState<TData>) => Promise<{
-        data: TData[];
-        pagination: ServerPaginationMeta;
-    }>;
+    fetch: (state: ServerTableState<TData>) => Promise<ServerFetchResult<TData>>;
     /** Base key (array of strings) or function that receives state and returns a query key so refetch runs when params change. */
     queryKey: string[] | ((state: ServerTableState<TData>) => unknown[]);
     /** Default rows per page (URL key: perPage). Prefer over initialPageSize. */
