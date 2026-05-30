@@ -32,6 +32,7 @@ import {
   SortableOverlay,
 } from "../components/ui/sortable";
 import { dataTableConfig } from "../config/data-table";
+import { NESTED_OVERLAY_Z_CLASS } from "../lib/constants";
 import { cn } from "@workspace/ui/lib/utils";
 
 const OPEN_MENU_SHORTCUT = "s";
@@ -180,7 +181,7 @@ export function DataTableSortList<TData>({
         <PopoverContent
           aria-labelledby={labelId}
           aria-describedby={descriptionId}
-          className="flex w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] flex-col gap-3.5 p-4 sm:min-w-[380px]"
+          className="flex w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] flex-col gap-3.5 overflow-visible p-4 sm:min-w-[380px]"
           {...props}
         >
           <div className="flex flex-col gap-1">
@@ -330,7 +331,10 @@ function DataTableSortItem({
           </PopoverTrigger>
           <PopoverContent
             id={fieldListboxId}
-            className="w-[var(--radix-popover-trigger-width)] origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className={cn(
+              NESTED_OVERLAY_Z_CLASS,
+              "w-[var(--radix-popover-trigger-width)] origin-[var(--radix-popover-content-transform-origin)] p-0",
+            )}
           >
             <Command>
               <CommandInput placeholder="Search fields..." />
@@ -367,7 +371,10 @@ function DataTableSortItem({
           <PopoverContent
             id={directionListboxId}
             align="start"
-            className="w-24 origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className={cn(
+              NESTED_OVERLAY_Z_CLASS,
+              "w-24 origin-[var(--radix-popover-content-transform-origin)] p-0",
+            )}
           >
             <Command>
               <CommandList>

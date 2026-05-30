@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
 import { cn } from "@workspace/ui/lib/utils";
+import { NESTED_OVERLAY_Z_CLASS } from "../../lib/constants";
 
 type FacetedValue<Multiple extends boolean> = Multiple extends true
   ? string[]
@@ -204,6 +205,7 @@ function FacetedContent(props: React.ComponentProps<typeof PopoverContent>) {
       {...contentProps}
       align="start"
       className={cn(
+        NESTED_OVERLAY_Z_CLASS,
         "w-[200px] origin-(--radix-popover-content-transform-origin) p-0",
         className,
       )}

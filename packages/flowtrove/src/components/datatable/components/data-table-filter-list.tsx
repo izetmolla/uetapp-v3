@@ -59,7 +59,7 @@ import { useDebouncedCallback } from "../hooks/use-debounced-callback";
 import { getDefaultFilterOperator, getFilterOperators } from "../lib/data-table";
 import { formatDate } from "../lib/format";
 import { generateId } from "../lib/id";
-import { QUERY_KEYS } from "../lib/constants";
+import { QUERY_KEYS, NESTED_OVERLAY_Z_CLASS } from "../lib/constants";
 import { getFiltersStateParser } from "../lib/parsers";
 import { cn } from "@workspace/ui/lib/utils";
 import type {
@@ -281,7 +281,7 @@ export function DataTableFilterList<TData>({
         <PopoverContent
           aria-describedby={descriptionId}
           aria-labelledby={labelId}
-          className="flex w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] flex-col gap-3.5 p-4 sm:min-w-[380px]"
+          className="flex w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] flex-col gap-3.5 overflow-visible p-4 sm:min-w-[380px]"
           {...props}
         >
           <div className="flex flex-col gap-1">
@@ -490,7 +490,7 @@ function DataTableFilterItem<TData>({
           <PopoverContent
             id={fieldListboxId}
             align="start"
-            className="w-40 origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className={cn(NESTED_OVERLAY_Z_CLASS, "w-40 origin-[var(--radix-popover-content-transform-origin)] p-0")}
           >
             <Command>
               <CommandInput placeholder="Search fields..." />
@@ -749,7 +749,10 @@ function onFilterInputRender<TData>({
           </FacetedTrigger>
           <FacetedContent
             id={inputListboxId}
-            className="w-[200px] origin-[var(--radix-popover-content-transform-origin)]"
+            className={cn(
+              NESTED_OVERLAY_Z_CLASS,
+              "w-[200px] origin-[var(--radix-popover-content-transform-origin)]",
+            )}
           >
             <FacetedInput
               aria-label={`Search ${columnMeta?.label} options`}
@@ -814,7 +817,10 @@ function onFilterInputRender<TData>({
           <PopoverContent
             id={inputListboxId}
             align="start"
-            className="w-auto origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className={cn(
+              NESTED_OVERLAY_Z_CLASS,
+              "w-auto origin-[var(--radix-popover-content-transform-origin)] p-0",
+            )}
           >
             {filter.operator === "isBetween" ? (
               <Calendar

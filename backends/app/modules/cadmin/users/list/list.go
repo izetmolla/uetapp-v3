@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/flowtrove/packages/datatable"
 	"github.com/flowtrove/packages/datatable/postgresql"
@@ -73,6 +74,8 @@ func (cc *Controller) GetUsersListView(c fiber.Ctx) error {
 			r.WithCode("BAD_REQUEST"),
 		)
 	}
+
+	fmt.Println("q", q)
 
 	users, pagination, err := postgresql.FindRaw[map[string]any](db, q, columns, models.User{}.TableName()).Run()
 	if err != nil {
@@ -221,10 +224,10 @@ func (cc *Controller) getUsersColumns(ctx context.Context) ([]datatable.Column, 
 			},
 		},
 		{
-			ID:          "last_login",
-			AccessorKey: "last_login",
-			SQLColumn: `(SELECT MAX(s.created_at) FROM sessions s WHERE s.user_id = users.id AND s.deleted_at IS NULL AND s.is_deleted = false)`,
-			Header:      "Last Login",
+			ID:            "last_login",
+			AccessorKey:   "last_login",
+			SQLColumn:     `(SELECT MAX(s.created_at) FROM sessions s WHERE s.user_id = users.id AND s.deleted_at IS NULL AND s.is_deleted = false)`,
+			Header:        "Last Login",
 			EnableSorting: true,
 			Meta: &datatable.ColumnMeta{
 				Label:   "Last Login",

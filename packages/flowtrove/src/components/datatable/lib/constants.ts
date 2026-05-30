@@ -14,3 +14,6 @@ export const THROTTLE_MS_DEFAULT = 50;
 
 /** Separator for array values in URL (e.g. multi-select filters). */
 export const ARRAY_SEPARATOR = ",";
+
+/** z-index for selects/popovers opened inside the filter panel (above PopoverContent z-[100]). */
+export const NESTED_OVERLAY_Z_CLASS = "z-[110]";

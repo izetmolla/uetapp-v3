@@ -40,6 +40,7 @@ import { useDebouncedCallback } from "../hooks/use-debounced-callback";
 import { getDefaultFilterOperator, getFilterOperators } from "../lib/data-table";
 import { formatDate } from "../lib/format";
 import { generateId } from "../lib/id";
+import { NESTED_OVERLAY_Z_CLASS } from "../lib/constants";
 import { getFiltersStateParser } from "../lib/parsers";
 import { cn } from "@workspace/ui/lib/utils";
 import type {
@@ -272,7 +273,7 @@ export function DataTableFilterMenu<TData>({
         </PopoverTrigger>
         <PopoverContent
           align={align}
-          className="w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] p-0"
+          className="w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] overflow-visible p-0"
           {...props}
         >
           <Command loop className="[&_[cmdk-input-wrapper]_svg]:hidden">
@@ -417,7 +418,7 @@ function DataTableFilterItem<TData>({
           </PopoverTrigger>
           <PopoverContent
             align="start"
-            className="w-48 origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className={cn(NESTED_OVERLAY_Z_CLASS, "w-48 origin-[var(--radix-popover-content-transform-origin)] p-0")}
           >
             <Command loop>
               <CommandInput placeholder="Search fields..." />
@@ -754,7 +755,7 @@ function onFilterInputRender<TData>({
           <PopoverContent
             id={inputListboxId}
             align="start"
-            className="w-48 origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className={cn(NESTED_OVERLAY_Z_CLASS, "w-48 origin-[var(--radix-popover-content-transform-origin)] p-0")}
           >
             <Command>
               <CommandInput placeholder="Search options..." />
@@ -831,7 +832,10 @@ function onFilterInputRender<TData>({
           <PopoverContent
             id={inputListboxId}
             align="start"
-            className="w-auto origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className={cn(
+              NESTED_OVERLAY_Z_CLASS,
+              "w-auto origin-[var(--radix-popover-content-transform-origin)] p-0",
+            )}
           >
             {filter.operator === "isBetween" ? (
               <Calendar
