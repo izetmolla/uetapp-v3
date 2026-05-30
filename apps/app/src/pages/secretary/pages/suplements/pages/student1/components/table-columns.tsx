@@ -3,7 +3,7 @@ import { Download, Ellipsis, Eye } from "lucide-react";
 import { Link } from "react-router";
 
 import { DataTableColumnHeader } from "@workspace/flowtrove/components/data-table/components/data-table-column-header";
-import { formatDate } from "@workspace/flowtrove/components/datatable/lib/format";
+import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";

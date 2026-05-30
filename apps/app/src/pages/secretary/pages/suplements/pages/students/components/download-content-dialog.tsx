@@ -13,7 +13,7 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { create } from 'zustand'
 import type { Student } from "../api"
-import { formatDate } from "@workspace/flowtrove/components/datatable/lib/format"
+import { formatDate } from "@workspace/flowtrove/components/data-table/lib/format"
 import { useMutation } from "@tanstack/react-query"
 import { createSingleSupplementRequest } from "../api"
 import {
@@ -96,7 +96,7 @@ const DownloadContentDialog: React.FC<DownloadContentDialogProps> = ({ onOpenCha
 
                         <div className="flex">
                             <span className="font-bold text-gray-800 dark:text-gray-200 min-w-[160px] mr-4">Viti i Diplomimit:</span>
-                            <span className="text-gray-900 dark:text-gray-100">{formatDate(studentToDownload?.graduated_at, { month: 'long', day: 'numeric', year: 'numeric' }) || '-'}</span>
+                            <span className="text-gray-900 dark:text-gray-100">{studentToDownload?.graduated_at ? formatDate(new Date(studentToDownload.graduated_at), "MMMM d, yyyy") : '-'}</span>
                         </div>
                     </div>
                 </div>
