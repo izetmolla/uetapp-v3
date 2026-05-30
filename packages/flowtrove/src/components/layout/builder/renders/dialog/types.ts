@@ -1,4 +1,5 @@
-import type { BaseLayoutItem, LayoutBuilderItem } from "../../types/items";
+import type { BaseLayoutItem } from "../../types/base-layout";
+import type { LayoutBuilderItem } from "../../types/items";
 
 /**
  * Dialog – maps to shadcn Dialog (Radix)

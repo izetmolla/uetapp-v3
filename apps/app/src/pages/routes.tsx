@@ -14,6 +14,7 @@ import Dashboard from "./dashboard"
 import secretaryRoutes from "./secretary/routes"
 import contractsRoutes from "./contracts/routes"
 import accountRoutes from "./account/routes"
+import lbRoutes from "./lb/router"
 
 // Authorization routes
 import SignIn from "./authorization/pages/signin"
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
             { path: "reset-password", element: <Reset /> },
             { path: "*", element: <DynamicPage /> },
         ]
+    },
+    {
+        path: "/lb",
+        children: lbRoutes
     }
 ])
 

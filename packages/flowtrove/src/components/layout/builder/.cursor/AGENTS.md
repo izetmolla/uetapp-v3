@@ -6,30 +6,33 @@ JSON item trees rendered by `<LayoutBuilder items={...} data={...} />`. Each `ty
 
 | Doc | Use when |
 |-----|----------|
-| [renders/button/.cursor/skills/generate-button-json/SKILL.md](renders/button/.cursor/skills/generate-button-json/SKILL.md) | Generate button JSON |
-| [renders/card/.cursor/skills/generate-card-json/SKILL.md](renders/card/.cursor/skills/generate-card-json/SKILL.md) | Generate card JSON |
-| [renders/dialog/.cursor/skills/generate-dialog-json/SKILL.md](renders/dialog/.cursor/skills/generate-dialog-json/SKILL.md) | Generate dialog JSON |
-| [renders/div/.cursor/skills/generate-div-json/SKILL.md](renders/div/.cursor/skills/generate-div-json/SKILL.md) | Generate div JSON |
-| [types/items.ts](types/items.ts) | `LayoutBuilderItem` union |
+| [renders/manifest.ts](renders/manifest.ts) | All registered `type` strings |
+| [renders/registry.tsx](renders/registry.tsx) | Dispatch map (lazy + sync bundles) |
+| [renders/button/.cursor/skills/generate-button-json/SKILL.md](renders/button/.cursor/skills/generate-button-json/SKILL.md) | Button JSON |
+| [types/items.ts](types/items.ts) | Full `LayoutBuilderItem` union (~70 types) |
 
-## Package layout
+## Scripts
 
-| Path | Role |
-|------|------|
-| `LayoutBuilder.tsx` | Root; `items`, `data`, `interpolation` |
-| `LayoutBuilderContext.tsx` | Shared context for renderers |
-| `renders/index.tsx` | Type → renderer dispatch |
-| `types/items.ts` | Item type union |
-| `lib/utils.ts` | `condition` evaluation, keys |
+| Script | Purpose |
+|--------|---------|
+| `scripts/generate-layout-renders.mjs` | Scaffold simple render folders |
+| `scripts/generate-items-union.mjs` | Regenerate `types/items.ts` union from `renders/*/types.ts` |
 
 ## Per-render AI docs
 
-| Render | `.cursor` path | Skill name |
-|--------|----------------|------------|
-| Button | `renders/button/.cursor/` | `generate-button-json` |
-| Card | `renders/card/.cursor/` | `generate-card-json` |
-| Dialog | `renders/dialog/.cursor/` | `generate-dialog-json` |
-| Div | `renders/div/.cursor/` | `generate-div-json` |
+| Render | `.cursor` path |
+|--------|----------------|
+| Button, Card, Dialog, Div | `renders/{name}/.cursor/` |
+
+## Registered renders (summary)
+
+| Category | Types |
+|----------|-------|
+| Layout | `div`, `scroll-area`, `button-group` |
+| Display | `badge`, `label`, `avatar`, `icon`, `skeleton`, `progress`, `separator`, `long-text`, `toggle` |
+| Form | `input`, `textarea`, `select`, `checkbox`, `switch`, `slider`, `radio-group`, `combobox`, `rs-fixed`, `rs-async`, `rs-creatable`, `repeatable` |
+| Compound | `card`, `dialog`, `sheet`, `alert-dialog`, `tabs`, `collapsible`, `popover`, `tooltip` |
+| Stub (extend) | `breadcrumb`, `pagination`, `dropdown-menu`, `command`, `input-group`, `timeline`, `calendar`, `sonner` |
 
 ## Rules
 
@@ -39,5 +42,5 @@ JSON item trees rendered by `<LayoutBuilder items={...} data={...} />`. Each `ty
 
 - Emit strict JSON arrays of `LayoutBuilderItem`.
 - Every item needs `type` + `id`.
-- Use render-specific skills for prop enums and mode rules (legacy vs composed for card/dialog).
-- Typical page: root `div` → `card`(s) / `dialog`(s) with nested `button` items.
+- Form fields need `name` (`BaseFormFieldItem`).
+- Compound components: legacy flat props **or** composed slot children — never mix (see card/dialog READMEs).

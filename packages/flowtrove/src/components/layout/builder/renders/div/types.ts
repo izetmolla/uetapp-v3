@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from "react";
-import type { ContainerItem } from "../../types/items";
+import type { ContainerItem } from "../../types/base-layout";
 
 /** Native HTML div element attributes (role, aria-*, data-*, etc.) */
 export type DivElementProperties = Omit<HTMLAttributes<HTMLDivElement>, "children">;

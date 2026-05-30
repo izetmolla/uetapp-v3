@@ -1,11 +1,9 @@
 import { createContext, useContext } from "react";
+import type { UseFormReturn } from "react-hook-form";
 import type { LayoutInterpolationConfig } from "./types/layout-interpolation";
 import type  { LayoutBuilderItem } from "./types/items";
 import type { AxiosInstance } from "axios";
 import type { QueryClient } from "@tanstack/react-query";
-
-
-
 
 /** Context value for layout builder */
 export type LayoutBuilderContextValue = {
@@ -16,9 +14,8 @@ export type LayoutBuilderContextValue = {
     data?: Record<string, unknown>;
     /** Default `{{ }}` behavior for `content` / `item-list` (overridable per block). */
     interpolation?: LayoutInterpolationConfig;
-
-
-
+    /** Active react-hook-form instance when rendering inside a `form` item. */
+    form?: UseFormReturn<Record<string, unknown>>;
     /**
      * Designer mode: inline edit callback. When provided, text/heading (and similar)
      * renderers can update item content directly (e.g. contenteditable) and call
@@ -27,8 +24,6 @@ export type LayoutBuilderContextValue = {
     onInlineEdit?: (path: number[], patch: Partial<LayoutBuilderItem>) => void;
     /** When set to an item id, that item may show inline editing on the canvas. */
     inlineEditActiveItemId?: string;
-    /** Handler for component actions (button clicks, menu selections, etc.) */
-    // onAction?: (detail: LayoutItemActionBinding) => void;
 }
 
 

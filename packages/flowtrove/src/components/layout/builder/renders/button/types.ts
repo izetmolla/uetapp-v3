@@ -1,4 +1,4 @@
-import type { BaseLayoutItem, ContainerItem, } from "../../types/items";
+import type { ContainerItem } from "../../types/base-layout";
 
 
 /**
@@ -8,7 +8,7 @@ import type { BaseLayoutItem, ContainerItem, } from "../../types/items";
  * | Root           | className, style | BaseLayoutItem |
  * | Button         | label, variant, size, disabled, action, icon, iconPosition |
  */
-export type ButtonItem = ContainerItem & BaseLayoutItem & {
+export type ButtonItem = ContainerItem & {
     type: "button";
     /** Button label */
     label: string;
