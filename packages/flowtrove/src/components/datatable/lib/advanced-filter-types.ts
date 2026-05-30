@@ -1,7 +1,7 @@
 import type { JoinOperator } from "../types/data-table";
 import type { FilterItemSchema } from "./parsers";
 
-export interface AdvancedFilterGroup<TData = unknown> {
+export interface AdvancedFilterGroup<_TData = unknown> {
   type: "group";
   groupId: string;
   joinOperator?: JoinOperator;

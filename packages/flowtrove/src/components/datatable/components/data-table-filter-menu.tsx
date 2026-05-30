@@ -709,9 +709,13 @@ function onFilterInputRender<TData>({
       const inputListboxId = `${inputId}-listbox`;
 
       const options = column.columnDef.meta?.options ?? [];
-      const selectedValues = Array.isArray(filter.value)
-        ? filter.value
-        : [filter.value];
+      const selectedValues: string[] = Array.isArray(filter.value)
+        ? filter.value.filter(
+            (v): v is string => typeof v === "string" && v !== "",
+          )
+        : filter.value != null && filter.value !== ""
+          ? [String(filter.value)]
+          : [];
 
       const selectedOptions = options.filter((option) =>
         selectedValues.includes(option.value),
@@ -773,7 +777,7 @@ function onFilterInputRender<TData>({
                         key={option.value}
                         value={option.value}
                         onSelect={() => {
-                          const value =
+                          const value: string | string[] =
                             filter.variant === "multiSelect"
                               ? isSelected
                                 ? selectedValues.filter((v) => v !== option.value)

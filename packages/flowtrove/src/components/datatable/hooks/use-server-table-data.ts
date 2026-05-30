@@ -25,7 +25,6 @@ import {
 import type { AdvancedFilterEntry } from "../lib/advanced-filter-types";
 import { serializeServerTableParams } from "../lib/serialize-server-table-params";
 import type {
-  ExtendedColumnFilter,
   ExtendedColumnSort,
   FilterVariant,
   JoinOperator,

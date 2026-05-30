@@ -135,7 +135,6 @@ export function DataTableFilterList<TData>({
     }),
   );
   const joinOperator = localState?.joinOperator ?? urlJoinOperator ?? "and";
-  const setJoinOperator = localState?.setJoinOperator ?? setUrlJoinOperator;
   const [, setUrlSorting] = useQueryState(QUERY_KEYS.SORT, parseAsString);
   const clearSorting = React.useCallback(() => {
     if (localState) {

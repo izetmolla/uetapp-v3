@@ -2,7 +2,6 @@ import { createParser } from "nuqs/server";
 import { z } from "zod";
 
 import { dataTableConfig } from "../config/data-table";
-import { isAdvancedFilterGroup } from "./advanced-filter-types";
 
 import type {
   AdvancedFilterEntry,
@@ -77,16 +76,6 @@ const filterEntrySchema = z.union([filterGroupSchema, filterConditionSchema]);
 export type FilterItemSchema = z.infer<typeof filterConditionSchema>;
 export type FilterGroupSchema = z.infer<typeof filterGroupSchema>;
 export type FilterEntrySchema = z.infer<typeof filterEntrySchema>;
-
-function entryUsesValidColumns(
-  entry: FilterEntrySchema,
-  validKeys: Set<string>,
-): boolean {
-  if (isAdvancedFilterGroup(entry)) {
-    return entry.filters.every((filter) => validKeys.has(filter.id));
-  }
-  return validKeys.has(entry.id);
-}
 
 export const getFiltersStateParser = <TData>(
   _columnIds?: string[] | Set<string>,
