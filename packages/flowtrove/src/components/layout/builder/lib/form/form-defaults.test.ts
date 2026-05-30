@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
     buildDefaultValues,
     getFormFieldNames,
+    mergeFormSubmitPayload,
     resolveFormDefaultValues,
 } from "./index";
 import type { LayoutBuilderChildItem } from "../../types/base-layout";
@@ -87,6 +88,49 @@ describe("form defaults and field collection", () => {
             displayName: "Static",
             country: "al",
             acceptTerms: false,
+        });
+    });
+
+    it("mergeFormSubmitPayload merges data[source] and includeDataKeys", () => {
+        expect(
+            mergeFormSubmitPayload(
+                { name: "Updated" },
+                {
+                    source: "config",
+                    data: {
+                        id: "42",
+                        config: {
+                            id: "42",
+                            name: "Original",
+                            bucket: "storage1",
+                        },
+                    },
+                    includeDataKeys: ["id"],
+                },
+            ),
+        ).toEqual({
+            id: "42",
+            name: "Updated",
+            bucket: "storage1",
+        });
+    });
+
+    it("resolveFormDefaultValues prefers data[source] over item.value", () => {
+        expect(
+            resolveFormDefaultValues(nestedFormChildren, {
+                source: "profile",
+                value: { displayName: "Static", country: "al" },
+                data: {
+                    profile: {
+                        displayName: "From API",
+                        country: "de",
+                    },
+                },
+            }),
+        ).toEqual({
+            displayName: "From API",
+            country: "de",
+            acceptTerms: true,
         });
     });
 });

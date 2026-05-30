@@ -10,6 +10,7 @@ import { LayoutBuilderContext, useLayoutBuilderContext } from "../../LayoutBuild
 import {
     buildFormSchemaForContext,
     getVisibleFormFieldNames,
+    mergeFormSubmitPayload,
     resolveFormDefaultValues,
 } from "../../lib/form";
 import {
@@ -46,19 +47,24 @@ function FormRenderer({ item, renderItems, path }: LayoutRendererProps<FormItem>
 
     const submitValues = async (values: Record<string, unknown>) => {
         const method = (item.method ?? "POST").toUpperCase();
+        const payload = mergeFormSubmitPayload(values, {
+            source: item.source,
+            data: parentContext.data,
+            includeDataKeys: item.submitInclude,
+        });
 
         if (item.action && parentContext.axios) {
             if (usesRequestBody(method)) {
                 await parentContext.axios.request({
                     url: item.action,
                     method: method as "POST" | "PUT" | "PATCH" | "DELETE",
-                    data: values,
+                    data: payload,
                 });
             } else {
                 await parentContext.axios.request({
                     url: item.action,
                     method: "GET",
-                    params: values,
+                    params: payload,
                 });
             }
         }

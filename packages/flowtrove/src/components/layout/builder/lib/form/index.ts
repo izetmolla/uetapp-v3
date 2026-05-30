@@ -852,6 +852,42 @@ function asPlainObject(value: unknown): Record<string, unknown> | null {
     return null;
 }
 
+export type MergeFormSubmitPayloadOptions = {
+    /** Key on layout `data` merged under validated field values (e.g. `"config"`). */
+    source?: string;
+    /** Layout runtime `data`. */
+    data?: Record<string, unknown>;
+    /** Top-level `data` keys to merge (e.g. route `id` not stored under `source`). */
+    includeDataKeys?: string[];
+};
+
+/**
+ * Build the HTTP submit body: optional `data[source]` and `includeDataKeys`, then validated form values (win on overlap).
+ */
+export function mergeFormSubmitPayload(
+    values: Record<string, unknown>,
+    options?: MergeFormSubmitPayloadOptions,
+): Record<string, unknown> {
+    let payload = { ...values };
+
+    if (options?.source && options.data) {
+        const scoped = asPlainObject(options.data[options.source]);
+        if (scoped) {
+            payload = { ...scoped, ...values };
+        }
+    }
+
+    if (options?.includeDataKeys?.length && options.data) {
+        for (const key of options.includeDataKeys) {
+            if (options.data[key] !== undefined) {
+                payload[key] = options.data[key];
+            }
+        }
+    }
+
+    return payload;
+}
+
 export type ResolveFormDefaultValuesOptions = {
     /** Inline object merged over field defaults (designer preview / static seed). */
     value?: Record<string, unknown>;
@@ -873,15 +909,15 @@ export function resolveFormDefaultValues(
     const fieldNames = getFormFieldNames(items);
     const overlay: Record<string, unknown> = {};
 
+    if (options?.value) {
+        Object.assign(overlay, options.value);
+    }
+
     if (options?.source && options.data) {
         const scoped = asPlainObject(options.data[options.source]);
         if (scoped) {
             Object.assign(overlay, scoped);
         }
-    }
-
-    if (options?.value) {
-        Object.assign(overlay, options.value);
     }
 
     if (options?.data) {

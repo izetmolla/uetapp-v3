@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import type { AlertDialogItem, AlertDialogTriggerItem, AlertDialogContentItem, AlertDialogHeaderItem, AlertDialogTitleItem, AlertDialogDescriptionItem, AlertDialogFooterItem } from "../renders/alert-dialog/types";
 import type { AvatarItem } from "../renders/avatar/types";
 import type { BadgeItem } from "../renders/badge/types";

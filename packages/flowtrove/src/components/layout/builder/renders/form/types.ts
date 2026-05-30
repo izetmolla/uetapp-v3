@@ -19,6 +19,11 @@ export type FormItem = BaseLayoutItem & {
     formConfigKey?: string;
     /** Key on layout `data` whose object pre-fills named fields (merged over JSON defaults). */
     source?: string;
+    /**
+     * Top-level layout `data` keys merged into the submit body (e.g. route `id`).
+     * Also merges `data[source]` when `source` is set; validated field values win on overlap.
+     */
+    submitInclude?: string[];
     /** Static values merged over field defaults when live `data[source]` is absent. */
     value?: Record<string, unknown>;
     /** Form action URL */

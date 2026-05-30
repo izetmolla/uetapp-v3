@@ -50,7 +50,7 @@ export function prependColumns(): Array<{ id: string } & Partial<ColumnDef<Resou
         withNameColumnLayout<Resource>({
             id: "name",
             cell: ({ row }) => (
-                <Link to={`/admin/resources/${row.original.id}`} className="block hover:opacity-90">
+                <Link to={`${row.original.id}`} className="block hover:opacity-90">
                     <EntityNameCell
                         name={String(row.getValue("name") ?? "")}
                         description={row.original?.description}
