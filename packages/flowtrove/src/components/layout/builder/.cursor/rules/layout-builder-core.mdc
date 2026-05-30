@@ -1,0 +1,52 @@
+---
+description: Flowtrove layout builder — JSON item trees, render dispatch, MCP generation context
+globs: packages/flowtrove/src/components/layout/builder/**
+alwaysApply: false
+---
+
+# Layout builder
+
+JSON-driven UI via `LayoutBuilder` + per-type renderers in `renders/`.
+
+## Item tree rules
+
+- Root: `items: LayoutBuilderItem[]` passed to `<LayoutBuilder />`.
+- Each item has `type` (discriminant) and `id` (unique string).
+- Containers use `children?: LayoutBuilderItem[]`.
+- Optional `condition` hides items based on `data` prop.
+- Designer-only: `locked` — strip before runtime if exporting clean JSON.
+
+## Registered types (current)
+
+| `type` | Renderer folder | MCP skill |
+|--------|-----------------|-----------|
+| `div` | `renders/div` | `generate-div-json` |
+| `button` | `renders/button` | `generate-button-json` |
+| `card`, `card-*` | `renders/card` | `generate-card-json` |
+| `dialog`, `dialog-*` | `renders/dialog` | `generate-dialog-json` |
+
+Unknown types render an amber placeholder in dev.
+
+## Render-specific rules
+
+Each render has `.cursor/AGENTS.md`, rules, and a `generate-*-json` skill:
+
+- `renders/button/.cursor/`
+- `renders/card/.cursor/`
+- `renders/dialog/.cursor/`
+- `renders/div/.cursor/`
+
+## Card / dialog mode rule
+
+Both support **legacy** (flat props) and **composed** (slot children). Never mix modes on the same item — see each render's skill.
+
+## Button JSON (MCP)
+
+Native HTML button type is `buttonType`, not `type` (which is always `"button"`).
+
+## Adding a new render
+
+1. `renders/<name>/types.ts` — item type(s)
+2. `renders/<name>/index.tsx` — renderer component(s)
+3. Register in `types/items.ts` union + `renders/index.tsx` switch
+4. Add `renders/<name>/.cursor/` (AGENTS.md, rules, `generate-<name>-json` skill) for MCP JSON generation

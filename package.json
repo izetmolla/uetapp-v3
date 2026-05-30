@@ -9,7 +9,8 @@
     "format": "turbo format",
     "typecheck": "turbo typecheck",
     "pub": "node --experimental-specifier-resolution=node packages/utils/src/cloud/publish.ts",
-    "pub app:backend": "./backends/app/deploy.sh"
+    "pub app:backend": "./backends/app/deploy.sh",
+    "test": "turbo test"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",

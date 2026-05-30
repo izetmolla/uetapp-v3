@@ -1,0 +1,30 @@
+---
+description: Flowtrove layout builder div render — container JSON, Tailwind layout, HTML attrs
+globs: packages/flowtrove/src/components/layout/builder/renders/div/**
+alwaysApply: false
+---
+
+# Div render (layout builder)
+
+Read `.cursor/AGENTS.md` and `skills/generate-div-json/SKILL.md` before generating div JSON.
+
+## JSON rules
+
+- Required: `type: "div"`, `id`.
+- `children`: `LayoutBuilderItem[]` — nested items (default `[]`).
+- `className`: primary way to express layout (flex, grid, gap, spacing).
+- `style`: inline CSS object when needed.
+- HTML div attributes allowed (except `children`): `role`, `aria-*`, `data-*`, `id`, `tabIndex`, etc.
+- Legacy `props` nested object merged onto DOM (prefer top-level attrs for new JSON).
+- Designer-only: dashed outline when `path` is set (not in production JSON concern).
+
+## Layout patterns
+
+- Row of buttons: `className: "flex gap-2 justify-end"`.
+- Page section: `className: "space-y-4"`.
+- Grid: `className: "grid gap-4 md:grid-cols-2"`.
+
+## Pitfalls
+
+- Using div for clickable actions — prefer `button` type.
+- Missing `children` key — omit or use `[]`; nested items go in `children`.

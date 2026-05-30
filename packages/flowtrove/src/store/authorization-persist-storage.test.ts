@@ -41,7 +41,7 @@ describe("authorization persist storage", () => {
     expect(parsed).not.toHaveProperty("version")
   })
 
-  it("reads legacy zustand-wrapped blob from localStorage", () => {
+  it("reads legacy zustand-wrapped blob from localStorage", async () => {
     const snapshot = {
       sessions: [],
       current_session: "u1",
@@ -52,12 +52,12 @@ describe("authorization persist storage", () => {
       JSON.stringify({ state: snapshot, version: 0 }),
     )
 
-    const item = storage.getItem(KEY)
+    const item = await Promise.resolve(storage.getItem(KEY))
     expect(item).toBeTruthy()
     expect(JSON.parse(item!).state).toEqual(snapshot)
   })
 
-  it("reads flat blob written directly", () => {
+  it("reads flat blob written directly", async () => {
     const snapshot = {
       sessions: [],
       current_session: "",
@@ -65,7 +65,7 @@ describe("authorization persist storage", () => {
     }
     localStorage.setItem(KEY, JSON.stringify(snapshot))
 
-    const item = storage.getItem(KEY)
+    const item = await Promise.resolve(storage.getItem(KEY))
     expect(JSON.parse(item!).state).toEqual(snapshot)
   })
 })

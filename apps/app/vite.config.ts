@@ -11,6 +11,7 @@ export default defineConfig(async ({ command }) => {
   const nextVersion = await bumpVersion(command);
   return {
     plugins: [react(), tailwindcss(), replaceTags(command)],
+    envDir: path.resolve(__dirname, "../.."),
     base: process.env.NODE_ENV === 'production' ? `/static/app/${nextVersion}/` : "/",
     resolve: {
       alias: {

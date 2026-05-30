@@ -1,0 +1,28 @@
+---
+description: Flowtrove layout builder dialog render — JSON schema, composed vs legacy, Radix slots
+globs: packages/flowtrove/src/components/layout/builder/renders/dialog/**
+alwaysApply: false
+---
+
+# Dialog render (layout builder)
+
+Read `.cursor/AGENTS.md` and `skills/generate-dialog-json/SKILL.md` before generating dialog JSON.
+
+## Mode detection
+
+- **Composed**: `children` has `dialog-trigger` or `dialog-content` → legacy props ignored.
+- **Legacy**: use `trigger`, `title`, `description`, `children` (body), `footer`.
+
+## JSON rules
+
+- Root: `type: "dialog"`. Slots: `dialog-trigger`, `dialog-content`, `dialog-header`, `dialog-title`, `dialog-description`, `dialog-footer`.
+- `dialog-title` / `dialog-description`: required `text`.
+- `showCloseButton` on legacy dialog / `dialog-content` defaults `true`; on `dialog-footer` defaults `false`.
+- Composed order: `dialog-trigger` then `dialog-content` (header/body/footer inside content).
+- Wrapper div receives root `className` / `style`.
+
+## Pitfalls
+
+- Missing trigger — legacy needs `trigger` array; composed needs `dialog-trigger` with button child.
+- Mixing legacy `trigger` with composed slots — pick one mode.
+- `label` on dialog-title — use `text`.

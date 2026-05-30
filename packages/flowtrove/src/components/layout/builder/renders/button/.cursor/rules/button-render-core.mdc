@@ -1,0 +1,37 @@
+---
+description: Flowtrove layout builder button render — JSON schema, shadcn mapping, MCP output rules
+globs: packages/flowtrove/src/components/layout/builder/renders/button/**
+alwaysApply: false
+---
+
+# Button render (layout builder)
+
+Read `.cursor/AGENTS.md` and `skills/generate-button-json/SKILL.md` before generating or editing button JSON.
+
+## JSON rules
+
+- **Required**: `type: "button"`, `id` (unique string), and either `label` (string) or non-empty `children`.
+- **Discriminant**: `type` must be exactly `"button"` (lowercase).
+- **Variants**: `default` | `destructive` | `outline` | `secondary` | `ghost` | `link` — match shadcn Button.
+- **Sizes**: `default` | `sm` | `lg` | `icon` — match `ButtonItem` in `types.ts` (UI may support extra sizes; stick to these for layout JSON).
+- **HTML type**: use `buttonType` (`submit` | `button` | `reset`), not `type`, for the native button element.
+- **Actions**: `action` (event name string) + optional `actionParams` (object). Handler wiring is app-level via `LayoutBuilder` `onAction` (planned).
+- **Condition**: optional `condition` string evaluated against `LayoutBuilder` `data` (e.g. `"data.canSubmit === true"`).
+- **Children vs label**: if `children.length > 0`, renderer shows children and ignores `label`.
+
+## Renderer rules
+
+- Map props via spread to `@workspace/ui/components/button`; do not invent new JSON fields without updating `types.ts` and this doc.
+- `icon` / `iconPosition` are declared in `types.ts` but not yet rendered in `index.tsx` — do not generate icon JSON until implemented.
+- Keep `action` / `actionParams` destructured even if click handler is not wired yet.
+
+## Validation checklist
+
+```
+- [ ] type === "button"
+- [ ] id is unique within the layout tree
+- [ ] label or children present
+- [ ] variant/size enums valid
+- [ ] buttonType set for form submit buttons
+- [ ] JSON is strict (no comments, no trailing commas)
+```

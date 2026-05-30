@@ -1,0 +1,28 @@
+---
+description: Flowtrove layout builder card render — JSON schema, composed vs legacy modes, slot types
+globs: packages/flowtrove/src/components/layout/builder/renders/card/**
+alwaysApply: false
+---
+
+# Card render (layout builder)
+
+Read `.cursor/AGENTS.md` and `skills/generate-card-json/SKILL.md` before generating or editing card JSON.
+
+## Mode detection
+
+- **Composed**: `children` has any top-level `card-header`, `card-content`, or `card-footer` → legacy flat props ignored.
+- **Legacy**: no such slots → use `title`, `description`, `headerAction`, `footer`, `children` (body in CardContent).
+
+## JSON rules
+
+- Root type: `"card"`. Slot types: `card-header`, `card-title`, `card-description`, `card-action`, `card-content`, `card-footer`.
+- `card-title` / `card-description`: required `text` string.
+- `size`: `"default"` | `"sm"` only.
+- Composed order: typically `card-header` → `card-content` → `card-footer`.
+- Legacy: `children` = body inside CardContent; auto `pt-6` when no header.
+
+## Pitfalls
+
+- Mixing legacy `title` with composed `card-header` in same card — pick one mode.
+- Using `label` on `card-title` — use `text`.
+- Empty card with no header/content — add at least body `children` or `card-content`.

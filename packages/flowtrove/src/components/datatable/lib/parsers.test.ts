@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import type { ExtendedColumnSort } from "../types/data-table";
 import { getFiltersStateParser, getSortingStateParser } from "./parsers";
 
+type SortingRow = { name: string; created_at: string };
+
 describe("getSortingStateParser", () => {
-  const parser = getSortingStateParser(["name", "created_at"]);
+  const parser = getSortingStateParser<SortingRow>(["name", "created_at"]);
 
   it("parses valid sorting JSON", () => {
     const value = JSON.stringify([
@@ -27,7 +30,9 @@ describe("getSortingStateParser", () => {
   });
 
   it("round-trips via serialize", () => {
-    const sorting = [{ id: "name", desc: false }];
+    const sorting: ExtendedColumnSort<SortingRow>[] = [
+      { id: "name", desc: false },
+    ];
     const serialized = parser.serialize(sorting);
     expect(parser.parse(serialized)).toEqual(sorting);
   });
