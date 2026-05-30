@@ -10,13 +10,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type SignInSchema } from "./api/validations";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import useAuthorizationStore from "@workspace/flowtrove/store/authorization";
+import type { AuthSession } from "@workspace/flowtrove/store/authorization";
 import PasswordInput from "@workspace/flowtrove/components/password";
 import Links from "../../components/links";
 import { useTranslation } from "react-i18next";
 import LanguageSwitch from "@workspace/flowtrove/components/language-switch";
+import Sessions, { userLoginId } from "./components/sessions";
 import {
     authCardClassName,
     authInputClassName,
@@ -30,7 +32,8 @@ import {
 /** When true, email and password are shown together for direct sign-in. When false, email is checked first. */
 const show2fields = true;
 
-// Enhanced FlowTrove Logo Component
+type SignInView = "picker" | "form";
+
 const FlowTroveLogo = ({ className }: { className?: string }) => {
     const navigate = useNavigate();
     return (
@@ -52,8 +55,10 @@ const SignIn = () => {
     const redirectUrl = useMemo(() => searchParams.get("redirectUrl"), [searchParams]);
     const navigate = useNavigate();
 
-    // const navigate = useNavigate()
-    const { signInUser } = useAuthorizationStore()
+    const { signInUser, sessions } = useAuthorizationStore()
+    const [view, setView] = useState<SignInView>(() => (sessions.length > 0 ? "picker" : "form"));
+    const [emailDisabled, setEmailDisabled] = useState(false);
+
     const form = useForm<SignInSchema>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
@@ -67,12 +72,55 @@ const SignIn = () => {
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        if (sessions.length === 0 && view === "picker") {
+            setView("form");
+        }
+    }, [sessions.length, view]);
+
+    useEffect(() => {
         if (!showPassword || show2fields) return;
         const timer = window.setTimeout(() => {
             passwordInputRef.current?.focus();
         }, 0);
         return () => window.clearTimeout(timer);
     }, [showPassword]);
+
+    useEffect(() => {
+        if (view !== "form" || !emailDisabled) return;
+        const timer = window.setTimeout(() => {
+            passwordInputRef.current?.focus();
+        }, 0);
+        return () => window.clearTimeout(timer);
+    }, [view, emailDisabled]);
+
+    const resetFormState = () => {
+        form.reset({ email: "", password: "", checkEmail: !show2fields });
+        setConfirmedEmail(null);
+        setEmailDisabled(false);
+        setShowPassword(show2fields);
+    };
+
+    const handleSelectSession = (session: AuthSession) => {
+        const loginId = userLoginId(session.user)
+        form.setValue("email", loginId);
+        form.setValue("password", "");
+        form.setValue("checkEmail", false);
+        form.clearErrors();
+        setConfirmedEmail(loginId);
+        setEmailDisabled(true);
+        setShowPassword(true);
+        setView("form");
+    };
+
+    const handleUseAnotherAccount = () => {
+        resetFormState();
+        setView("form");
+    };
+
+    const handleBackToPicker = () => {
+        resetFormState();
+        setView("picker");
+    };
 
     const mutation = useMutation({
         mutationFn: signIn,
@@ -125,9 +173,6 @@ const SignIn = () => {
         }
     })
 
-
-
-
     const onsubmit = (data: SignInSchema) => {
         mutation.mutate({
             ...form.getValues(),
@@ -136,6 +181,8 @@ const SignIn = () => {
         })
     }
 
+    const showPicker = view === "picker" && sessions.length > 0;
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onsubmit)}>
@@ -143,108 +190,131 @@ const SignIn = () => {
                     <div className={authPageClassName}>
                         <div className={authCardClassName}>
                             <div className="space-y-3">
-                                {/* Header with Logo and Language Switch */}
                                 <div className="flex items-start justify-between mb-6">
                                     <FlowTroveLogo />
                                     <LanguageSwitch variant="minimal" />
                                 </div>
 
-                                {/* Login Header - Dark text for white background */}
-                                <div className="text-left space-y-2">
-                                    <h1 className="text-xl font-semibold text-foreground">{t('Log in')}</h1>
-                                    <p className="text-base font-normal text-muted-foreground">{t("Continue to UET App")}</p>
-                                </div>
-
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem className='space-y-1'>
-                                            <FormLabel className="sr-only">{t("Email")}</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    className={authInputClassName}
-                                                    placeholder={t("Email")}
-                                                    autoComplete="email"
-                                                    {...field}
-                                                    onChange={(event) => {
-                                                        field.onChange(event);
-                                                        if (
-                                                            !show2fields &&
-                                                            showPassword &&
-                                                            confirmedEmail !== null &&
-                                                            event.target.value !== confirmedEmail
-                                                        ) {
-                                                            setShowPassword(false);
-                                                            setConfirmedEmail(null);
-                                                            form.setValue("checkEmail", true);
-                                                            form.setValue("password", "");
-                                                            form.clearErrors("password");
-                                                        }
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                {(show2fields || showPassword) && (
-                                    <FormField
-                                        control={form.control}
-                                        name="password"
-                                        render={({ field }) => (
-                                            <FormItem className='space-y-1'>
-                                                <FormLabel className="sr-only">{t("Password")}</FormLabel>
-                                                <FormControl>
-                                                    <PasswordInput
-                                                        className={authInputClassName}
-                                                        placeholder={t("Password")}
-                                                        autoComplete="current-password"
-                                                        data-form-type="other"
-                                                        spellCheck="false"
-                                                        {...field}
-                                                        ref={(node) => {
-                                                            field.ref(node);
-                                                            passwordInputRef.current = node;
-                                                        }}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
+                                {showPicker ? (
+                                    <Sessions
+                                        sessions={sessions}
+                                        onSelectSession={handleSelectSession}
+                                        onUseAnotherAccount={handleUseAnotherAccount}
                                     />
-                                )}
+                                ) : (
+                                    <>
+                                        {sessions.length > 0 ? (
+                                            <button
+                                                type="button"
+                                                className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                                                onClick={handleBackToPicker}
+                                            >
+                                                <ArrowLeft className="size-4" />
+                                                {t("Back")}
+                                            </button>
+                                        ) : null}
 
-                                {(show2fields || showPassword) && (
-                                    <div className="flex justify-end">
-                                        <Link
-                                            to={`/reset-password?email=${encodeURIComponent(form.getValues("email"))}`}
-                                            className={authLinkClassName}
+                                        <div className="text-left space-y-2">
+                                            <h1 className="text-xl font-semibold text-foreground">
+                                                {emailDisabled ? t("Enter password") : t('Log in')}
+                                            </h1>
+                                            {!emailDisabled ? (
+                                                <p className="text-base font-normal text-muted-foreground">
+                                                    {t("Continue to UET App")}
+                                                </p>
+                                            ) : null}
+                                        </div>
+
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem className="space-y-1">
+                                                    <FormLabel className="sr-only">{t("Email")}</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            className={authInputClassName}
+                                                            placeholder={t("Email")}
+                                                            autoComplete="email"
+                                                            disabled={emailDisabled}
+                                                            {...field}
+                                                            onChange={(event) => {
+                                                                field.onChange(event);
+                                                                if (
+                                                                    !show2fields &&
+                                                                    showPassword &&
+                                                                    confirmedEmail !== null &&
+                                                                    event.target.value !== confirmedEmail
+                                                                ) {
+                                                                    setShowPassword(false);
+                                                                    setConfirmedEmail(null);
+                                                                    form.setValue("checkEmail", true);
+                                                                    form.setValue("password", "");
+                                                                    form.clearErrors("password");
+                                                                }
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        {(show2fields || showPassword) && (
+                                            <FormField
+                                                control={form.control}
+                                                name="password"
+                                                render={({ field }) => (
+                                                    <FormItem className='space-y-1'>
+                                                        <FormLabel className="sr-only">{t("Password")}</FormLabel>
+                                                        <FormControl>
+                                                            <PasswordInput
+                                                                className={authInputClassName}
+                                                                placeholder={t("Password")}
+                                                                autoComplete="current-password"
+                                                                data-form-type="other"
+                                                                spellCheck="false"
+                                                                {...field}
+                                                                ref={(node) => {
+                                                                    field.ref(node);
+                                                                    passwordInputRef.current = node;
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        )}
+
+                                        {(show2fields || showPassword) && (
+                                            <div className="flex justify-end">
+                                                <Link
+                                                    to={`/reset-password?email=${encodeURIComponent(form.getValues("email"))}`}
+                                                    className={authLinkClassName}
+                                                >
+                                                    {t("Forgot password?")}
+                                                </Link>
+                                            </div>
+                                        )}
+
+                                        <Button
+                                            className="h-10 w-full rounded-md border border-transparent bg-gradient-brand text-base font-normal text-white shadow-brand-glow transition-opacity hover:opacity-90"
+                                            disabled={mutation.isPending}
+                                            type="submit"
                                         >
-                                            {t("Forgot password?")}
-                                        </Link>
-                                    </div>
+                                            {mutation.isPending && <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />}
+                                            {show2fields || showPassword ? t("Sign in") : t("Continue with email")}
+                                        </Button>
+
+                                        <div className={authSeparatorClassName}>
+                                            <div className={authSeparatorLineClassName} />
+                                            <span className={authSeparatorLabelClassName}>{t("or")}</span>
+                                            <div className={authSeparatorLineClassName} />
+                                        </div>
+                                        <SocialLogin />
+                                    </>
                                 )}
 
-                                {/* Continue Button - Light gray styling for white background */}
-                                <Button
-                                    className="h-10 w-full rounded-md border border-transparent bg-gradient-brand text-base font-normal text-white shadow-brand-glow transition-opacity hover:opacity-90"
-                                    disabled={mutation.isPending}
-                                    type="submit"
-                                >
-                                    {mutation.isPending && <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />}
-                                    {show2fields || showPassword ? t("Sign in") : t("Continue with email")}
-                                </Button>
-
-
-                                <div className={authSeparatorClassName}>
-                                    <div className={authSeparatorLineClassName} />
-                                    <span className={authSeparatorLabelClassName}>{t("or")}</span>
-                                    <div className={authSeparatorLineClassName} />
-                                </div>
-                                <SocialLogin />
-
-                                {/* Footer Links - Dark styling for white background */}
                                 <Links />
                             </div>
                         </div>
@@ -252,7 +322,6 @@ const SignIn = () => {
                 </div>
             </form>
         </Form>
-
     );
 };
 

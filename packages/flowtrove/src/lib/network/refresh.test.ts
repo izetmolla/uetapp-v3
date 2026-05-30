@@ -28,11 +28,24 @@ describe("refreshAccessToken (single-flight)", () => {
 
     beforeEach(() => {
         useAuthorizationStore.setState({
+            current_session: "user-1",
             user: undefined,
             tokens: { access_token: "old", refresh_token: "rt" },
             isSignedIn: true,
-            sessions: [],
+            sessions: [
+                {
+                    id: "user-1",
+                    user: {
+                        id: "user-1",
+                        email: "u@test",
+                        created_at: "",
+                        roles: [],
+                    },
+                    tokens: { access_token: "old", refresh_token: "rt" },
+                },
+            ],
             redirectUrl: "",
+            accessDenied: false,
         })
         originalAdapter = BaseService.defaults.adapter
         BaseService.defaults.adapter = mock.adapter

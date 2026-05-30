@@ -9,7 +9,15 @@ export interface User {
   created_at: string
   roles: string[]
 }
+
 export interface Tokens {
   access_token: string
   refresh_token: string
+}
+
+/** One account on this browser. `tokens` cleared on sign-out; `user` kept as a login shortcut. */
+export interface AuthSession {
+  id: string
+  user: User
+  tokens?: Tokens
 }

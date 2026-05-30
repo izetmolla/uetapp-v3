@@ -28,13 +28,19 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Link } from "react-router";
 import { useTheme, type Theme } from "@workspace/flowtrove/components/providers/theme-provider";
-import useAuthorizationStore, { useSignOutApi } from "@workspace/flowtrove/store/authorization";
+import useAuthorizationStore, {
+  getSignedInSessions,
+  useSignOutApi,
+} from "@workspace/flowtrove/store/authorization";
 import { generateAvatarFallback } from "@workspace/ui/lib/utils";
 
 export default function UserMenu() {
-  const { user, signOut } = useAuthorizationStore()
+  const { user, sessions, signOut, signOutAll, setCurrentSession } =
+    useAuthorizationStore()
+  const authState = useAuthorizationStore()
   const { theme, setTheme } = useTheme()
   const fullName = `${user?.first_name} ${user?.last_name}`
+  const otherSignedInSessions = getSignedInSessions(authState)
 
   const handleLogout = () => {
     signOut()
@@ -43,10 +49,14 @@ export default function UserMenu() {
   }
 
   const handleSwitchAccount = () => {
-    signOut()
-    void useSignOutApi()
     const returnTo = `${window.location.pathname}${window.location.search}`
     window.location.replace(`/sign-in?redirectUrl=${encodeURIComponent(returnTo)}`)
+  }
+
+  const handleSignOutAll = () => {
+    signOutAll()
+    void useSignOutApi()
+    window.location.replace("/sign-in")
   }
 
   return (
@@ -124,6 +134,30 @@ export default function UserMenu() {
             </DropdownMenuItem>
           )}
         </DropdownMenuGroup>
+        {otherSignedInSessions.length > 0 ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-muted-foreground text-xs">
+              Switch account
+            </DropdownMenuLabel>
+            {otherSignedInSessions.map((session) => {
+              const name = [session.user.first_name, session.user.last_name]
+                .filter(Boolean)
+                .join(" ")
+                .trim()
+              return (
+                <DropdownMenuItem
+                  key={session.id}
+                  className="cursor-pointer"
+                  onClick={() => setCurrentSession(session.id)}
+                >
+                  <UserRound className="size-3.5 opacity-70" />
+                  <span className="truncate">{name || session.user.email}</span>
+                </DropdownMenuItem>
+              )
+            })}
+          </>
+        ) : null}
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           <LogOut className="size-3.5 opacity-70" />
           Log out
@@ -131,8 +165,17 @@ export default function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSwitchAccount} className="cursor-pointer text-xs">
           <UserRound className="size-3.5 opacity-70" />
-          Switch account
+          Add account
         </DropdownMenuItem>
+        {sessions.length > 1 ? (
+          <DropdownMenuItem
+            onClick={handleSignOutAll}
+            className="cursor-pointer text-xs text-destructive focus:text-destructive"
+          >
+            <LogOut className="size-3.5 opacity-70" />
+            Sign out of all accounts
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

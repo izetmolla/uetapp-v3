@@ -36,11 +36,13 @@ describe("BaseService interceptor", () => {
 
     beforeEach(() => {
         useAuthorizationStore.setState({
+            current_session: "",
             user: undefined,
             tokens: undefined,
             isSignedIn: false,
             sessions: [],
             redirectUrl: "",
+            accessDenied: false,
         })
         originalAdapter = BaseService.defaults.adapter
         BaseService.defaults.adapter = mock.adapter
