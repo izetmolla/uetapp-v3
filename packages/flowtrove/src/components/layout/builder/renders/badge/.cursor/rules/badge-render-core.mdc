@@ -1,0 +1,30 @@
+---
+description: Flowtrove layout builder badge render — JSON schema, MCP output rules
+globs: packages/flowtrove/src/components/layout/builder/renders/badge/**
+alwaysApply: false
+---
+
+# Badge render (layout builder)
+
+Read `.cursor/AGENTS.md` and `skills/generate-badge-json/SKILL.md` before generating or editing JSON.
+
+## JSON rules
+
+- **Required**: `type` ("badge"), `id` (unique string).
+- **Discriminant**: `type` must match exactly one of the registered values above.
+- **BaseLayoutItem**: optional `className`, `style`, `condition`, `locked`.
+- **Condition**: evaluated against `LayoutBuilder` `data` (see `lib/utils.ts`).
+
+## Renderer rules
+
+- Map props to `@workspace/ui` components; do not add JSON fields without updating `types.ts`.
+- Keep renderer in sync with `types.ts` — schema is the source of truth.
+
+## Validation checklist
+
+```
+- [ ] type is one of: badge
+- [ ] id is unique within the layout tree
+- [ ] JSON is strict (no comments, no trailing commas)
+- [ ] Props match types.ts (no invented fields)
+```

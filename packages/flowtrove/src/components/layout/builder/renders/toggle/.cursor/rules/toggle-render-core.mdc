@@ -1,0 +1,31 @@
+---
+description: Flowtrove layout builder toggle render — JSON schema, MCP output rules
+globs: packages/flowtrove/src/components/layout/builder/renders/toggle/**
+alwaysApply: false
+---
+
+# Toggle render (layout builder)
+
+Read `.cursor/AGENTS.md` and `skills/generate-toggle-json/SKILL.md` before generating or editing JSON.
+
+## JSON rules
+
+- **Required**: `type` ("toggle"), `id` (unique string).
+- **Discriminant**: `type` must match exactly one of the registered values above.
+- **BaseLayoutItem**: optional `className`, `style`, `condition`, `locked`.
+- **Condition**: evaluated against `LayoutBuilder` `data` (see `lib/utils.ts`).
+- **Children**: `children` is an array of layout items; nest valid `LayoutBuilderItem` objects.
+
+## Renderer rules
+
+- Map props to `@workspace/ui` components; do not add JSON fields without updating `types.ts`.
+- Keep renderer in sync with `types.ts` — schema is the source of truth.
+
+## Validation checklist
+
+```
+- [ ] type is one of: toggle
+- [ ] id is unique within the layout tree
+- [ ] JSON is strict (no comments, no trailing commas)
+- [ ] Props match types.ts (no invented fields)
+```

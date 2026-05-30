@@ -1,13 +1,17 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { cn } from "@workspace/ui/lib/utils";
 import { Form } from "@workspace/ui/components/form";
 import type { LayoutRendererProps } from "../../types";
 import { LayoutBuilderContext, useLayoutBuilderContext } from "../../LayoutBuilderContext";
-import { buildDefaultValues, buildFormSchema, getFormFieldNames } from "../../lib/form";
+import {
+    buildFormSchema,
+    getFormFieldNames,
+    resolveFormDefaultValues,
+} from "../../lib/form";
 import {
     applyZodErrors,
     handleFormSubmitError,
@@ -21,13 +25,25 @@ function FormRenderer({ item, renderItems, path }: LayoutRendererProps<FormItem>
     const [formError, setFormError] = useState<string | null>(null);
 
     const schema = useMemo(() => buildFormSchema(children), [children]);
-    const defaultValues = useMemo(() => buildDefaultValues(children), [children]);
+    const defaultValues = useMemo(
+        () =>
+            resolveFormDefaultValues(children, {
+                value: item.value,
+                data: parentContext.data,
+                source: item.source,
+            }),
+        [children, item.value, item.source, parentContext.data],
+    );
     const fieldNames = useMemo(() => getFormFieldNames(children), [children]);
 
     const form = useForm<Record<string, unknown>>({
         defaultValues,
         mode: "onSubmit",
     });
+
+    useEffect(() => {
+        form.reset(defaultValues);
+    }, [defaultValues, form]);
 
     const submitValues = async (values: Record<string, unknown>) => {
         const method = (item.method ?? "POST").toUpperCase();
@@ -64,9 +80,7 @@ function FormRenderer({ item, renderItems, path }: LayoutRendererProps<FormItem>
         form.clearErrors();
         setFormError(null);
 
-        const values = form.getValues();
-        const parsed = schema.safeParse(values);
-
+        const parsed = schema.safeParse(form.getValues());
         if (!parsed.success) {
             applyZodErrors(form, parsed.error.issues);
             return;

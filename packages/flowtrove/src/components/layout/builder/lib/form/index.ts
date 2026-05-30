@@ -7,6 +7,10 @@ import type { InputItem } from "../../renders/input/types";
 import type { RadioGroupItem } from "../../renders/radio-group/types";
 import type { SelectItem } from "../../renders/select/types";
 import type { RepeatableFieldDef, RepeatableItem } from "../../renders/repeatable/types";
+import {
+    getStaticSelectOptions,
+    hasRemoteSelectOptions,
+} from "../select-options-source";
 
 /**
  * Type guard: narrows `item` to `FormFieldItem` when it has a non-empty `"name"` string.
@@ -21,6 +25,47 @@ export function isFormFieldItem(item: any): item is FormFieldItem {
 
 
 
+/** Child arrays on layout containers (card footer, tabs, etc.) that may hold form fields. */
+function collectNestedItemLists(item: LayoutBuilderChildItem): LayoutBuilderChildItem[][] {
+    const lists: LayoutBuilderChildItem[][] = [];
+
+    if (hasChildren(item) && Array.isArray(item.children)) {
+        lists.push(item.children);
+    }
+
+    const raw = item as LayoutBuilderChildItem & {
+        footer?: LayoutBuilderChildItem[];
+        headerAction?: LayoutBuilderChildItem[];
+        tabs?: { children?: LayoutBuilderChildItem[] }[];
+        steps?: { children?: LayoutBuilderChildItem[] }[];
+    };
+
+    if (Array.isArray(raw.footer) && raw.footer.length > 0) {
+        lists.push(raw.footer);
+    }
+    if (Array.isArray(raw.headerAction) && raw.headerAction.length > 0) {
+        lists.push(raw.headerAction);
+    }
+
+    const itemType = item.type as string;
+    if (itemType === "tabs") {
+        for (const tab of raw.tabs ?? []) {
+            if (tab.children?.length) {
+                lists.push(tab.children);
+            }
+        }
+    }
+    if (itemType === "steps") {
+        for (const step of raw.steps ?? []) {
+            if (step.children?.length) {
+                lists.push(step.children);
+            }
+        }
+    }
+
+    return lists;
+}
+
 function collectFieldItems(items: LayoutBuilderChildItem[] | undefined): FormFieldItem[] {
     if (!Array.isArray(items)) return [];
     const fields: FormFieldItem[] = [];
@@ -29,23 +74,8 @@ function collectFieldItems(items: LayoutBuilderChildItem[] | undefined): FormFie
             fields.push(item);
         }
 
-        // Layout items that directly expose children
-        if (hasChildren(item) && "children" in item && Array.isArray((item as any).children)) {
-            fields.push(...collectFieldItems((item as any).children));
-        }
-
-        // Tabs / steps: not yet in LayoutBuilderItem union — guard for forward compatibility.
-        const itemType = item.type as string;
-        if (itemType === "tabs") {
-            for (const tab of (item as { tabs?: { children?: LayoutBuilderChildItem[] }[] }).tabs ?? []) {
-                fields.push(...collectFieldItems(tab.children));
-            }
-        }
-
-        if (itemType === "steps") {
-            for (const step of (item as { steps?: { children?: LayoutBuilderChildItem[] }[] }).steps ?? []) {
-                fields.push(...collectFieldItems(step.children));
-            }
+        for (const nested of collectNestedItemLists(item)) {
+            fields.push(...collectFieldItems(nested));
         }
     }
     return fields;
@@ -506,8 +536,8 @@ function zodTypeForField(field: FormFieldItem): z.ZodTypeAny {
         }
         case "select": {
             const selectField = field as SelectItem;
-            const values = (selectField.options ?? []).map((o) => o.value);
-            if (values.length === 0 || selectField.fetchOptions) {
+            const values = getStaticSelectOptions(selectField.options).map((o) => o.value);
+            if (values.length === 0 || hasRemoteSelectOptions(selectField)) {
                 return applyStringValidation(z.string(), v, { label, name: field.name });
             }
             return applyEnumValidation(values, v, { label, name: field.name });
@@ -536,6 +566,10 @@ function zodTypeForField(field: FormFieldItem): z.ZodTypeAny {
             return z.boolean().optional();
         case "switch":
             return z.boolean().optional();
+        case "slider": {
+            const base = z.array(z.coerce.number());
+            return applyArrayValidation(base, v, { label, name: field.name });
+        }
         case "multi-select": {
             const base = z.array(z.string());
             return applyArrayValidation(base, v, { label, name: field.name });
@@ -543,10 +577,15 @@ function zodTypeForField(field: FormFieldItem): z.ZodTypeAny {
         case "rs-async":
         case "rs-creatable":
         case "rs-fixed": {
-            const multi = (field as { multi?: boolean }).multi === true;
+            const rsField = field as { multi?: boolean; optionsApi?: unknown; loadOptionsUrl?: string };
+            const remote = Boolean(rsField.optionsApi || rsField.loadOptionsUrl);
+            const multi = rsField.multi === true;
             if (multi) {
                 const base = z.array(z.string());
                 return applyArrayValidation(base, v, { label, name: field.name });
+            }
+            if (remote) {
+                return applyStringValidation(z.string(), v, { label, name: field.name });
             }
             return applyStringValidation(z.string(), v, { label, name: field.name });
         }
@@ -643,9 +682,21 @@ export function buildDefaultValues(items: LayoutBuilderChildItem[]): Record<stri
     for (const field of nameToField.values()) {
         switch (field.type) {
             case "checkbox":
-            case "switch":
-                defaults[field.name] = false;
+            case "switch": {
+                const toggled = field as { defaultChecked?: boolean };
+                defaults[field.name] = toggled.defaultChecked ?? false;
                 break;
+            }
+            case "slider": {
+                const slider = field as { defaultValue?: number[] };
+                defaults[field.name] = slider.defaultValue ?? [50];
+                break;
+            }
+            case "textarea": {
+                const textarea = field as { defaultValue?: string };
+                defaults[field.name] = textarea.defaultValue ?? "";
+                break;
+            }
             case "input": {
                 const inputField = field as InputItem;
                 const fallback = inputField.inputType === "number" ? undefined : "";
@@ -707,8 +758,64 @@ export function buildDefaultValues(items: LayoutBuilderChildItem[]): Record<stri
                 break;
             }
             default:
-                defaults[field.name] = "";
+                defaults[(field as FormFieldItem).name] = "";
         }
     }
     return defaults;
+}
+
+function asPlainObject(value: unknown): Record<string, unknown> | null {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+        return value as Record<string, unknown>;
+    }
+    return null;
+}
+
+export type ResolveFormDefaultValuesOptions = {
+    /** Inline object merged over field defaults (designer preview / static seed). */
+    value?: Record<string, unknown>;
+    /** Layout runtime `data` — used with `source` or matching top-level field names. */
+    data?: Record<string, unknown>;
+    /** Key on `data` whose object is merged into defaults (e.g. `"profile"`). */
+    source?: string;
+};
+
+/**
+ * Build react-hook-form defaults from field items, then overlay runtime / static values.
+ * Field JSON `defaultValue` / `options` still seed the form; `value` and `data[source]` win on overlap.
+ */
+export function resolveFormDefaultValues(
+    items: LayoutBuilderChildItem[],
+    options?: ResolveFormDefaultValuesOptions,
+): Record<string, unknown> {
+    const defaults = buildDefaultValues(items);
+    const fieldNames = getFormFieldNames(items);
+    const overlay: Record<string, unknown> = {};
+
+    if (options?.source && options.data) {
+        const scoped = asPlainObject(options.data[options.source]);
+        if (scoped) {
+            Object.assign(overlay, scoped);
+        }
+    }
+
+    if (options?.value) {
+        Object.assign(overlay, options.value);
+    }
+
+    if (options?.data) {
+        for (const name of fieldNames) {
+            if (Object.hasOwn(options.data, name) && !Object.hasOwn(overlay, name)) {
+                overlay[name] = options.data[name];
+            }
+        }
+    }
+
+    const resolved = { ...defaults };
+    for (const name of fieldNames) {
+        if (Object.hasOwn(overlay, name) && overlay[name] !== undefined) {
+            resolved[name] = overlay[name];
+        }
+    }
+    return resolved;
 }

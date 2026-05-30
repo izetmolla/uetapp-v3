@@ -33,6 +33,7 @@ function CheckboxRenderer({ item }: LayoutRendererProps<CheckboxItem>) {
                                 checked={!!field.value}
                                 onCheckedChange={field.onChange}
                                 disabled={item.disabled}
+                                aria-invalid={item.invalid || undefined}
                                 className={item.formCheckboxClassName}
                             />
                         </FormControl>

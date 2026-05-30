@@ -9,6 +9,7 @@ export type {
 } from "./items";
 
 export type { FetchSelectOption, FetchOptions, RsCommonProps } from "./fetch-options";
+export { isFetchOptions, normalizeFetchOptions } from "./fetch-options";
 
 /** Base props passed to all item renderers */
 export type LayoutRendererProps<T extends LayoutBuilderItem = LayoutBuilderItem> = {

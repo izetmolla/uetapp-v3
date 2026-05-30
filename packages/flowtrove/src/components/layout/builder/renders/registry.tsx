@@ -13,6 +13,8 @@ import * as PopoverRenderers from "./popover";
 import * as TooltipRenderers from "./tooltip";
 import * as TableRenderers from "./table";
 import * as ToggleGroupRenderers from "./toggle-group";
+import { ContentRenderer } from "./content";
+import { ItemListRenderer } from "./item-list";
 
 type Renderer = ComponentType<LayoutRendererProps<LayoutBuilderItem>>;
 type LazyRenderer = LazyExoticComponent<ComponentType<LayoutRendererProps<LayoutBuilderItem>>>;
@@ -115,6 +117,8 @@ const SYNC: Record<string, Renderer> = {
     "table-footer": TableRenderers.TableFooterRenderer as Renderer,
     "toggle-group": ToggleGroupRenderers.default as Renderer,
     "toggle-group-item": ToggleGroupRenderers.ToggleGroupMemberRenderer as Renderer,
+    content: ContentRenderer as Renderer,
+    "item-list": ItemListRenderer as Renderer,
 };
 
 export function getRenderer(type: string): Renderer | LazyRenderer | undefined {

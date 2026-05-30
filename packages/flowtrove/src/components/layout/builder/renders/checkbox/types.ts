@@ -2,13 +2,8 @@ import type { BaseFormFieldItem } from "../../types/items-types";
 
 export type CheckboxItem = BaseFormFieldItem & {
     type: "checkbox";
-    placeholder?: string;
-    defaultValue?: string;
-    inputType?: string;
+    checked?: boolean;
     defaultChecked?: boolean;
-    rows?: number;
-    min?: number;
-    max?: number;
-    step?: number;
-    size?: "default" | "sm";
+    required?: boolean;
+    invalid?: boolean;
 };

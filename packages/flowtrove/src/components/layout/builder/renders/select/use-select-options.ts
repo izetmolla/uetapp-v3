@@ -3,6 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLayoutBuilderContext } from "../../LayoutBuilderContext";
 import type { FetchSelectOption } from "../../types";
+import {
+    getStaticSelectOptions,
+    resolveSelectFetchConfig,
+} from "../../lib/select-options-source";
 import type { SelectItem, SelectOption } from "./types";
 
 function normalizeOptions(data: unknown): SelectOption[] {
@@ -23,40 +27,42 @@ function normalizeOptions(data: unknown): SelectOption[] {
         .filter((opt): opt is SelectOption => opt != null);
 }
 
-export function useSelectOptions(item: Pick<SelectItem, "options" | "fetchOptions" | "replaceOptions">) {
+export function useSelectOptions(
+    item: Pick<SelectItem, "options" | "fetchOptions" | "replaceOptions">,
+) {
     const { axios } = useLayoutBuilderContext();
-    const staticOptions = item.options ?? [];
-    const fetchOptions = item.fetchOptions;
+    const staticOptions = getStaticSelectOptions(item.options);
+    const fetchConfig = resolveSelectFetchConfig(item);
 
     const { data: fetched = [], isLoading } = useQuery({
         queryKey: [
             "layout-select-options",
-            fetchOptions?.url,
-            fetchOptions?.method,
-            fetchOptions?.params,
-            fetchOptions?.data,
+            fetchConfig?.url,
+            fetchConfig?.method,
+            fetchConfig?.params,
+            fetchConfig?.data,
         ],
-        enabled: Boolean(fetchOptions?.url && axios),
+        enabled: Boolean(fetchConfig?.url && axios),
         queryFn: async () => {
-            if (!axios || !fetchOptions?.url) {
+            if (!axios || !fetchConfig?.url) {
                 return [] as SelectOption[];
             }
             const response = await axios.request<unknown>({
-                url: fetchOptions.url,
-                method: fetchOptions.method,
-                params: fetchOptions.params,
-                data: fetchOptions.data,
+                url: fetchConfig.url,
+                method: fetchConfig.method,
+                params: fetchConfig.params,
+                data: fetchConfig.data,
             });
             const payload = (response.data as { data?: unknown })?.data ?? response.data;
             return normalizeOptions(payload);
         },
     });
 
-    if (!fetchOptions) {
+    if (!fetchConfig) {
         return { options: staticOptions, isLoading: false };
     }
 
-    const replace = item.replaceOptions ?? fetchOptions.replaceOptions ?? false;
+    const replace = item.replaceOptions ?? fetchConfig.replaceOptions ?? false;
     if (replace) {
         return { options: fetched, isLoading };
     }

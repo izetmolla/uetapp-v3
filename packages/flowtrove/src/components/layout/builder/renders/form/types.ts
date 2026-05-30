@@ -14,6 +14,10 @@ export type FormItem = BaseLayoutItem & {
     name?: string;
     /** Key from designer config.forms_fields to bind this form to; when set, field names are restricted to that config. */
     formConfigKey?: string;
+    /** Key on layout `data` whose object pre-fills named fields (merged over JSON defaults). */
+    source?: string;
+    /** Static values merged over field defaults when live `data[source]` is absent. */
+    value?: Record<string, unknown>;
     /** Form action URL */
     action?: string;
     /** HTTP method */

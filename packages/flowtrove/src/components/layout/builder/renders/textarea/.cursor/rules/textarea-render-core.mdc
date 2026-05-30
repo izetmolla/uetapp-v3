@@ -1,0 +1,33 @@
+---
+description: Flowtrove layout builder textarea render — JSON schema, MCP output rules
+globs: packages/flowtrove/src/components/layout/builder/renders/textarea/**
+alwaysApply: false
+---
+
+# Textarea render (layout builder)
+
+Read `.cursor/AGENTS.md` and `skills/generate-textarea-json/SKILL.md` before generating or editing JSON.
+
+## JSON rules
+
+- **Required**: `type` ("textarea"), `id` (unique string).
+- **Discriminant**: `type` must match exactly one of the registered values above.
+- **BaseLayoutItem**: optional `className`, `style`, `condition`, `locked`.
+- **Condition**: evaluated against `LayoutBuilder` `data` (see `lib/utils.ts`).
+- **Form fields**: require `name` (string); optional `label`, `description`, `validation`, `placeholder`.
+- **Inside forms**: fields auto-bind via `LayoutBuilderContext.form`; preview mode when outside a form.
+- **Validation**: use `FieldValidation` from `lib/form/types.ts`; schema built by `buildFormSchema`.
+
+## Renderer rules
+
+- Map props to `@workspace/ui` components; do not add JSON fields without updating `types.ts`.
+- Keep renderer in sync with `types.ts` — schema is the source of truth.
+
+## Validation checklist
+
+```
+- [ ] type is one of: textarea
+- [ ] id is unique within the layout tree
+- [ ] JSON is strict (no comments, no trailing commas)
+- [ ] Props match types.ts (no invented fields)
+```

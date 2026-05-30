@@ -24,6 +24,8 @@ export const RENDER_MANIFEST: RenderManifestEntry[] = [
     { folder: "button", type: "button", lazy: true },
     { folder: "select", type: "select", lazy: true, formField: true },
     { folder: "repeatable", type: "repeatable", formField: true },
+    { folder: "content", type: "content" },
+    { folder: "item-list", type: "item-list" },
 
     // Card (sync bundle)
     { folder: "card", type: "card" },

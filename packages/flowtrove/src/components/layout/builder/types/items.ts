@@ -1,4 +1,3 @@
-import type { BaseFormFieldItem } from "./items-types";
 import type { AlertDialogItem, AlertDialogTriggerItem, AlertDialogContentItem, AlertDialogHeaderItem, AlertDialogTitleItem, AlertDialogDescriptionItem, AlertDialogFooterItem } from "../renders/alert-dialog/types";
 import type { AvatarItem } from "../renders/avatar/types";
 import type { BadgeItem } from "../renders/badge/types";
@@ -10,6 +9,7 @@ import type { CardItem, CardActionItem, CardContentItem, CardDescriptionItem, Ca
 import type { CheckboxItem } from "../renders/checkbox/types";
 import type { CollapsibleItem, CollapsibleTriggerItem, CollapsibleContentItem } from "../renders/collapsible/types";
 import type { ComboboxItem } from "../renders/combobox/types";
+import type { ContentItem } from "../renders/content/types";
 import type { CommandItem } from "../renders/command/types";
 import type { DialogItem, DialogTriggerItem, DialogContentItem, DialogHeaderItem, DialogTitleItem, DialogDescriptionItem, DialogFooterItem } from "../renders/dialog/types";
 import type { DivItem } from "../renders/div/types";
@@ -18,6 +18,7 @@ import type { DropdownMenuItem } from "../renders/dropdown-menu/types";
 import type { IconItem } from "../renders/icon/types";
 import type { InputItem } from "../renders/input/types";
 import type { InputGroupItem } from "../renders/input-group/types";
+import type { ItemListItem } from "../renders/item-list/types";
 import type { LabelItem } from "../renders/label/types";
 import type { LongTextItem } from "../renders/long-text/types";
 import type { MultiSelectItem } from "../renders/multi-select/types";
@@ -72,6 +73,7 @@ export type LayoutBuilderItem =
   | CollapsibleContentItem
   | ComboboxItem
   | CommandItem
+  | ContentItem
   | DialogItem
   | DialogTriggerItem
   | DialogContentItem
@@ -85,6 +87,7 @@ export type LayoutBuilderItem =
   | IconItem
   | InputItem
   | InputGroupItem
+  | ItemListItem
   | LabelItem
   | LongTextItem
   | MultiSelectItem
@@ -133,6 +136,19 @@ export type LayoutBuilderItem =
   | TooltipContentItem;
 
 /** Items that have a form field name */
-export type FormFieldItem = BaseFormFieldItem;
+export type FormFieldItem =
+    | InputItem
+    | TextareaItem
+    | SelectItem
+    | CheckboxItem
+    | SwitchItem
+    | SliderItem
+    | RadioGroupItem
+    | MultiSelectItem
+    | ComboboxItem
+    | RsFixedItem
+    | RsAsyncItem
+    | RsCreatableItem
+    | RepeatableItem;
 
 export type { BaseLayoutItem, ContainerItem, LayoutBuilderChildItem } from "./base-layout";

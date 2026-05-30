@@ -16,7 +16,8 @@ function TextareaRenderer({ item }: LayoutRendererProps<TextareaItem>) {
                     defaultValue={item.defaultValue}
                     disabled={item.disabled}
                     rows={item.rows}
-                    className={cn(item.className)}
+                    aria-invalid={item.invalid || undefined}
+                    className={cn(item.className, item.formTextareaClassName)}
                 />
             )}
             renderControl={(field) => (
@@ -25,6 +26,8 @@ function TextareaRenderer({ item }: LayoutRendererProps<TextareaItem>) {
                     placeholder={item.placeholder}
                     disabled={item.disabled}
                     rows={item.rows}
+                    aria-invalid={item.invalid || undefined}
+                    className={cn(item.formTextareaClassName)}
                     value={(field.value as string | undefined) ?? ""}
                 />
             )}

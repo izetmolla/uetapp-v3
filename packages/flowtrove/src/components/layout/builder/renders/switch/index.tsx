@@ -43,6 +43,8 @@ function SwitchRenderer({ item }: LayoutRendererProps<SwitchItem>) {
                                 checked={!!field.value}
                                 onCheckedChange={field.onChange}
                                 disabled={item.disabled}
+                                size={item.size}
+                                aria-invalid={item.invalid || undefined}
                                 className={item.formSwitchClassName}
                             />
                         </FormControl>
@@ -55,7 +57,12 @@ function SwitchRenderer({ item }: LayoutRendererProps<SwitchItem>) {
 
     return (
         <FormFieldPreview item={item}>
-            <Switch defaultChecked={item.defaultChecked} disabled={item.disabled} className={cn(item.className)} />
+            <Switch
+                defaultChecked={item.defaultChecked}
+                disabled={item.disabled}
+                size={item.size}
+                className={cn(item.className)}
+            />
         </FormFieldPreview>
     );
 }
