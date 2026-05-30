@@ -106,6 +106,9 @@ spec:
   - hosts:
     - uet.izetmolla.com
     secretName: uetedu-v3-tls
+  - hosts:
+    - app.uet.edu.al
+    secretName: app-uet-edu-al-tls
   rules:
     - host: uet.izetmolla.com
       http:
@@ -117,6 +120,16 @@ spec:
           #       name: uetapp-administrator
           #       port:
           #         number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 3000
+    - host: app.uet.edu.al
+      http:
+        paths:
           - path: /
             pathType: Prefix
             backend:
@@ -142,8 +155,21 @@ spec:
     - hosts:
         - uet.izetmolla.com
       secretName: uetedu-v3-tls
+    - hosts:
+        - app.uet.edu.al
+      secretName: app-uet-edu-al-tls
   rules:
     - host: uet.izetmolla.com
+      http:
+        paths:
+          - path: /static/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: minio-static
+                port:
+                  number: 9000
+    - host: app.uet.edu.al
       http:
         paths:
           - path: /static/(.*)

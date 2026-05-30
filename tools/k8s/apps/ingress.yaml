@@ -20,7 +20,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: app-uet-edu-al-tls
-  namespace: default
+  namespace: uetedu-v3
 spec:
   secretName: app-uet-edu-al-tls
   issuerRef:
@@ -29,77 +29,5 @@ spec:
   commonName: app.uet.edu.al
   dnsNames:
     - app.uet.edu.al
-
-
-
-
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  # Must match the existing ingress in the cluster (nginx allows one rule per host+path).
-  name: app
-  namespace: uetedu-v3
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-dns01-issuer-uet
-    kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600s"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600s"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600s"
-    
-spec:
-  ingressClassName: nginx
-  tls:
-  - hosts:
-    - app.uet.edu.al
-    secretName: app-uet-edu-al-tls
-  rules:
-    - host: app.uet.edu.al
-      http:
-        paths:
-          # - path: /administrator
-          #   pathType: ImplementationSpecific
-          #   backend:
-          #     service:
-          #       name: uetapp-administrator
-          #       port:
-          #         number: 3000
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: app
-                port:
-                  number: 3000
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: app-static
-  namespace: uetedu-v3
-  annotations:
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /uetedu-v3/$1
-spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - app.uet.edu.al
-      secretName: app-uet-edu-al-tls
-  rules:
-    - host: app.uet.edu.al
-      http:
-        paths:
-          - path: /static/(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: minio-static
-                port:
-                  number: 9000
+# Ingress rules for app.uet.edu.al live in app.yaml alongside uet.izetmolla.com
+# (one Ingress resource per path class; nginx rejects duplicate host+path across resources).
