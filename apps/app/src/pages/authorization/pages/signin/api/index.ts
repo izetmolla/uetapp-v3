@@ -30,3 +30,19 @@ export async function checkTrustedDevice(session_id: string) {
         }
     })
 }
+
+export async function checkConfirmation(session_id: string, code: string) {
+    return ApiService.fetchData<SignInResponseType>({
+        url: withAPI('/authorization/check-confirmation'),
+        method: 'post',
+        data: { session_id, code },
+    })
+}
+
+export async function resendConfirmation(session_id: string) {
+    return ApiService.fetchData<SignInResponseType>({
+        url: withAPI('/authorization/resend-confirmation'),
+        method: 'post',
+        data: { session_id },
+    })
+}

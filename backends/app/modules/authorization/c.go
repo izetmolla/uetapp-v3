@@ -25,6 +25,8 @@ func SetupRoutes(app fiber.Router, api fiber.Router, appClients *config.AppClien
 	authApi.Post("/sign-in", controller.SignInApi)
 	authApi.Post("/check-email", controller.SignInCheckEmail)
 	authApi.Post("/check-trusted-device", controller.CheckTrustedDevice)
+	authApi.Post("/check-confirmation", controller.CheckConfirmation)
+	authApi.Post("/resend-confirmation", controller.ResendConfirmation)
 	// The sign-out endpoint is intentionally unauthenticated: a client
 	// with a stale or already-revoked session should still be able to
 	// drop the cookie and clear server-side state without bouncing
@@ -139,6 +141,14 @@ func (cc *Controller) CheckTrustedDevice(c fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"trusted": session.ID != "",
 	})
+}
+
+func (c *Controller) CheckConfirmation(ctx fiber.Ctx) error {
+	return c.app.Api(ctx, c.app.Render().WithError(errors.New("Not implemented")))
+}
+
+func (c *Controller) ResendConfirmation(ctx fiber.Ctx) error {
+	return c.app.Api(ctx, c.app.Render().WithError(errors.New("Not implemented")))
 }
 
 // SignOut tears down the user's session in a way that is safe to call

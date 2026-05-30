@@ -1,9 +1,12 @@
+import { checkConfirmation, resendConfirmation } from "../api"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
+import { useMutation } from "@tanstack/react-query"
 import { LoaderCircle, ShieldCheck } from "lucide-react"
 import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { authInputClassName } from "../../../components/styles"
+import type { SignInResponseType } from "../api"
 import type { Confirmation } from "@workspace/flowtrove/types"
 
 const OTP_LENGTH = 6
@@ -11,11 +14,10 @@ const RESEND_SECONDS = 60
 
 export interface ConfirmOtpProps {
     confirmation: Confirmation
-    onConfirm: (code: string) => void
-    onResend: () => void
+    session_id: string
+    onVerified: (data: SignInResponseType) => void
     onCancel: () => void
-    isSubmitting?: boolean
-    error?: string
+    onConfirmationUpdated?: (confirmation: Confirmation) => void
 }
 
 function contactLabel(confirmation: Confirmation): string | null {
@@ -42,13 +44,25 @@ function sanitizeCode(value: string): string {
         .slice(0, OTP_LENGTH)
 }
 
+function getApiErrorMessage(error: unknown, fallback: string): string {
+    const axiosError = error as {
+        response?: { data?: { message?: string; error?: { message?: string } } }
+        message?: string
+    }
+    return (
+        axiosError.response?.data?.error?.message ??
+        axiosError.response?.data?.message ??
+        axiosError.message ??
+        fallback
+    )
+}
+
 export default function ConfirmOtp({
     confirmation,
-    onConfirm,
-    onResend,
+    session_id,
+    onVerified,
     onCancel,
-    isSubmitting = false,
-    error,
+    onConfirmationUpdated,
 }: ConfirmOtpProps) {
     const { t } = useTranslation("authorization")
     const inputId = useId()
@@ -57,10 +71,53 @@ export default function ConfirmOtp({
     const submittedRef = useRef(false)
     const [digits, setDigits] = useState<string[]>(Array.from({ length: OTP_LENGTH }, () => ""))
     const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS)
+    const [error, setError] = useState<string | undefined>()
 
     const destination = contactLabel(confirmation)
     const code = digits.join("")
-    const canResend = secondsLeft === 0 && !isSubmitting
+
+    const verifyMutation = useMutation({
+        mutationFn: (otpCode: string) => checkConfirmation(session_id, otpCode),
+        onSuccess: (data) => {
+            if (data?.error) {
+                submittedRef.current = false
+                setError(data.error.message ?? t("Invalid verification code"))
+                return
+            }
+            if (data.confirmation) {
+                submittedRef.current = false
+                onConfirmationUpdated?.(data.confirmation)
+                setError(t("Invalid verification code"))
+                return
+            }
+            onVerified(data)
+        },
+        onError: (err) => {
+            submittedRef.current = false
+            setError(getApiErrorMessage(err, t("Invalid verification code")))
+        },
+    })
+
+    const resendMutation = useMutation({
+        mutationFn: () => resendConfirmation(session_id),
+        onSuccess: (data) => {
+            if (data?.error) {
+                setError(data.error.message ?? t("Could not resend code"))
+                return
+            }
+            if (data.confirmation) {
+                onConfirmationUpdated?.(data.confirmation)
+            }
+            setError(undefined)
+        },
+        onError: (err) => {
+            setError(getApiErrorMessage(err, t("Could not resend code")))
+        },
+    })
+
+    const isSubmitting = verifyMutation.isPending
+    const isResending = resendMutation.isPending
+    const canResend = secondsLeft === 0 && !isSubmitting && !isResending
 
     useEffect(() => {
         inputRefs.current[0]?.focus()
@@ -75,10 +132,11 @@ export default function ConfirmOtp({
     }, [secondsLeft])
 
     useEffect(() => {
-        if (code.length !== OTP_LENGTH || isSubmitting || submittedRef.current) return
+        if (code.length !== OTP_LENGTH || verifyMutation.isPending || submittedRef.current) return
         submittedRef.current = true
-        onConfirm(code)
-    }, [code, isSubmitting, onConfirm])
+        setError(undefined)
+        verifyMutation.mutate(code)
+    }, [code, verifyMutation.isPending, verifyMutation.mutate])
 
     useEffect(() => {
         if (!isSubmitting && code.length < OTP_LENGTH) {
@@ -101,6 +159,7 @@ export default function ConfirmOtp({
     )
 
     const updateDigit = (index: number, raw: string) => {
+        setError(undefined)
         const cleaned = sanitizeCode(raw)
         if (cleaned.length > 1) {
             applyFullCode(cleaned)
@@ -142,8 +201,9 @@ export default function ConfirmOtp({
         submittedRef.current = false
         setDigits(Array.from({ length: OTP_LENGTH }, () => ""))
         setSecondsLeft(RESEND_SECONDS)
+        setError(undefined)
         focusInput(0)
-        onResend()
+        resendMutation.mutate()
     }
 
     return (
@@ -202,7 +262,7 @@ export default function ConfirmOtp({
                                 autoComplete={index === 0 ? "one-time-code" : "off"}
                                 maxLength={1}
                                 value={digit}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isResending}
                                 aria-label={t("Character {{position}} of {{total}}", {
                                     position: index + 1,
                                     total: OTP_LENGTH,
@@ -238,7 +298,7 @@ export default function ConfirmOtp({
                     type="button"
                     variant="outline"
                     className="h-10 w-full font-normal"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isResending}
                     onClick={onCancel}
                 >
                     {t("Cancel")}
@@ -250,9 +310,17 @@ export default function ConfirmOtp({
                             type="button"
                             variant="link"
                             className="h-auto p-0 text-sm font-normal"
+                            disabled={isResending}
                             onClick={handleResend}
                         >
-                            {t("Resend code")}
+                            {isResending ? (
+                                <>
+                                    <LoaderCircle className="mr-1 size-3 animate-spin" />
+                                    {t("Sending...")}
+                                </>
+                            ) : (
+                                t("Resend code")
+                            )}
                         </Button>
                     ) : (
                         <span>

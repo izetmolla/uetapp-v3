@@ -67,7 +67,6 @@ const SignIn = () => {
     const [emailDisabled, setEmailDisabled] = useState(false);
     const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
     const [pendingConfirmation, setPendingConfirmation] = useState<Confirmation | null>(null);
-    const [otpError, setOtpError] = useState<string | undefined>();
     const [isCompletingSignIn, setIsCompletingSignIn] = useState(false);
 
     const form = useForm<SignInSchema>({
@@ -146,7 +145,6 @@ const SignIn = () => {
         if (data.confirmation) {
             setPendingConfirmation(data.confirmation)
             setPendingSessionId(data.session_id ?? null)
-            setOtpError(undefined)
             setView("otp")
             return
         }
@@ -234,23 +232,17 @@ const SignIn = () => {
         resetFormState();
         setPendingSessionId(null);
         setPendingConfirmation(null);
-        setOtpError(undefined);
         setView("picker");
     };
 
     const handleBackFromOtp = () => {
         setPendingConfirmation(null);
         setPendingSessionId(null);
-        setOtpError(undefined);
         setView(sessions.length > 0 ? "picker" : "form");
     };
 
-    const handleOtpConfirm = (_code: string) => {
-        // OTP verify API to be wired here
-    };
-
-    const handleOtpResend = () => {
-        // OTP resend API to be wired here
+    const handleOtpVerified = (data: SignInResponseType) => {
+        completeSignInAfterAuth(data);
     };
 
     const handleTrustDevice = () => {
@@ -318,7 +310,7 @@ const SignIn = () => {
         })
     }
 
-    const showOtp = view === "otp" && pendingConfirmation !== null;
+    const showOtp = view === "otp" && pendingConfirmation !== null && pendingSessionId !== null;
     const showPicker = view === "picker" && sessions.length > 0 && !isCompletingSignIn && !showOtp;
     const showTrust = (view === "trust" && pendingSessionId !== null) || (isCompletingSignIn && !showOtp);
 
@@ -337,10 +329,10 @@ const SignIn = () => {
                                 {showOtp ? (
                                     <ConfirmOtp
                                         confirmation={pendingConfirmation}
-                                        onConfirm={handleOtpConfirm}
-                                        onResend={handleOtpResend}
+                                        session_id={pendingSessionId}
+                                        onVerified={handleOtpVerified}
                                         onCancel={handleBackFromOtp}
-                                        error={otpError}
+                                        onConfirmationUpdated={setPendingConfirmation}
                                     />
                                 ) : showTrust ? (
                                     <TrustDevice
